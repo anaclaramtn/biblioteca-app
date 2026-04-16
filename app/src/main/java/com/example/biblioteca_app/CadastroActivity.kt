@@ -49,7 +49,8 @@ class CadastroActivity : AppCompatActivity() {
             }
 
             if (!senhaValida(senhaStr)) {
-                Toast.makeText(this, "A senha não atende aos requisitos", Toast.LENGTH_SHORT).show()
+                // descricao exatamente como esta nos requisitos
+                Toast.makeText(this, "Digite uma senha que cumpra os requisitos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
