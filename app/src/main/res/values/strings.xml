@@ -1,3 +1,12 @@
 <resources>
-    <string name="app_name">biblioteca-app</string>
+    <string name="app_name">BibliotecaApp</string>
+    <string name="desc_logo_unifor">Logo Unifor</string>
+    <string name="label_email">Email:</string>
+    <string name="hint_email">nome@unifor.br</string>
+    <string name="label_senha">Senha:</string>
+    <string name="hint_senha">********</string>
+    <string name="btn_entrar">Entrar</string>
+    <string name="btn_esqueceu_senha">Esqueceu a senha?</string>
+    <string name="btn_criar_conta">Criar Conta</string>
+    <string name="app_version">v1.0.1</string>
 </resources>
