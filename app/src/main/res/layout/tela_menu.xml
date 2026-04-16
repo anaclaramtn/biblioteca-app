@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF">
+
+    <!-- Conteudo principal -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- Titulo -->
+        <TextView
+            android:id="@+id/txtTitulo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#002D5E"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="MENU"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <!-- Lista dos botoes -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/btnPerfil"
+                style="@style/MenuItem"
+                android:text="Perfil"/>
+
+            <TextView
+                android:id="@+id/btnHistorico"
+                style="@style/MenuItem"
+                android:text="Histórico"/>
+
+            <TextView
+                android:id="@+id/btnLudoteca"
+                style="@style/MenuItem"
+                android:text="Ludoteca"/>
+
+            <TextView
+                android:id="@+id/btnPesquisa"
+                style="@style/MenuItem"
+                android:text="Pesquisa Científica"/>
+
+            <TextView
+                android:id="@+id/btnConfig"
+                style="@style/MenuItem"
+                android:text="Configurações"/>
+
+            <TextView
+                android:id="@+id/btnSair"
+                style="@style/MenuItem"
+                android:text="Sair"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:menu="@menu/bottom_menu"
+        app:itemBackground="@drawable/nav_item_bg"
+        app:itemRippleColor="@android:color/transparent"
+        app:itemIconTint="@null"
+        app:itemTextColor="@null"
+        app:itemActiveIndicatorStyle="@null"
+        app:labelVisibilityMode="unlabeled"/>
+
+
+</LinearLayout>

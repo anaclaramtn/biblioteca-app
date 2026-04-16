@@ -12,4 +12,21 @@
         <item name="cornerRadius">12dp</item>
     </style>
 
+    <style name="MenuItem">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+
+        <!-- Espaçamento -->
+        <item name="android:paddingVertical">20dp</item>
+        <item name="android:paddingHorizontal">16dp</item>
+
+        <!-- Texto maior -->
+        <item name="android:textSize">20sp</item>
+
+        <item name="android:background">@drawable/item_menu_bg</item>
+    </style>
+
+    <style name="NavBar">
+
+    </style>
 </resources>

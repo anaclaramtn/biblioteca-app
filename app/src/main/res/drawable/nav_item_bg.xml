@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Item selecionado na navbar -->
+    <item android:state_checked="true">
+        <inset
+            android:insetLeft="8dp"
+            android:insetRight="8dp"
+            android:insetTop="8dp"
+            android:insetBottom="8dp">
+
+            <shape android:shape="rectangle">
+                <solid android:color="#D0E2F2"/>
+                <corners android:radius="100dp"/>
+            </shape>
+
+        </inset>
+    </item>
+
+    <!-- Item sem selecao -->
+    <item>
+        <color android:color="@android:color/transparent"/>
+    </item>
+
+</selector>
