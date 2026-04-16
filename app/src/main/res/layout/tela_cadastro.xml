@@ -129,11 +129,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:background=""
             android:padding="12dp"
             android:text="Requisitos da senha:\n- Pelo menos 1 número\n- Pelo menos 1 letra minúscula\n- Pelo menos 1 letra maiúscula"
             android:textColor="@color/white"
-            android:textSize="13sp" />
+            android:textSize="13sp"/>
 
         <TextView
             android:layout_width="wrap_content"

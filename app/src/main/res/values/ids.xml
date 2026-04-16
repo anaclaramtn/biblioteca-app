@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <item name="ButtonCriarConta" type="id">ButtonCriarConta</item>
-    <item name="TextViewVersao" type="id">TextViewVersao</item>
-    <item name="ButtonEsqueceuSenha" type="id">ButtonEsqueceuSenha</item>
-    <item name="ButtonEntrar" type="id">ButtonEntrar</item>
-</resources>
