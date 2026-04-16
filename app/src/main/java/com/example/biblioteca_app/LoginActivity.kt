@@ -14,7 +14,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.tela_login)
 
-        val btnCriarConta = findViewById<MaterialButton>(R.id.ButtonCriarConta)
+        val btnCriarConta = findViewById<MaterialButton>(R.id.ButtonCriarConta1)
         val btnEsqueceuSenha = findViewById<MaterialButton>(R.id.ButtonEsqueceuSenha)
 
         btnCriarConta.setOnClickListener {

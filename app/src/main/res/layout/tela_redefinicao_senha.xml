@@ -19,57 +19,70 @@
 
         <ImageButton
             android:id="@+id/ButtonVoltar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="0dp"
             android:background="@android:color/transparent"
             android:contentDescription="Voltar"
             android:src="@drawable/ic_leftarrow" />
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="223dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="40dp"
-            android:contentDescription="Logo Biblioteca App"
-            android:src="@drawable/logo" />
-
         <TextView
-            android:id="@+id/TextViewLabelEmail"
+            android:id="@+id/TextViewTituloCadastro"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:text="Digite o seu email"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="24dp"
+            android:layout_marginBottom="60dp"
+            android:text="Redefinir Senha"
             android:textColor="#FFFFFF"
-            android:textSize="14sp"
+            android:textSize="24dp"
             android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/EditTextEmail"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/background_campo_input"
-            android:inputType="textEmailAddress"
-            android:maxLines="1"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:textColor="#212121"
-            android:textColorHint="#90A4AE"
-            android:textSize="15sp" />
+<!--        <ImageView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="223dp"-->
+<!--            android:layout_marginTop="16dp"-->
+<!--            android:layout_marginBottom="40dp"-->
+<!--            android:contentDescription="Logo Biblioteca App"-->
+<!--            android:src="@drawable/logo" />-->
 
-        <Button
-            android:id="@+id/ButtonEnviarLink"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginBottom="20dp"
-            android:text="Enviar Link"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:backgroundTint="#002D5E"
-            app:cornerRadius="8dp" />
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/TextViewLabelEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:text="Digite o seu email"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/EditTextEmail"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/background_campo_input"
+                android:hint="email@email.com"
+                android:inputType="textEmailAddress"
+                android:maxLines="1"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textColor="@color/black"
+                android:textColorHint="#90A4AE"
+                android:textSize="15sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/ButtonRedefinicao"
+                style="@style/botoesTelasIniciais"
+                android:text="Enviar Link" />
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

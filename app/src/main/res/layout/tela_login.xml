@@ -36,6 +36,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:textColorHint="@color/padrao_app"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:hintEnabled="false"
@@ -46,17 +47,18 @@
             app:boxCornerRadiusBottomEnd="12dp">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/EditTextEmail"
+                android:id="@+id/EditTextEmailLogin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/background_campo_input"
                 android:hint="nome@unifor.br"
-                android:inputType="textEmailAddress"
-                android:padding="16dp"
-                android:textColor="@color/white"
-                android:textColorHint="#80FFFFFF"
-                android:textSize="16sp"
                 android:imeOptions="actionNext"
-                android:nextFocusDown="@+id/EditTextSenha" />
+                android:inputType="textEmailAddress"
+                android:nextFocusDown="@+id/EditTextSenha"
+                android:padding="16dp"
+                android:textColor="@color/black"
+                android:textColorHint="#90A4AE"
+                android:textSize="16sp" />
 
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
@@ -78,11 +80,12 @@
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:textColorHint="@color/padrao_app"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:hintEnabled="false"
             app:endIconMode="password_toggle"
-            app:endIconTint="@color/white"
+            app:endIconTint="@color/padrao_app"
             app:boxStrokeColor="@color/white"
             app:boxCornerRadiusTopStart="12dp"
             app:boxCornerRadiusTopEnd="12dp"
@@ -90,32 +93,25 @@
             app:boxCornerRadiusBottomEnd="12dp">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/EditTextSenha"
+                android:id="@+id/EditTextSenhaLogin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="********"
-                android:imeOptions="actionDone"
-                android:inputType="textPassword"
+                android:background="@drawable/background_campo_input"
+                android:hint="nome@unifor.br"
+                android:imeOptions="actionNext"
+                android:inputType="textEmailAddress"
+                android:nextFocusDown="@+id/EditTextSenha"
                 android:padding="16dp"
-                android:textColor="@color/white"
-                android:textColorHint="#80FFFFFF"
+                android:textColor="@color/black"
+                android:textColorHint="#90A4AE"
                 android:textSize="16sp" />
-
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/ButtonEntrar"
-        style="@style/Widget.MaterialComponents.Button"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="Entrar"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:textAllCaps="false"
-        android:textColor="#002D5E"
-        app:backgroundTint="#FFFFFF"
-        app:cornerRadius="12dp" />
+        style="@style/botoesTelasIniciais"
+        android:text="Entrar"/>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/ButtonEsqueceuSenha"
@@ -136,8 +132,8 @@
         android:layout_weight="1" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/ButtonCriarConta"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:id="@+id/ButtonCriarConta1"
+        style="@style/botoesTelasIniciais"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Criar Conta"

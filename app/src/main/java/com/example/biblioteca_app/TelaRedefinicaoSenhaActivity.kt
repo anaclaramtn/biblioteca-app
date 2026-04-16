@@ -1,5 +1,6 @@
 package com.example.biblioteca_app
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
@@ -12,7 +13,9 @@ class TelaRedefinicaoSenhaActivity : AppCompatActivity() {
         val btnVoltar = findViewById<ImageButton>(R.id.ButtonVoltar)
 
         btnVoltar.setOnClickListener {
-            finish() // Volta para a tela anterior (Login)
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
         }
     }
 }
