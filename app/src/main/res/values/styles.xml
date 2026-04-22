@@ -23,10 +23,14 @@
         <!-- Texto maior -->
         <item name="android:textSize">20sp</item>
 
-        <item name="android:background">@drawable/item_menu_bg</item>
+        <item name="android:background">@drawable/item_menu_background</item>
     </style>
 
-    <style name="NavBar">
-
+    <style name="NavBar" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemBackground">@drawable/nav_item_background</item>
+        <item name="itemRippleColor">@android:color/transparent</item>
+        <item name="itemIconTint">@null</item>
+        <item name="itemTextColor">@null</item>
+        <item name="labelVisibilityMode">unlabeled</item>
     </style>
 </resources>

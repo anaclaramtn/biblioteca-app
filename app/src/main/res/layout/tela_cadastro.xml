@@ -60,8 +60,8 @@
                 android:id="@+id/EditTextNomeCompleto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Nome Completo"
-                android:inputType="textPersonName"/>
+                android:hint="Nome"
+                android:inputType="textPersonName" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
@@ -85,12 +85,13 @@
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
             app:boxCornerRadiusBottomEnd="12dp">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/EditTextEmailCadastro"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="E-mail"
-            android:inputType="textEmailAddress" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/EditTextEmailCadastro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="nome@unifor.br"
+                android:inputType="textEmailAddress" />
         </com.google.android.material.textfield.TextInputLayout>
         <TextView
             android:layout_width="wrap_content"
@@ -120,7 +121,7 @@
                 android:id="@+id/EditTextSenhaCadastro"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Senha"
+                android:hint="********"
                 android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -162,7 +163,7 @@
                 android:id="@+id/EditTextConfirmarSenhaCadastro"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Confirmar Senha"
+                android:hint="********"
                 android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 

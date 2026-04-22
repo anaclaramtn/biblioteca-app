@@ -67,17 +67,6 @@
 
     </LinearLayout>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNav"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:menu="@menu/bottom_menu"
-        app:itemBackground="@drawable/nav_item_bg"
-        app:itemRippleColor="@android:color/transparent"
-        app:itemIconTint="@null"
-        app:itemTextColor="@null"
-        app:itemActiveIndicatorStyle="@null"
-        app:labelVisibilityMode="unlabeled"/>
-
+    <include layout="@layout/navbar_layout"/>
 
 </LinearLayout>
