@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bibliotecaapp">
         <activity
+            android:name=".TelaHomeActivity"
+            android:exported="false" />
+        <activity
             android:name=".AlteracaoDeSenhaActivity"
             android:exported="false" />
         <activity
