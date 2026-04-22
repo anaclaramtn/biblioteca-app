@@ -44,6 +44,13 @@ class MenuActivity : AppCompatActivity() {
                 else -> false
             }
         }
+
+        var btnConfiguracoes = findViewById<TextView>(R.id.btnConfiguracoes)
+
+        btnConfiguracoes.setOnClickListener {
+            startActivity(Intent(this, ConfiguracoesActivity::class.java))
+            finish()
+        }
     }
 
     private fun mostrarDialogoSaida() {

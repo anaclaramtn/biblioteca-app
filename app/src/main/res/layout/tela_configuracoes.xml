@@ -5,9 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#E6EEF2">
+    android:background="#FFFFFF">
 
-    <!-- CONTEÚDO -->
+    <!-- Conteudo principal -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -17,87 +17,54 @@
         <!-- HEADER -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_header"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="@drawable/background"
-            android:paddingHorizontal="12dp">
+            android:gravity="center_vertical">
 
             <ImageView
                 android:id="@+id/btnVoltar"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
+                android:layout_marginStart="12dp"
                 android:src="@drawable/ic_leftarrow"
                 app:tint="#FFFFFF"/>
 
+            <!-- Titulo -->
             <TextView
+                android:id="@+id/txtTitulo"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:gravity="center"
+                android:padding="16dp"
                 android:text="CONFIGURAÇÕES"
                 android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:gravity="center"/>
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
         </LinearLayout>
 
-        <!-- SUBTÍTULO -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Sobre o aplicativo"
-            android:gravity="center"
-            android:padding="12dp"
-            android:textColor="#555"/>
-
-        <!-- LOGO -->
-        <ImageView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:layout_gravity="center"
-            android:src="@drawable/logo"
-            android:layout_marginTop="8dp"/>
-
-        <!-- TEXTO -->
+        <!-- Lista dos botoes -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="vertical">
 
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Nome do Aplicativo: Biblioteca Unifor"
-                android:textSize="14sp"/>
+                android:id="@+id/btnAlterarSenha"
+                style="@style/MenuItem"
+                android:text="Alterar senha" />
 
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Desenvolvido por:"
-                android:layout_marginTop="8dp"/>
+                android:id="@+id/btnSobreOApp"
+                style="@style/MenuItem"
+                android:text="Sobre o App"/>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Ana Clara, Bruno, João Victor e Ygor"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Versão atual: v1.0.1"
-                android:layout_marginTop="8dp"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Suporte: biblioteca@unifor.br"
-                android:layout_marginTop="8dp"/>
         </LinearLayout>
 
     </LinearLayout>
 
-    <!-- NAVBAR -->
     <include layout="@layout/navbar_layout"/>
 
 </LinearLayout>

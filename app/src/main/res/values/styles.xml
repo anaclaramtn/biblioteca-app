@@ -29,7 +29,7 @@
     <style name="NavBar" parent="Widget.MaterialComponents.BottomNavigationView">
         <item name="itemBackground">@drawable/nav_item_background</item>
         <item name="itemRippleColor">@android:color/transparent</item>
-        <item name="itemIconTint">@null</item>
+        <item name="itemIconTint">#002D7E</item>
         <item name="itemTextColor">@null</item>
         <item name="labelVisibilityMode">unlabeled</item>
     </style>

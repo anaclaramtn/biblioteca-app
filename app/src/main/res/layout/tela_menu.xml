@@ -19,7 +19,7 @@
             android:id="@+id/txtTitulo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#002D5E"
+            android:background="@drawable/background_header"
             android:gravity="center"
             android:padding="16dp"
             android:text="MENU"
@@ -36,7 +36,7 @@
             <TextView
                 android:id="@+id/btnPerfil"
                 style="@style/MenuItem"
-                android:text="Perfil"/>
+                android:text="Perfil" />
 
             <TextView
                 android:id="@+id/btnHistorico"
@@ -54,7 +54,7 @@
                 android:text="Pesquisa Científica"/>
 
             <TextView
-                android:id="@+id/btnConfig"
+                android:id="@+id/btnConfiguracoes"
                 style="@style/MenuItem"
                 android:text="Configurações"/>
 

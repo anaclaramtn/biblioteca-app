@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#E6EEF2">
+
+    <!-- CONTEÚDO -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- HEADER -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/background_header"
+            android:paddingHorizontal="12dp">
+
+            <ImageView
+                android:id="@+id/btnVoltar"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_leftarrow"
+                app:tint="#FFFFFF"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="CONFIGURAÇÕES"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="24sp"
+                android:gravity="center"/>
+        </LinearLayout>
+
+        <!-- SUBTÍTULO -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sobre o aplicativo"
+            android:gravity="center"
+            android:padding="20dp"
+            android:textColor="#444"/>
+
+        <!-- LOGO -->
+        <ImageView
+            android:layout_width="240dp"
+            android:layout_height="240dp"
+            android:layout_gravity="center"
+            android:src="@drawable/logo"
+            app:tint="#002D5E"
+            android:layout_marginTop="8dp"/>
+
+        <!-- TEXTO -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nome do Aplicativo:"
+                android:layout_marginTop="8dp"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="  Biblioteca App"
+                android:textSize="14sp"
+                android:layout_marginTop="8dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Desenvolvido por:"
+                android:layout_marginTop="16dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="  Ana Clara, Bruno, João Victor e Ygor"
+                android:layout_marginTop="8dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Versão atual:"
+                android:layout_marginTop="16dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="  v1.0.1"
+                android:layout_marginTop="8dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Suporte:"
+                android:layout_marginTop="16dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="  biblioteca@unifor.br"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- NAVBAR -->
+    <include layout="@layout/navbar_layout"/>
+
+</LinearLayout>
