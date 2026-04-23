@@ -1,5 +1,6 @@
 package com.example.biblioteca_app
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.biblioteca_app.adapters.GenericAdapter
 import com.example.biblioteca_app.models.Noticia
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class TelaHomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,7 +32,7 @@ class TelaHomeActivity : AppCompatActivity() {
 
         val listaNoticias = listOf(
             Noticia("ENADE está chegando!", "A prova do ENADE será realizada em breve. Não perca os prazos de inscrição e prepare-se com os materiais da biblioteca.", R.drawable.logo),
-            Noticia("Professor Boba Fett", "Inacreditável! Um professor de Computação deu aula totalmente fantasiado de Boba Fett de Star Wars hoje.", R.drawable.war)
+            Noticia("Professor Boba Fett", "Inacreditável! Um professor de Computação deu aula totalmente fantasiado de Boba Fett de Star Wars hoje.", R.drawable.logo)
         )
 
         rvNoticias.adapter = GenericAdapter(R.layout.item_noticia, listaNoticias) { view, noticia ->
@@ -38,6 +40,13 @@ class TelaHomeActivity : AppCompatActivity() {
             view.findViewById<TextView>(R.id.txtDescricaoNoticia).text = noticia.descricao
             noticia.imagemRes?.let {
                 view.findViewById<ImageView>(R.id.imgNoticia).setImageResource(it)
+            }
+            
+            view.findViewById<View>(R.id.btnSaibaMais).setOnClickListener {
+                val intent = Intent(this, NoticiaCompletaActivity::class.java)
+                intent.putExtra("TITULO", noticia.titulo)
+                intent.putExtra("IMAGEM", noticia.imagemRes ?: R.drawable.logo)
+                startActivity(intent)
             }
         }
 
@@ -80,6 +89,26 @@ class TelaHomeActivity : AppCompatActivity() {
         }
 
         setupLivrosCarrossel()
+        setupNavBar()
+    }
+
+    private fun setupNavBar() {
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    // Já está na Home
+                    true
+                }
+                R.id.nav_menu -> {
+                    val intent = Intent(this, MenuActivity::class.java)
+                    startActivity(intent)
+                    true
+                }
+                // Adicione outros itens se necessário
+                else -> false
+            }
+        }
     }
 
     private fun setupLivrosCarrossel() {
