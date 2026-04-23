@@ -112,17 +112,17 @@ class TelaHomeActivity : AppCompatActivity() {
     }
 
     private fun setupLivrosCarrossel() {
-        // Reutilizando lógica do Perfil para popular os livros na Home
+        // Todos os livros agora são Dom Quixote conforme pedido
         
         // Populares
-        setupItemLivro(findViewById(R.id.livroPop1), R.drawable.war, "Star Wars", "George Lucas")
-        setupItemLivro(findViewById(R.id.livroPop2), R.drawable.uno, "UNO", "Mattel")
+        setupItemLivro(findViewById(R.id.livroPop1), R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
+        setupItemLivro(findViewById(R.id.livroPop2), R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
         setupItemLivro(findViewById(R.id.livroPop3), R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
 
         // Mais Bem Avaliados
-        setupItemLivro(findViewById(R.id.livroAval1), R.drawable.logo, "Biblioteca", "Unifor")
+        setupItemLivro(findViewById(R.id.livroAval1), R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
         setupItemLivro(findViewById(R.id.livroAval2), R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
-        setupItemLivro(findViewById(R.id.livroAval3), R.drawable.war, "Star Wars", "George Lucas")
+        setupItemLivro(findViewById(R.id.livroAval3), R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
     }
 
     private fun setupItemLivro(view: View, imgRes: Int, titulo: String, autor: String) {
