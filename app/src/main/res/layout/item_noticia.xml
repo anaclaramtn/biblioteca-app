@@ -13,7 +13,13 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Espaço da imagem (removido conforme pedido "sem foto", mas mantendo a estrutura) -->
+        <ImageView
+            android:id="@+id/imgNoticia"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:scaleType="centerCrop"
+            android:background="#DDDDDD"
+            android:layout_marginBottom="8dp" />
 
         <TextView
             android:id="@+id/txtTituloNoticia"

@@ -88,6 +88,93 @@
             android:layout_marginTop="4dp"
             android:orientation="horizontal" />
 
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Livros Populares -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="16dp"
+                    android:text="Livros Populares Essa Semana"
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <include android:id="@+id/livroPop1" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroPop2" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroPop3" layout="@layout/item_livro" />
+
+                    </LinearLayout>
+                </HorizontalScrollView>
+
+                <!-- Livros Mais Curtidos -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="8dp"
+                    android:text="Livros Mais Curtidos"
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text="Nenhum livro curtido por enquanto"
+                    android:textColor="#999999"
+                    android:fontFamily="cursive"
+                    android:textSize="14sp" />
+
+                <!-- Livros Mais Bem Avaliados -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="8dp"
+                    android:text="Livros Mais Bem Avaliados"
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <include android:id="@+id/livroAval1" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroAval2" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroAval3" layout="@layout/item_livro" />
+
+                    </LinearLayout>
+                </HorizontalScrollView>
+
+            </LinearLayout>
+        </ScrollView>
+
 
     </LinearLayout>
 

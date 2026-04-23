@@ -3,6 +3,7 @@ package com.example.biblioteca_app
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -28,13 +29,16 @@ class TelaHomeActivity : AppCompatActivity() {
         val btnNext = findViewById<ImageButton>(R.id.btnNextNoticia)
 
         val listaNoticias = listOf(
-            Noticia("Novo Acervo de Fantasia", "Chegaram mais de 50 novos títulos de fantasia épica esta semana!"),
-            Noticia("Evento de Leitura", "Participe do nosso círculo de leitura no próximo sábado às 14h.")
+            Noticia("ENADE está chegando!", "A prova do ENADE será realizada em breve. Não perca os prazos de inscrição e prepare-se com os materiais da biblioteca.", R.drawable.logo),
+            Noticia("Professor Boba Fett", "Inacreditável! Um professor de Computação deu aula totalmente fantasiado de Boba Fett de Star Wars hoje.", R.drawable.war)
         )
 
         rvNoticias.adapter = GenericAdapter(R.layout.item_noticia, listaNoticias) { view, noticia ->
             view.findViewById<TextView>(R.id.txtTituloNoticia).text = noticia.titulo
             view.findViewById<TextView>(R.id.txtDescricaoNoticia).text = noticia.descricao
+            noticia.imagemRes?.let {
+                view.findViewById<ImageView>(R.id.imgNoticia).setImageResource(it)
+            }
         }
 
         // SnapHelper para comportamento de carrossel (para parar na notícia centralizada)
@@ -74,6 +78,28 @@ class TelaHomeActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        setupLivrosCarrossel()
+    }
+
+    private fun setupLivrosCarrossel() {
+        // Reutilizando lógica do Perfil para popular os livros na Home
+        
+        // Populares
+        setupItemLivro(findViewById(R.id.livroPop1), R.drawable.war, "Star Wars", "George Lucas")
+        setupItemLivro(findViewById(R.id.livroPop2), R.drawable.uno, "UNO", "Mattel")
+        setupItemLivro(findViewById(R.id.livroPop3), R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
+
+        // Mais Bem Avaliados
+        setupItemLivro(findViewById(R.id.livroAval1), R.drawable.logo, "Biblioteca", "Unifor")
+        setupItemLivro(findViewById(R.id.livroAval2), R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
+        setupItemLivro(findViewById(R.id.livroAval3), R.drawable.war, "Star Wars", "George Lucas")
+    }
+
+    private fun setupItemLivro(view: View, imgRes: Int, titulo: String, autor: String) {
+        view.findViewById<ImageView>(R.id.imgCapa).setImageResource(imgRes)
+        view.findViewById<TextView>(R.id.txtTituloLivro).text = titulo
+        view.findViewById<TextView>(R.id.txtAutor).text = autor
     }
 
     private fun setupDots(container: LinearLayout, count: Int) {
