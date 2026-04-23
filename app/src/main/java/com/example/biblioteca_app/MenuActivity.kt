@@ -46,9 +46,14 @@ class MenuActivity : AppCompatActivity() {
         }
 
         var btnConfiguracoes = findViewById<TextView>(R.id.btnConfiguracoes)
+        var btnPesquisaCientifica = findViewById<TextView>(R.id.btnPesquisa)
 
         btnConfiguracoes.setOnClickListener {
             startActivity(Intent(this, ConfiguracoesActivity::class.java))
+            finish()
+        }
+        btnPesquisaCientifica.setOnClickListener {
+            startActivity(Intent(this, PesquisaCientificaActivity::class.java))
             finish()
         }
     }
