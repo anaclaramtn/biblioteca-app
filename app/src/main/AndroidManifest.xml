@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bibliotecaapp">
         <activity
+            android:name=".LudotecaActivity"
+            android:exported="true" />
+        <activity
             android:name=".PesquisaCientificaActivity"
             android:exported="false" />
         <activity
