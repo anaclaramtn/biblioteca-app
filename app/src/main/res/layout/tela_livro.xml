@@ -1,10 +1,174 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LivroActivity">
+    android:orientation="vertical"
+    android:background="#FFFFFF">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- CONTEÚDO -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- HEADER AZUL -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_header"
+                android:orientation="vertical"
+                android:paddingBottom="16dp">
+
+                <!-- VOLTAR -->
+                <ImageButton
+                    android:id="@+id/btnVoltar"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="16dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_leftarrow"
+                    android:contentDescription="Voltar"/>
+
+                <!-- CAPA -->
+                <ImageView
+                    android:id="@+id/imgCapa"
+                    android:layout_width="160dp"
+                    android:layout_height="220dp"
+                    android:layout_gravity="center"
+                    android:scaleType="centerCrop"/>
+            </LinearLayout>
+
+            <!-- TITULO -->
+            <TextView
+                android:id="@+id/txtTitulo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Título do Livro"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:gravity="center"
+                android:paddingTop="12dp"/>
+
+            <!-- AUTOR -->
+            <TextView
+                android:id="@+id/txtAutor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Autor"
+                android:gravity="center"
+                android:textColor="#666"/>
+
+            <!-- STATUS -->
+            <TextView
+                android:id="@+id/txtStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Disponível"
+                android:layout_gravity="center"
+                android:padding="6dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_status"/>
+
+            <!-- CURTIR -->
+            <ImageButton
+                android:id="@+id/btnCurtir"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_heart"
+                android:contentDescription="Curtir"/>
+
+            <!-- MÉDIA -->
+            <TextView
+                android:id="@+id/txtMedia"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4.5"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_gravity="center"
+                android:layout_marginTop="4dp"/>
+
+            <!-- TOTAL -->
+            <TextView
+                android:id="@+id/txtTotalAvaliacoes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="120 avaliações"
+                android:textColor="#777"
+                android:layout_gravity="center"/>
+
+            <!-- SINOPSE -->
+            <TextView
+                android:id="@+id/txtDescricao"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Descrição longa..."
+                android:maxLines="4"
+                android:ellipsize="end"
+                android:padding="16dp"/>
+
+            <TextView
+                android:id="@+id/btnVerMais"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ver mais"
+                android:textColor="@color/padrao_app"
+                android:paddingStart="16dp"/>
+
+            <!-- AVALIAÇÕES -->
+            <include layout="@layout/item_avaliacao"/>
+            <include layout="@layout/item_avaliacao"/>
+
+            <!-- SEM AVALIAÇÕES -->
+            <TextView
+                android:id="@+id/txtSemAvaliacoes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nenhuma avaliação ainda. Seja o primeiro a avaliar!"
+                android:padding="16dp"
+                android:visibility="gone"/>
+
+            <!-- BOTÕES -->
+            <Button
+                android:id="@+id/btnVerAvaliacoes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Ver mais avaliações"
+                android:textSize="20dp"
+                android:layout_margin="16dp"
+                android:backgroundTint="@color/padrao_app"
+                android:textColor="#FFFFFF"/>
+
+            <Button
+                android:id="@+id/btnAvaliar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Avaliar"
+                android:textSize="20dp"
+                android:layout_marginHorizontal="16dp"
+                android:backgroundTint="@color/padrao_app"
+                android:textColor="#FFFFFF"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- BOTÃO FIXO -->
+    <Button
+        android:id="@+id/btnAlugar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Alugar"
+        android:textSize="20dp"
+        android:backgroundTint="@color/padrao_app"
+        android:textColor="#FFFFFF"/>
+
+</LinearLayout>

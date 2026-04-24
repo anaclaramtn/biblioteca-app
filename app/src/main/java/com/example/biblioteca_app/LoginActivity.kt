@@ -16,6 +16,7 @@ class LoginActivity : AppCompatActivity() {
 
         val btnCriarConta = findViewById<MaterialButton>(R.id.ButtonCriarConta1)
         val btnEsqueceuSenha = findViewById<MaterialButton>(R.id.ButtonEsqueceuSenha)
+        val btnEntrar = findViewById<MaterialButton>(R.id.ButtonEntrar)
 
         btnCriarConta.setOnClickListener {
             val intent = Intent(this, CadastroActivity::class.java)
@@ -25,6 +26,10 @@ class LoginActivity : AppCompatActivity() {
         btnEsqueceuSenha.setOnClickListener {
             val intent = Intent(this, TelaRedefinicaoSenhaActivity::class.java)
             startActivity(intent)
+        }
+
+        btnEntrar.setOnClickListener {
+            val intent = Intent(this, TelaHomeActivity::class.java)
         }
     }
 }
