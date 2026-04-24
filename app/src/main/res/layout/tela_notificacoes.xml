@@ -1,10 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".NotificacoesActivity">
+    android:orientation="vertical"
+    android:background="#FFFFFF">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- CONTEÚDO -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- HEADER -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/background_header">
+
+            <ImageView
+                android:id="@+id/btnVoltar"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="12dp"
+                android:src="@drawable/ic_leftarrow"
+                app:tint="#FFFFFF"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:gravity="center"
+                android:text="Notificações"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="18sp"/>
+        </RelativeLayout>
+
+        <!-- BOTÃO LIMPAR -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Marcar todas como lidas"
+            android:layout_gravity="end"
+            android:padding="8dp"
+            android:layout_margin="8dp"
+            android:background="#DDDDDD"
+            android:textSize="12sp"/>
+
+        <!-- LISTA -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- ITEM -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    app:cardElevation="3dp"
+                    app:cardCornerRadius="8dp">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="12dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/titulo1"
+                            android:text="Administração - Lembrete"
+                            android:textStyle="bold"
+                            android:textSize="14sp"
+                            android:layout_alignParentStart="true"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/msg1"
+                            android:text="O livro 'O Hobbit' deve ser devolvido em três dias."
+                            android:textSize="12sp"
+                            android:layout_below="@id/titulo1"
+                            android:layout_marginTop="4dp"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="1:30 pm\n24/04/2026"
+                            android:textSize="10sp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentBottom="true"/>
+
+                        <View
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_marginTop="2dp"
+                            android:background="@drawable/nav_item_background"/>
+                    </RelativeLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- DUPLIQUE OS CARDS PARA MAIS ITENS -->
+
+            </LinearLayout>
+        </ScrollView>
+
+    </LinearLayout>
+
+    <!-- NAVBAR -->
+    <include layout="@layout/navbar_layout"/>
+
+</LinearLayout>
