@@ -30,6 +30,7 @@ class LoginActivity : AppCompatActivity() {
 
         btnEntrar.setOnClickListener {
             val intent = Intent(this, TelaHomeActivity::class.java)
+            startActivity(intent)
         }
     }
 }

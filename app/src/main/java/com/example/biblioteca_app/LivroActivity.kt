@@ -1,4 +1,4 @@
-package com.example.biblioteca_app.ui
+package com.example.biblioteca_app
 
 import android.os.Bundle
 import android.widget.Toast
@@ -29,7 +29,7 @@ class LivroActivity : AppCompatActivity() {
         return Livro(
             titulo = "Star Wars: A Vingança dos Sith",
             autor = "George Lucas",
-            descricao = "Anakin Skywalker se torna Darth Vader após ser seduzido pelo lado sombrio da Força. Uma história de queda, tragédia e redenção que marca o fim da República e o surgimento do Império.",
+            descricao = "Anakin Skywalker se torna Darth Vader após ser seduzido pelo lado sombrio da Força. Uma história de queda, tragédia e redenção que marca o fim da República e o surgimento do Império.Anakin Skywalker se torna Darth Vader após ser seduzido pelo lado sombrio da Força. Uma história de queda, tragédia e redenção que marca o fim da República e o surgimento do Império. Anakin Skywalker se torna Darth Vader após ser seduzido pelo lado sombrio da Força. Uma história de queda, tragédia e redenção que marca o fim da República e o surgimento do Império",
             imagemRes = R.drawable.capa_star_wars,
             disponivel = true,
             media = 4.9f,
@@ -38,6 +38,10 @@ class LivroActivity : AppCompatActivity() {
     }
 
     private fun preencherTela(livro: Livro) {
+        //isso eh so um debug pra ver se este caralho estava rodando, depois vou remover
+        Toast.makeText(this, "preencherTela chamado: ${livro.titulo}", Toast.LENGTH_LONG).show()
+        binding.txtTitulo.text = livro.titulo
+
         binding.txtTitulo.text = livro.titulo
         binding.txtAutor.text = livro.autor
         binding.txtDescricao.text = livro.descricao

@@ -1,5 +1,7 @@
 package com.example.biblioteca_app.models
 
+import java.io.Serializable
+
 data class Noticia(
     val titulo: String,
     val descricao: String,
@@ -14,4 +16,4 @@ data class Livro(
     val disponivel: Boolean,
     val media: Float,
     val totalAvaliacoes: Int
-)
+) : Serializable
