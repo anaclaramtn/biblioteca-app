@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    tools:context=".BuscaActivity">
+
+    <!-- Header -->
+    <TextView
+        android:id="@+id/txtTitulo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_header"
+        android:gravity="center"
+        android:padding="24dp"
+        android:text="Consulte nosso acervo"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <!-- Conteúdo Scrollable -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Barra de Pesquisa -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_campo_input"
+                android:padding="4dp">
+
+                <ImageView
+                    android:id="@+id/ivSearchIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="8dp"
+                    android:src="@drawable/ic_search"
+                    app:tint="#666666" />
+
+                <EditText
+                    android:id="@+id/etPesquisa"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/ivSearchIcon"
+                    android:layout_toStartOf="@+id/btnLimparPesquisa"
+                    android:background="@android:color/transparent"
+                    android:hint="Pesquisar..."
+                    android:padding="12dp"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:id="@+id/btnLimparPesquisa"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="8dp"
+                    android:src="@android:drawable/ic_menu_close_clear_cancel"
+                    app:tint="#000000" />
+            </RelativeLayout>
+
+            <!-- Ordenação e Contagem -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp">
+
+                <LinearLayout
+                    android:id="@+id/btnOrdenar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_sort_alphabetically"
+                        app:tint="#000000" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="Ordenar por ▽"
+                        android:textColor="#000000"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txtQtdLivros"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:gravity="end"
+                    android:text="6 livro(s) registrado(s) no\nacervo"
+                    android:textSize="12sp"
+                    android:textColor="#666666" />
+            </RelativeLayout>
+
+            <!-- Grid de Livros (Usando GridLayout para simular 3 colunas) -->
+            <GridLayout
+                android:id="@+id/gridLivros"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:columnCount="3"
+                android:useDefaultMargins="true">
+
+                <include android:id="@+id/item1" layout="@layout/item_livro" />
+                <include android:id="@+id/item2" layout="@layout/item_livro" />
+                <include android:id="@+id/item3" layout="@layout/item_livro" />
+                <include android:id="@+id/item4" layout="@layout/item_livro" />
+                <include android:id="@+id/item5" layout="@layout/item_livro" />
+                <include android:id="@+id/item6" layout="@layout/item_livro" />
+
+            </GridLayout>
+
+            <!-- Estado: Sem resultados -->
+            <LinearLayout
+                android:id="@+id/layoutSemResultados"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginTop="50dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=":("
+                    android:textSize="80sp"
+                    android:textColor="#999999"
+                    android:rotation="90" />
+
+                <TextView
+                    android:id="@+id/txtMensagemErro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center"
+                    android:text="Nenhum resultado encontrado para\n\&quot;...\&quot;"
+                    android:textColor="#333333"
+                    android:textSize="18sp"
+                    android:fontFamily="cursive" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Navbar -->
+    <include layout="@layout/navbar_layout" />
+
+</LinearLayout>

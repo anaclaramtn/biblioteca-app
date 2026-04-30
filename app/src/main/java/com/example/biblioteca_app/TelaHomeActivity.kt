@@ -112,7 +112,6 @@ class TelaHomeActivity : AppCompatActivity() {
     }
 
     private fun setupLivrosCarrossel() {
-        // Todos os livros agora são Dom Quixote conforme pedido
         
         // Populares
         setupItemLivro(findViewById(R.id.livroPop1), R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")

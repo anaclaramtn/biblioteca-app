@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bibliotecaapp">
         <activity
+            android:name=".BuscaActivity"
+            android:exported="false" />
+        <activity
             android:name=".LivroActivity"
             android:exported="true">
             <intent-filter>
@@ -61,7 +64,7 @@
             android:exported="false" />
         <activity
             android:name=".CadastroActivity"
-            android:exported="true"/>
+            android:exported="true" />
     </application>
 
 </manifest>
