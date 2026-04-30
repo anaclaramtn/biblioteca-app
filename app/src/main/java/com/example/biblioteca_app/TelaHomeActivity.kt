@@ -94,18 +94,22 @@ class TelaHomeActivity : AppCompatActivity() {
 
     private fun setupNavBar() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
+        bottomNav.selectedItemId = R.id.nav_home
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> {
-                    // Já está na Home
+                R.id.nav_home -> true
+                R.id.nav_busca -> {
+                    startActivity(Intent(this, BuscaActivity::class.java))
+                    true
+                }
+                R.id.nav_notif -> {
+                    startActivity(Intent(this, NotificacoesActivity::class.java))
                     true
                 }
                 R.id.nav_menu -> {
-                    val intent = Intent(this, MenuActivity::class.java)
-                    startActivity(intent)
+                    startActivity(Intent(this, MenuActivity::class.java))
                     true
                 }
-                // Adicione outros itens se necessário
                 else -> false
             }
         }

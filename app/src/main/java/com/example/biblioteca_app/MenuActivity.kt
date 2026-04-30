@@ -25,22 +25,23 @@ class MenuActivity : AppCompatActivity() {
         }
 
         bottomNav = findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNav)
-
+        bottomNav.selectedItemId = R.id.nav_menu
         bottomNav.setOnItemSelectedListener {
             when(it.itemId) {
                 R.id.nav_home -> {
-                    // abrir tela home
+                    startActivity(Intent(this, TelaHomeActivity::class.java))
+                    finish()
                     true
                 }
                 R.id.nav_busca -> {
+                    startActivity(Intent(this, BuscaActivity::class.java))
                     true
                 }
                 R.id.nav_notif -> {
+                    startActivity(Intent(this, NotificacoesActivity::class.java))
                     true
                 }
-                R.id.nav_menu -> {
-                    true
-                }
+                R.id.nav_menu -> true
                 else -> false
             }
         }

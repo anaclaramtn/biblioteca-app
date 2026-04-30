@@ -113,23 +113,32 @@
                     android:textColor="#666666" />
             </RelativeLayout>
 
-            <!-- Grid de Livros (Usando GridLayout para simular 3 colunas) -->
-            <GridLayout
+            <!-- Grid de Livros (Usando Flow dentro de um Constraint para manter design da Home) -->
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/gridLivros"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:columnCount="3"
-                android:useDefaultMargins="true">
+                android:layout_marginTop="16dp">
 
                 <include android:id="@+id/item1" layout="@layout/item_livro" />
                 <include android:id="@+id/item2" layout="@layout/item_livro" />
                 <include android:id="@+id/item3" layout="@layout/item_livro" />
                 <include android:id="@+id/item4" layout="@layout/item_livro" />
-                <include android:id="@+id/item5" layout="@layout/item_livro" />
-                <include android:id="@+id/item6" layout="@layout/item_livro" />
 
-            </GridLayout>
+                <androidx.constraintlayout.helper.widget.Flow
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:constraint_referenced_ids="item1,item2,item3,item4"
+                    app:flow_wrapMode="aligned"
+                    app:flow_horizontalGap="8dp"
+                    app:flow_verticalGap="16dp"
+                    app:flow_maxElementsWrap="3"
+                    app:flow_horizontalStyle="spread_inside" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!-- Estado: Sem resultados -->
             <LinearLayout

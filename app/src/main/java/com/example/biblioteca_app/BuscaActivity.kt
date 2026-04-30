@@ -35,7 +35,7 @@ class BuscaActivity : AppCompatActivity() {
         val gridLivros = findViewById<View>(R.id.gridLivros)
         val layoutSemResultados = findViewById<View>(R.id.layoutSemResultados)
         val txtMensagemErro = findViewById<TextView>(R.id.txtMensagemErro)
-        val ids = listOf(R.id.item1, R.id.item2, R.id.item3, R.id.item4, R.id.item5, R.id.item6)
+        val ids = listOf(R.id.item1, R.id.item2, R.id.item3, R.id.item4)
 
         btnLimpar.setOnClickListener {
             etPesquisa.text.clear()
@@ -48,16 +48,26 @@ class BuscaActivity : AppCompatActivity() {
                 gridLivros.visibility = View.VISIBLE
                 layoutSemResultados.visibility = View.GONE
                 ids.forEach { findViewById<View>(it).visibility = View.VISIBLE }
-            } else if (query.contains("dom") || query.contains("quixote") || query.contains("miguel") || query.contains("cervantes")) {
-                gridLivros.visibility = View.VISIBLE
-                layoutSemResultados.visibility = View.GONE
-                // Mostra apenas o primeiro para simular resultado único encontrado
-                ids.forEach { findViewById<View>(it).visibility = View.GONE }
-                findViewById<View>(R.id.item1).visibility = View.VISIBLE
             } else {
-                gridLivros.visibility = View.GONE
-                layoutSemResultados.visibility = View.VISIBLE
-                txtMensagemErro.text = "Nenhum resultado encontrado para\n\"$text\""
+                val matches = mutableListOf<Int>()
+                
+                // Simulação de pesquisa para os 4 livros específicos
+                if ("star wars".contains(query) || "george lucas".contains(query)) matches.add(R.id.item1)
+                if ("frankenstein".contains(query) || "mary shelley".contains(query)) matches.add(R.id.item2)
+                if ("the hobbit".contains(query) || "j.r.r. tolkien".contains(query)) matches.add(R.id.item3)
+                if ("it".contains(query) || "stephen king".contains(query)) matches.add(R.id.item4)
+
+                if (matches.isNotEmpty()) {
+                    gridLivros.visibility = View.VISIBLE
+                    layoutSemResultados.visibility = View.GONE
+                    ids.forEach { id -> 
+                        findViewById<View>(id).visibility = if (matches.contains(id)) View.VISIBLE else View.GONE 
+                    }
+                } else {
+                    gridLivros.visibility = View.GONE
+                    layoutSemResultados.visibility = View.VISIBLE
+                    txtMensagemErro.text = "Nenhum resultado encontrado para\n\"$text\""
+                }
             }
         }
 
@@ -67,7 +77,7 @@ class BuscaActivity : AppCompatActivity() {
             showOrderDialog()
         }
 
-        // Configurar Livros (Todos Dom Quixote para demonstração)
+        // Configurar Livros (Star Wars no primeiro, demais Dom Quixote)
         setupLivros(ids)
 
         // Configurar NavBar
@@ -78,14 +88,34 @@ class BuscaActivity : AppCompatActivity() {
         val txtQtdLivros = findViewById<TextView>(R.id.txtQtdLivros)
         txtQtdLivros.text = "${ids.size} livro(s) registrado(s) no\nacervo"
         
-        for (id in ids) {
+        for (i in ids.indices) {
+            val id = ids[i]
             val view = findViewById<View>(id)
-            view.findViewById<ImageView>(R.id.imgCapa).setImageResource(R.drawable.capadomquixote)
-            view.findViewById<TextView>(R.id.txtTituloLivro).text = "Dom Quixote"
-            view.findViewById<TextView>(R.id.txtAutor).text = "Miguel de Cervantes"
+            
+            when (i) {
+                0 -> {
+                    view.findViewById<ImageView>(R.id.imgCapa).setImageResource(R.drawable.capa_star_wars)
+                    view.findViewById<TextView>(R.id.txtTituloLivro).text = "Star Wars"
+                    view.findViewById<TextView>(R.id.txtAutor).text = "George Lucas"
+                }
+                1 -> {
+                    view.findViewById<ImageView>(R.id.imgCapa).setImageResource(R.drawable.frankstein)
+                    view.findViewById<TextView>(R.id.txtTituloLivro).text = "Frankenstein"
+                    view.findViewById<TextView>(R.id.txtAutor).text = "Mary Shelley"
+                }
+                2 -> {
+                    view.findViewById<ImageView>(R.id.imgCapa).setImageResource(R.drawable.hobbit)
+                    view.findViewById<TextView>(R.id.txtTituloLivro).text = "The Hobbit"
+                    view.findViewById<TextView>(R.id.txtAutor).text = "J.R.R. Tolkien"
+                }
+                3 -> {
+                    view.findViewById<ImageView>(R.id.imgCapa).setImageResource(R.drawable.it)
+                    view.findViewById<TextView>(R.id.txtTituloLivro).text = "It"
+                    view.findViewById<TextView>(R.id.txtAutor).text = "Stephen King"
+                }
+            }
             
             view.setOnClickListener {
-                // Ao clicar, vai para a tela do livro
                 val intent = Intent(this, LivroActivity::class.java)
                 startActivity(intent)
             }
@@ -113,11 +143,15 @@ class BuscaActivity : AppCompatActivity() {
                     finish()
                     true
                 }
+                R.id.nav_busca -> true
+                R.id.nav_notif -> {
+                    startActivity(Intent(this, NotificacoesActivity::class.java))
+                    true
+                }
                 R.id.nav_menu -> {
                     startActivity(Intent(this, MenuActivity::class.java))
                     true
                 }
-                R.id.nav_busca -> true
                 else -> false
             }
         }
