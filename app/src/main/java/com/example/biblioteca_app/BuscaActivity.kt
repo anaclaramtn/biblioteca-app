@@ -22,12 +22,6 @@ class BuscaActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.tela_busca)
-        
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
 
         // Configuração da Pesquisa
         val etPesquisa = findViewById<EditText>(R.id.etPesquisa)

@@ -1,0 +1,58 @@
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="10dp"
+    app:cardElevation="2dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground">
+
+        <!-- TÍTULO -->
+        <TextView
+            android:id="@+id/titulo1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Administração - Lembrete"
+            android:textStyle="bold"
+            android:textSize="14sp"/>
+
+        <!-- MENSAGEM -->
+        <TextView
+            android:id="@+id/msg1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/titulo1"
+            android:layout_marginTop="4dp"
+            android:text="Mensagem aqui..."
+            android:textSize="12sp"/>
+
+        <!-- DATA -->
+        <TextView
+            android:id="@+id/data1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1:30 pm\n24/04/2026"
+            android:textSize="10sp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"/>
+
+        <!-- INDICADOR AZUL -->
+        <View
+            android:id="@+id/indicadorNaoLido"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="2dp"
+            android:background="@drawable/circle_blue"/>
+
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>

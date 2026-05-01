@@ -14,36 +14,12 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <!-- HEADER -->
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/background_header">
+        <!-- HEADER NOVO -->
+        <include
+            android:id="@+id/header"
+            layout="@layout/header_layout"/>
 
-            <ImageView
-                android:id="@+id/btnVoltar"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="12dp"
-                android:src="@drawable/ic_leftarrow"
-                app:tint="#FFFFFF"/>
-
-            <!-- Titulo -->
-            <TextView
-                android:id="@+id/txtTitulo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:gravity="center"
-                android:padding="16dp"
-                android:text="CONFIGURAÇÕES"
-                android:textColor="#FFFFFF"
-                android:textSize="24sp"
-                android:textStyle="bold" />
-        </RelativeLayout>
-
-        <!-- Lista dos botoes -->
+        <!-- Lista -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -21,17 +21,9 @@
             android:orientation="vertical">
 
             <!-- Titulo -->
-            <TextView
-                android:id="@+id/txtTitulo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/background_header"
-                android:gravity="left"
-                android:padding="24dp"
-                android:text="Olá, Narak"
-                android:textColor="#FFFFFF"
-                android:textSize="20dp"
-                android:textStyle="bold" />
+            <include
+                android:id="@+id/header"
+                layout="@layout/header_layout"/>
 
             <!-- Notícias da Biblioteca -->
             <TextView

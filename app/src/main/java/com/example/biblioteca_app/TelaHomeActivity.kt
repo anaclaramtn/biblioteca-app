@@ -23,6 +23,17 @@ class TelaHomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.tela_home)
+
+        val header = findViewById<View>(R.id.header)
+
+        val titulo = header.findViewById<TextView>(R.id.txtTitulo)
+        val btnBack = header.findViewById<ImageView>(R.id.btnBack)
+
+        // Define o título
+        titulo.text = "Olá, Narak"
+
+        // Garante que NÃO aparece botão de voltar
+        btnBack.visibility = View.GONE
         
         // Configuração das Notícias
         val rvNoticias = findViewById<RecyclerView>(R.id.rvNoticias)
@@ -35,13 +46,18 @@ class TelaHomeActivity : AppCompatActivity() {
             Noticia("Professor Boba Fett", "Inacreditável! Um professor de Computação deu aula totalmente fantasiado de Boba Fett de Star Wars hoje.", R.drawable.logo)
         )
 
-        rvNoticias.adapter = GenericAdapter(R.layout.item_noticia, listaNoticias) { view, noticia ->
+        rvNoticias.adapter = GenericAdapter(
+            R.layout.item_noticia,
+            listaNoticias
+        ) { view, noticia, position ->
+
             view.findViewById<TextView>(R.id.txtTituloNoticia).text = noticia.titulo
             view.findViewById<TextView>(R.id.txtDescricaoNoticia).text = noticia.descricao
+
             noticia.imagemRes?.let {
                 view.findViewById<ImageView>(R.id.imgNoticia).setImageResource(it)
             }
-            
+
             view.findViewById<View>(R.id.btnSaibaMais).setOnClickListener {
                 val intent = Intent(this, NoticiaCompletaActivity::class.java)
                 intent.putExtra("TITULO", noticia.titulo)
@@ -80,12 +96,6 @@ class TelaHomeActivity : AppCompatActivity() {
         btnNext.setOnClickListener {
             val currentPos = (rvNoticias.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             if (currentPos < listaNoticias.size - 1) rvNoticias.smoothScrollToPosition(currentPos + 1)
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
         }
 
         setupLivrosCarrossel()

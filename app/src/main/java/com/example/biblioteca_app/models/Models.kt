@@ -17,3 +17,10 @@ data class Livro(
     val media: Float,
     val totalAvaliacoes: Int
 ) : Serializable
+
+data class Notificacao(
+    val titulo: String,
+    val mensagem: String,
+    val data: String,
+    var lida: Boolean = false
+)
