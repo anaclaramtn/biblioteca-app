@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -17,13 +19,11 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- HEADER AZUL -->
-            <LinearLayout
+            <!-- HEADER -->
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/background_header"
-                android:orientation="vertical"
-                android:paddingBottom="16dp">
+                android:layout_height="260dp"
+                android:background="@drawable/background_header">
 
                 <!-- VOLTAR -->
                 <ImageButton
@@ -33,26 +33,43 @@
                     android:layout_margin="16dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_leftarrow"
-                    android:contentDescription="Voltar"/>
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"/>
 
-                <!-- CAPA -->
+                <!-- CAPA centralizada -->
                 <ImageView
                     android:id="@+id/imgCapa"
-                    android:layout_width="160dp"
-                    android:layout_height="220dp"
-                    android:layout_gravity="center"
-                    android:scaleType="centerCrop"/>
-            </LinearLayout>
+                    android:layout_width="140dp"
+                    android:layout_height="200dp"
+                    android:scaleType="centerCrop"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
 
-            <!-- TITULO -->
+
+                <ImageButton
+                    android:id="@+id/btnCurtir"
+                    android:layout_width="56dp"
+                    android:layout_height="70dp"
+                    android:layout_marginTop="184dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_heart"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- TÍTULO -->
             <TextView
                 android:id="@+id/txtTitulo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Título do Livro"
                 android:textStyle="bold"
-                android:textSize="18sp"
-                android:gravity="center"
+                android:textSize="20sp"
+                android:paddingStart="16dp"
                 android:paddingTop="12dp"/>
 
             <!-- AUTOR -->
@@ -61,8 +78,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Autor"
-                android:gravity="center"
-                android:textColor="#666"/>
+                android:textColor="#666"
+                android:paddingStart="16dp"/>
 
             <!-- STATUS -->
             <TextView
@@ -70,48 +87,50 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Disponível"
-                android:layout_gravity="center"
                 android:padding="6dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="6dp"
                 android:background="@drawable/bg_status"/>
 
-            <!-- CURTIR -->
-            <ImageButton
-                android:id="@+id/btnCurtir"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="center"
-                android:layout_marginTop="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_heart"
-                android:contentDescription="Curtir"/>
-
-            <!-- MÉDIA -->
-            <TextView
-                android:id="@+id/txtMedia"
-                android:layout_width="wrap_content"
+            <!-- AVALIAÇÃO -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="4.5"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_gravity="center"
-                android:layout_marginTop="4dp"/>
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingTop="8dp"
+                android:gravity="center_vertical">
 
-            <!-- TOTAL -->
-            <TextView
-                android:id="@+id/txtTotalAvaliacoes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="120 avaliações"
-                android:textColor="#777"
-                android:layout_gravity="center"/>
+                <TextView
+                    android:id="@+id/txtMedia"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0.0"
+                    android:textStyle="bold"
+                    android:textSize="16sp"/>
+
+                <TextView
+                    android:id="@+id/txtEstrelasMedia"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⭐⭐⭐⭐☆"
+                    android:layout_marginStart="6dp"/>
+
+                <TextView
+                    android:id="@+id/txtTotalAvaliacoes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="(0 avaliações)"
+                    android:textColor="#777"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
 
             <!-- SINOPSE -->
             <TextView
                 android:id="@+id/txtDescricao"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Descrição longa..."
+                android:text="Descrição do livro..."
                 android:maxLines="4"
                 android:ellipsize="end"
                 android:padding="16dp"/>
@@ -125,8 +144,13 @@
                 android:paddingStart="16dp"/>
 
             <!-- AVALIAÇÕES -->
-            <include layout="@layout/item_avaliacao"/>
-            <include layout="@layout/item_avaliacao"/>
+            <include
+                android:id="@+id/avaliacao1"
+                layout="@layout/item_avaliacao" />
+
+            <include
+                android:id="@+id/avaliacao2"
+                layout="@layout/item_avaliacao" />
 
             <!-- SEM AVALIAÇÕES -->
             <TextView
@@ -137,37 +161,58 @@
                 android:padding="16dp"
                 android:visibility="gone"/>
 
-            <!-- BOTÕES -->
-            <Button
-                android:id="@+id/btnVerAvaliacoes"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Ver mais avaliações"
-                android:textSize="20dp"
-                android:layout_margin="16dp"
-                android:backgroundTint="@color/padrao_app"
-                android:textColor="#FFFFFF"/>
+            <!--
+                BOTÕES LADO A LADO — usamos um LinearLayout horizontal
+                com layout_weight="1" em cada botão.
 
-            <Button
-                android:id="@+id/btnAvaliar"
+                O que é layout_weight?
+                É como dividir o espaço disponível proporcionalmente.
+                weight="1" em ambos = cada botão ocupa 50% da largura.
+                Se um tivesse weight="2" e outro weight="1", seria 66%/33%.
+
+                layout_width="0dp" é obrigatório quando usamos weight horizontal,
+                porque estamos dizendo: "não calcule a largura normalmente,
+                deixa o weight decidir".
+            -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Avaliar"
-                android:textSize="20dp"
+                android:orientation="horizontal"
                 android:layout_marginHorizontal="16dp"
-                android:backgroundTint="@color/padrao_app"
-                android:textColor="#FFFFFF"/>
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp">
+
+                <Button
+                    android:id="@+id/btnAvaliar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Avaliar"
+                    android:layout_marginEnd="8dp"
+                    android:backgroundTint="@color/padrao_app"
+                    android:textColor="#FFFFFF"/>
+
+                <Button
+                    android:id="@+id/btnVerAvaliacoes"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Ver mais avaliações"
+                    android:backgroundTint="@color/padrao_app"
+                    android:textColor="#FFFFFF"/>
+
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
 
-    <!-- BOTÃO FIXO -->
+    <!-- BOTÃO FIXO — fica sempre visível no rodapé, fora do ScrollView -->
     <Button
         android:id="@+id/btnAlugar"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:text="Alugar"
-        android:textSize="20dp"
+        android:textSize="20sp"
         android:backgroundTint="@color/padrao_app"
         android:textColor="#FFFFFF"/>
 

@@ -29,7 +29,7 @@ class PerfilActivity : AppCompatActivity() {
         // Configurar botão voltar
         val btnVoltar = findViewById<ImageView>(R.id.btnVoltar)
         btnVoltar.setOnClickListener {
-            val intent = Intent(this, ConfiguracoesActivity::class.java)
+            val intent = Intent(this, MenuActivity::class.java)
             startActivity(intent)
             finish()
         }

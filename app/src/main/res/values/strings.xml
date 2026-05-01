@@ -9,4 +9,34 @@
     <string name="btn_esqueceu_senha">Esqueceu a senha?</string>
     <string name="btn_criar_conta">Criar Conta</string>
     <string name="app_version">v1.0.1</string>
+
+    <!-- Dialog Denúncia -->
+    <string name="dialog_denuncia_titulo">Qual o motivo da denúncia?</string>
+    <string name="motivo_spoiler">Spoiler Não Sinalizado</string>
+    <string name="motivo_inadequado">Conteúdo Inadequado</string>
+    <string name="motivo_incorreto">Informações Incorretas</string>
+    <string name="motivo_spam">Spam</string>
+    <string name="motivo_outro">Outro:</string>
+    <string name="hint_descreva_problema">Descreva o problema</string>
+    <string name="btn_cancelar">Cancelar</string>
+    <string name="btn_enviar_denuncia">Enviar denúncia</string>
+
+    <!-- Dialog Confirmação -->
+    <string name="dialog_confirmacao_cancelar_pergunta">Tem certeza que deseja cancelar?</string>
+    <string name="btn_nao">Não</string>
+    <string name="btn_sim">Sim</string>
+
+    <!-- Dialog Sucesso -->
+    <string name="dialog_sucesso_titulo">Sua reclamação foi enviada!</string>
+    <string name="dialog_sucesso_mensagem">Aguarde o administrador validar sua denúncia</string>
+    <string name="btn_ok">Ok</string>
+
+    <!-- Livro Activity -->
+    <string name="btn_ver_mais">Ver mais</string>
+    <string name="btn_ver_menos">Ver menos</string>
+    <string name="btn_solicitacao_enviada">Solicitação enviada</string>
+    <string name="msg_solicitacao_enviada">Sua solicitação foi enviada</string>
+    <string name="status_disponivel">Disponível</string>
+    <string name="status_indisponivel">Indisponível</string>
+    <string name="total_avaliacoes_format">%d avaliações</string>
 </resources>

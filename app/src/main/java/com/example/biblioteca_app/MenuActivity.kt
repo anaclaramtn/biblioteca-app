@@ -26,14 +26,27 @@ class MenuActivity : AppCompatActivity() {
 
         var btnConfiguracoes = findViewById<TextView>(R.id.btnConfiguracoes)
         var btnPesquisaCientifica = findViewById<TextView>(R.id.btnPesquisa)
+        val btnPerfil = findViewById<TextView>(R.id.btnPerfil)
+        val btnHistorico = findViewById<TextView>(R.id.btnHistorico)
+        val btnLudoteca = findViewById<TextView>(R.id.btnLudoteca)
+
+        btnPerfil.setOnClickListener {
+            startActivity(Intent(this, PerfilActivity::class.java))
+        }
+
+        btnHistorico.setOnClickListener {
+            startActivity(Intent(this, HistoricoActivity::class.java))
+        }
+
+        btnLudoteca.setOnClickListener {
+            startActivity(Intent(this, LudotecaActivity::class.java))
+        }
 
         btnConfiguracoes.setOnClickListener {
             startActivity(Intent(this, ConfiguracoesActivity::class.java))
-            finish()
         }
         btnPesquisaCientifica.setOnClickListener {
             startActivity(Intent(this, PesquisaCientificaActivity::class.java))
-            finish()
         }
         setupNavBar()
     }

@@ -149,6 +149,11 @@ class TelaHomeActivity : AppCompatActivity() {
         view.findViewById<ImageView>(R.id.imgCapa).setImageResource(imgRes)
         view.findViewById<TextView>(R.id.txtTituloLivro).text = titulo
         view.findViewById<TextView>(R.id.txtAutor).text = autor
+        
+        view.setOnClickListener {
+            val intent = Intent(this, LivroActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun setupDots(container: LinearLayout, count: Int) {

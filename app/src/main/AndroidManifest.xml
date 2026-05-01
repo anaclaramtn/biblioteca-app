@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bibliotecaapp">
         <activity
+            android:name=".MaisAvaliacoesActivity"
+            android:exported="false" />
+        <activity
             android:name=".BuscaActivity"
             android:exported="false" />
         <activity
