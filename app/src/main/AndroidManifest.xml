@@ -12,6 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bibliotecaapp">
         <activity
+            android:name=".DetalhesusuarioadmActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UsuarioadmActivity"
+            android:exported="true" />
+        <activity
             android:name=".MaisAvaliacoesActivity"
             android:exported="false" />
         <activity
@@ -49,7 +55,7 @@
             android:exported="false" />
         <activity
             android:name=".ConfiguracoesActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".MenuActivity"
             android:exported="false" />
@@ -58,7 +64,7 @@
             android:exported="false" />
         <activity
             android:name=".LoginActivity"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

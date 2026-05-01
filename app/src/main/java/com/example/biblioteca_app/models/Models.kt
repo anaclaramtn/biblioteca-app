@@ -24,3 +24,19 @@ data class Notificacao(
     val data: String,
     var lida: Boolean = false
 )
+
+data class Usuario(
+    val nome: String,
+    val email: String,
+    var qtdLivros: Int,
+    var multa: Double = 0.0
+)
+
+data class Emprestimo(
+    val titulo: String,
+    val dataEmprestimo: String,
+    val dataDevolucao: String? = null,
+    val valorMulta: Double,
+    val imagemRes: Int? = null,
+    val isAtivo: Boolean
+)
