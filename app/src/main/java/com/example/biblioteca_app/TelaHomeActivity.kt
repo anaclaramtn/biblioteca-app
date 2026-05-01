@@ -97,17 +97,24 @@ class TelaHomeActivity : AppCompatActivity() {
         bottomNav.selectedItemId = R.id.nav_home
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> true
+                R.id.nav_home -> {
+                    startActivity(Intent(this, TelaHomeActivity::class.java))
+                    finish()
+                    true
+                }
                 R.id.nav_busca -> {
                     startActivity(Intent(this, BuscaActivity::class.java))
+                    finish()
                     true
                 }
                 R.id.nav_notif -> {
                     startActivity(Intent(this, NotificacoesActivity::class.java))
+                    finish()
                     true
                 }
                 R.id.nav_menu -> {
                     startActivity(Intent(this, MenuActivity::class.java))
+                    finish()
                     true
                 }
                 else -> false

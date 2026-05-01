@@ -143,13 +143,19 @@ class BuscaActivity : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_busca -> true
+                R.id.nav_busca -> {
+                    startActivity(Intent(this, BuscaActivity::class.java))
+                    finish()
+                    true
+                }
                 R.id.nav_notif -> {
                     startActivity(Intent(this, NotificacoesActivity::class.java))
+                    finish()
                     true
                 }
                 R.id.nav_menu -> {
                     startActivity(Intent(this, MenuActivity::class.java))
+                    finish()
                     true
                 }
                 else -> false
