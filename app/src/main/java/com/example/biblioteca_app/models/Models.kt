@@ -40,3 +40,19 @@ data class Emprestimo(
     val imagemRes: Int? = null,
     val isAtivo: Boolean
 )
+
+data class Jogo(
+    val nome: String,
+    val imagemRes: Int
+)
+
+data class Sala(
+    val nome: String,
+    val capacidade: Int
+)
+
+data class PesquisaAdm(
+    val nome: String,
+    val descricao: String,
+    val disponibilidade: String
+)

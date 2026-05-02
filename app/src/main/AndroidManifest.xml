@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bibliotecaapp">
         <activity
+            android:name=".AcervoadmActivity"
+            android:exported="false" />
+        <activity
             android:name=".DetalhesusuarioadmActivity"
             android:exported="false" />
         <activity

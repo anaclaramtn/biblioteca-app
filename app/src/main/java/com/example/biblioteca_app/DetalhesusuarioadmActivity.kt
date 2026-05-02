@@ -116,7 +116,8 @@ class DetalhesusuarioadmActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_acervo -> {
-                    Toast.makeText(this, "Acessando Acervo...", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, AcervoadmActivity::class.java))
+                    finish()
                     true
                 }
                 R.id.nav_usuarios -> {

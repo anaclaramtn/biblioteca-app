@@ -111,9 +111,8 @@ class UsuarioadmActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_acervo -> {
-                    // Por enquanto abre BuscaActivity ou sua tela de Acervo se existir
-                    // startActivity(Intent(this, AcervoActivity::class.java))
-                    Toast.makeText(this, "Acessando Acervo...", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, AcervoadmActivity::class.java))
+                    finish()
                     true
                 }
                 R.id.nav_usuarios -> {
