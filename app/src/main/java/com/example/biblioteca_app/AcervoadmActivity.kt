@@ -25,6 +25,39 @@ class AcervoadmActivity : AppCompatActivity() {
     private lateinit var recycler: RecyclerView
     private val categorias = listOf("Livros", "Notícias", "Jogos", "Salas", "Pesquisa Científica")
 
+    companion object {
+        val listaLivros = mutableListOf(
+            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500),
+            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500),
+            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500),
+            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500),
+            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500),
+            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500)
+        )
+        val listaNoticias = mutableListOf(
+            Noticia("Título da notícia", "Descrição breve da notícia para o admin."),
+            Noticia("Evento na Biblioteca", "Nova ala de estudos aberta."),
+            Noticia("Manutenção", "Sistema ficará offline no domingo.")
+        )
+        val listaJogos = mutableListOf(
+            Jogo("UNO", R.drawable.uno),
+            Jogo("WAR", R.drawable.war),
+            Jogo("Catan", R.drawable.uno)
+        )
+        val listaSalas = mutableListOf(
+            Sala("SALA 01", 10),
+            Sala("SALA 02", 10),
+            Sala("AUDITÓRIO", 50),
+            Sala("SALA 03", 8),
+            Sala("SALA 04", 12),
+            Sala("SALA 05", 10)
+        )
+        val listaPesquisas = mutableListOf(
+            PesquisaAdm("Prof. Osvaldo", "Dúvida em relação à norma ABNT", "Dias disponíveis:\nSeg, Qua, Sex\nSalas Disponíveis:\nB01, B02, B05\nHorários:\n7h - 11h"),
+            PesquisaAdm("Monitor Gabriel", "Dúvidas relacionadas à ideias de TCC", "Dias disponíveis:\nSeg, Qua, Sex\nSalas Disponíveis:\nB01, B02, B05\nHorários:\n11h - 14h")
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -41,8 +74,25 @@ class AcervoadmActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.btnAdicionar).setOnClickListener {
             val categoria = findViewById<Spinner>(R.id.spinnerFiltro).selectedItem.toString()
-            Toast.makeText(this, "Adicionar novo item em: $categoria", Toast.LENGTH_SHORT).show()
+            val intent = when (categoria) {
+                "Livros" -> Intent(this, CadastroLivroActivity::class.java)
+                "Notícias" -> Intent(this, CadastroNoticiaActivity::class.java)
+                "Salas" -> Intent(this, CadastroSalaActivity::class.java)
+                "Pesquisa Científica" -> Intent(this, CadastroPesquisaActivity::class.java)
+                "Jogos" -> Intent(this, CadastroJogoActivity::class.java)
+                else -> {
+                    Toast.makeText(this, "Adicionar novo item em: $categoria", Toast.LENGTH_SHORT).show()
+                    null
+                }
+            }
+            intent?.let { startActivity(it) }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val spinner = findViewById<Spinner>(R.id.spinnerFiltro)
+        atualizarConteudo(spinner.selectedItem.toString())
     }
 
     private fun setupSpinner() {
@@ -70,16 +120,8 @@ class AcervoadmActivity : AppCompatActivity() {
     }
 
     private fun setupLivros() {
-        val lista = listOf(
-            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500),
-            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500),
-            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500),
-            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500),
-            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500),
-            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500)
-        )
         recycler.layoutManager = GridLayoutManager(this, 3)
-        recycler.adapter = GenericAdapter(R.layout.item_livro, lista) { view, item, _ ->
+        recycler.adapter = GenericAdapter(R.layout.item_livro, listaLivros) { view, item, _ ->
             view.findViewById<ImageView>(R.id.imgCapa).setImageResource(item.imagemRes)
             view.findViewById<TextView>(R.id.txtTituloLivro).text = item.titulo
             view.findViewById<TextView>(R.id.txtAutor).text = item.autor
@@ -87,54 +129,32 @@ class AcervoadmActivity : AppCompatActivity() {
     }
 
     private fun setupNoticias() {
-        val lista = listOf(
-            Noticia("Título da notícia", "Descrição breve da notícia para o admin."),
-            Noticia("Evento na Biblioteca", "Nova ala de estudos aberta."),
-            Noticia("Manutenção", "Sistema ficará offline no domingo.")
-        )
         recycler.layoutManager = LinearLayoutManager(this)
-        recycler.adapter = GenericAdapter(R.layout.item_noticia, lista) { view, item, _ ->
+        recycler.adapter = GenericAdapter(R.layout.item_noticia, listaNoticias) { view, item, _ ->
             view.findViewById<TextView>(R.id.txtTituloNoticia).text = item.titulo
             view.findViewById<TextView>(R.id.txtDescricaoNoticia).text = item.descricao
         }
     }
 
     private fun setupJogos() {
-        val lista = listOf(
-            Jogo("UNO", R.drawable.uno),
-            Jogo("WAR", R.drawable.war),
-            Jogo("Catan", R.drawable.uno) // Mock
-        )
         recycler.layoutManager = GridLayoutManager(this, 3)
-        recycler.adapter = GenericAdapter(R.layout.item_jogo, lista) { view, item, _ ->
+        recycler.adapter = GenericAdapter(R.layout.item_jogo, listaJogos) { view, item, _ ->
             view.findViewById<ImageView>(R.id.imgJogo).setImageResource(item.imagemRes)
             view.findViewById<TextView>(R.id.txtNomeJogo).text = item.nome
         }
     }
 
     private fun setupSalas() {
-        val lista = listOf(
-            Sala("SALA 01", 10),
-            Sala("SALA 02", 10),
-            Sala("AUDITÓRIO", 50),
-            Sala("SALA 03", 8),
-            Sala("SALA 04", 12),
-            Sala("SALA 05", 10)
-        )
         recycler.layoutManager = GridLayoutManager(this, 3)
-        recycler.adapter = GenericAdapter(R.layout.item_sala, lista) { view, item, _ ->
+        recycler.adapter = GenericAdapter(R.layout.item_sala, listaSalas) { view, item, _ ->
             view.findViewById<TextView>(R.id.txtNomeSala).text = item.nome
             view.findViewById<TextView>(R.id.txtCapacidade).text = "capacidade: ${item.capacidade} pessoas"
         }
     }
 
     private fun setupPesquisa() {
-        val lista = listOf(
-            PesquisaAdm("Prof. Osvaldo", "Dúvida em relação à norma ABNT", "Dias disponíveis:\nSeg, Qua, Sex\nSalas Disponíveis:\nB01, B02, B05\nHorários:\n7h - 11h"),
-            PesquisaAdm("Monitor Gabriel", "Dúvidas relacionadas à ideias de TCC", "Dias disponíveis:\nSeg, Qua, Sex\nSalas Disponíveis:\nB01, B02, B05\nHorários:\n11h - 14h")
-        )
         recycler.layoutManager = LinearLayoutManager(this)
-        recycler.adapter = GenericAdapter(R.layout.item_pesquisa_adm, lista) { view, item, _ ->
+        recycler.adapter = GenericAdapter(R.layout.item_pesquisa_adm, listaPesquisas) { view, item, _ ->
             view.findViewById<TextView>(R.id.txtNomePesquisa).text = item.nome
             view.findViewById<TextView>(R.id.txtDescricaoPesquisa).text = item.descricao
             view.findViewById<TextView>(R.id.txtDisponibilidade).text = item.disponibilidade

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:orientation="vertical">
+
+    <!-- HEADER -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_header">
+
+        <ImageButton
+            android:id="@+id/btnVoltar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_leftarrow"
+            app:tint="#FFFFFF"
+            android:contentDescription="Voltar" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="Acervo"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Seleção de Imagem -->
+            <LinearLayout
+                android:layout_width="150dp"
+                android:layout_height="200dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/background_campo_input"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@android:drawable/ic_menu_gallery"
+                    app:tint="#666666"
+                    android:contentDescription="Selecionar imagem" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="Selecione a capa do livro"
+                    android:textColor="#666666" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Título do Livro:"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/edtTituloLivro"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/background_campo_input"
+                android:hint="Informe o nome do Livro"
+                android:padding="12dp"
+                android:textSize="14sp"
+                android:inputType="text"
+                android:importantForAutofill="no" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nome do Autor:"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/edtNomeAutor"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/background_campo_input"
+                android:hint="Informe o nome do Autor"
+                android:padding="12dp"
+                android:textSize="14sp"
+                android:inputType="textPersonName"
+                android:importantForAutofill="no" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sinopse:"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/edtSinopse"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginBottom="32dp"
+                android:background="@drawable/background_campo_input"
+                android:gravity="top"
+                android:hint="Digite aqui a sinopse"
+                android:padding="12dp"
+                android:textSize="14sp"
+                android:inputType="textMultiLine"
+                android:importantForAutofill="no" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnEnviar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_campo_input"
+                android:text="ENVIAR"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- NAVBAR -->
+    <include layout="@layout/navbar_admin_layout" />
+
+</LinearLayout>

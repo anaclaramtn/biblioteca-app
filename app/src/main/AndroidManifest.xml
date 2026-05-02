@@ -15,6 +15,21 @@
             android:name=".AcervoadmActivity"
             android:exported="false" />
         <activity
+            android:name=".CadastroLivroActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CadastroNoticiaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CadastroSalaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CadastroPesquisaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CadastroJogoActivity"
+            android:exported="false" />
+        <activity
             android:name=".DetalhesusuarioadmActivity"
             android:exported="false" />
         <activity
