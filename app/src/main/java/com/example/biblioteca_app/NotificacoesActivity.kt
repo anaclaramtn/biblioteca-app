@@ -6,8 +6,6 @@ import android.view.View
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.biblioteca_app.adapters.GenericAdapter
@@ -33,7 +31,6 @@ class NotificacoesActivity : AppCompatActivity() {
     private fun setupRecycler() {
         recycler = findViewById(R.id.recyclerNotificacoes)
 
-        // 🔹 DADOS MOCK (substitui aqueles "Item 0")
         lista.add(
             Notificacao(
                 "Administração - Lembrete",
@@ -54,12 +51,14 @@ class NotificacoesActivity : AppCompatActivity() {
         adapter = GenericAdapter(
             R.layout.item_notificacao,
             lista
-        ) { view, item, position ->
+        ) { view, _, position ->
 
             val titulo = view.findViewById<TextView>(R.id.titulo1)
             val msg = view.findViewById<TextView>(R.id.msg1)
             val data = view.findViewById<TextView>(R.id.data1)
             val indicador = view.findViewById<View>(R.id.indicadorNaoLido)
+
+            val item = lista[position] // 🔥 SEMPRE pega da lista
 
             titulo.text = item.titulo
             msg.text = item.mensagem
@@ -68,9 +67,11 @@ class NotificacoesActivity : AppCompatActivity() {
             // 🔵 bolinha azul
             indicador.visibility = if (item.lida) View.GONE else View.VISIBLE
 
-            // ❌ remover ao clicar
+            // ✅ clicar = marcar como lido (sumir bolinha)
             view.setOnClickListener {
-                adapter.removeAt(position)
+                val itemAtual = adapter.getItems()[position] as Notificacao
+                itemAtual.lida = true
+                adapter.updateItem(position, itemAtual)
             }
         }
 
@@ -103,9 +104,7 @@ class NotificacoesActivity : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_notif -> {
-                    true // 🔥 NÃO recria a mesma tela
-                }
+                R.id.nav_notif -> true
                 R.id.nav_menu -> {
                     startActivity(Intent(this, MenuActivity::class.java))
                     finish()
