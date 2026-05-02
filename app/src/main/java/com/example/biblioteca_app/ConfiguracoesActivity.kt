@@ -35,6 +35,9 @@ class ConfiguracoesActivity : AppCompatActivity() {
         btnSobreOApp.setOnClickListener {
             startActivity(Intent(this, SobreOAppActivity::class.java))
         }
+        btnAlterarSenha.setOnClickListener {
+            startActivity(Intent(this, AlteracaoDeSenhaActivity::class.java))
+        }
 
         setupNavBar()
     }

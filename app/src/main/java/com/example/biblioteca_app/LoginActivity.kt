@@ -2,14 +2,13 @@ package com.example.biblioteca_app
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 
-// como uma nova activity deve ser criada assim que adicionamos uma tela
-//res > new > empty views activity
-
 class LoginActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.tela_login)
@@ -17,6 +16,9 @@ class LoginActivity : AppCompatActivity() {
         val btnCriarConta = findViewById<MaterialButton>(R.id.ButtonCriarConta1)
         val btnEsqueceuSenha = findViewById<MaterialButton>(R.id.ButtonEsqueceuSenha)
         val btnEntrar = findViewById<MaterialButton>(R.id.ButtonEntrar)
+
+        val editEmail = findViewById<EditText>(R.id.EditTextEmailLogin)
+        val editSenha = findViewById<EditText>(R.id.EditTextSenhaLogin)
 
         btnCriarConta.setOnClickListener {
             val intent = Intent(this, CadastroActivity::class.java)
@@ -29,8 +31,40 @@ class LoginActivity : AppCompatActivity() {
         }
 
         btnEntrar.setOnClickListener {
-            val intent = Intent(this, TelaHomeActivity::class.java)
-            startActivity(intent)
+
+            val email = editEmail.text.toString().trim()
+            val senha = editSenha.text.toString().trim()
+
+            // Verifica campos vazios
+            if (email.isEmpty() || senha.isEmpty()) {
+                Toast.makeText(
+                    this,
+                    "Preencha todos os campos\nPara prosseguir com o login, favor, preencher todos os campos",
+                    Toast.LENGTH_LONG
+                ).show()
+                return@setOnClickListener
+            }
+
+            // Login USER
+            if (email == "User" && senha == "123") {
+                val intent = Intent(this, TelaHomeActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+            // Login ADMIN
+            else if (email == "Admin" && senha == "321") {
+                val intent = Intent(this, AcervoadmActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+            // Login inválido
+            else {
+                Toast.makeText(
+                    this,
+                    "Login inválido\nVerifique suas credenciais",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 }
