@@ -18,10 +18,15 @@ class PesquisaCientificaActivity : AppCompatActivity() {
 
         val btnVoltar = findViewById<ImageView>(R.id.btnVoltar)
         val recycler = findViewById<RecyclerView>(R.id.recyclerPesquisas)
+        val btnOrdenar = findViewById<android.view.View>(R.id.btnOrdenar)
 
         btnVoltar.setOnClickListener {
             startActivity(Intent(this, MenuActivity::class.java))
             finish()
+        }
+
+        btnOrdenar.setOnClickListener {
+            mostrarDialogOrdenacao()
         }
 
         // 🔹 Lista de dados (substitui seus cards fixos)
@@ -55,5 +60,17 @@ class PesquisaCientificaActivity : AppCompatActivity() {
 
         recycler.layoutManager = LinearLayoutManager(this)
         recycler.adapter = adapter
+    }
+
+    private fun mostrarDialogOrdenacao() {
+        val opcoes = arrayOf("Mais próximos", "Alfabética (A-Z)", "Alfabética (Z-A)")
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Ordenar por")
+            .setItems(opcoes) { _, which ->
+                val opcaoSelecionada = opcoes[which]
+                android.widget.Toast.makeText(this, "Ordenando por: $opcaoSelecionada", android.widget.Toast.LENGTH_SHORT).show()
+            }
+            .show()
     }
 }

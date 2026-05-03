@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.biblioteca_app.databinding.DialogConfirmacaoCancelarBinding
 import com.example.biblioteca_app.databinding.DialogDenunciaBinding
 import com.example.biblioteca_app.databinding.DialogSucessoDenunciaBinding
+import com.example.biblioteca_app.databinding.ItemAvaliacaoBinding
 import com.example.biblioteca_app.databinding.TelaLivroBinding
 import com.example.biblioteca_app.models.Livro
 
@@ -50,11 +51,25 @@ class LivroActivity : AppCompatActivity() {
         binding.imgCapa.setImageResource(livro.imagemRes)
 
         binding.txtStatus.text = if (livro.disponivel) getString(R.string.status_disponivel) else getString(R.string.status_indisponivel)
-        binding.txtMedia.text = livro.media.toString()
-        binding.txtTotalAvaliacoes.text = getString(R.string.total_avaliacoes_format, livro.totalAvaliacoes)
+
+        // Preenche o resumo de avaliações (molde padronizado)
+        binding.layoutResumo.txtMedia.text = livro.media.toString()
+        binding.layoutResumo.txtTotalAvaliacoes.text = "(${livro.totalAvaliacoes} avaliações)"
+        binding.layoutResumo.txtEstrelasMedia.text = converterMediaParaEstrelas(livro.media)
 
         if (livro.totalAvaliacoes == 0) {
             binding.txtSemAvaliacoes.visibility = View.VISIBLE
+        }
+    }
+
+    private fun converterMediaParaEstrelas(media: Float): String {
+        return when {
+            media >= 4.5 -> "⭐⭐⭐⭐⭐"
+            media >= 3.5 -> "⭐⭐⭐⭐☆"
+            media >= 2.5 -> "⭐⭐⭐☆☆"
+            media >= 1.5 -> "⭐⭐☆☆☆"
+            media >= 0.5 -> "⭐☆☆☆☆"
+            else -> "☆☆☆☆☆"
         }
     }
 
@@ -90,12 +105,71 @@ class LivroActivity : AppCompatActivity() {
             }
         }
 
-        // Configura o clique de denúncia nas avaliações incluídas
-        binding.avaliacao1.btnDenunciar.setOnClickListener {
-            mostrarDialogDenuncia()
+        binding.btnVerAvaliacoes.setOnClickListener {
+            val intent = android.content.Intent(this, MaisAvaliacoesActivity::class.java)
+            intent.putExtra("MEDIA", 4.9f)
+            intent.putExtra("TOTAL", 4)
+            startActivity(intent)
         }
-        binding.avaliacao2.btnDenunciar.setOnClickListener {
-            mostrarDialogDenuncia()
+
+        // Configura cada item de avaliação com textos específicos
+        configurarItemAvaliacao(
+            binding.avaliacao1,
+            "João Silva",
+            "Excelente leitura, recomendo a todos!",
+            "15/05/2023"
+        )
+        configurarItemAvaliacao(
+            binding.avaliacao2,
+            "Maria Souza",
+            "O livro é bom, mas o final poderia ser melhor.",
+            "20/06/2023"
+        )
+    }
+
+    private fun configurarItemAvaliacao(
+        itemBinding: ItemAvaliacaoBinding,
+        nome: String,
+        comentario: String,
+        data: String,
+        temSpoiler: Boolean = false
+    ) {
+        var curtido = false
+        var numCurtidas = (0..20).random() // Valor inicial aleatório
+        itemBinding.txtNomeUsuario.text = nome
+        itemBinding.txtComentario.text = comentario
+        itemBinding.txtData.text = data
+        itemBinding.txtCurtidas.text = numCurtidas.toString()
+
+        // Lógica de Spoiler
+        if (temSpoiler) {
+            itemBinding.txtComentario.visibility = View.GONE
+            itemBinding.btnVerSpoiler.visibility = View.VISIBLE
+            itemBinding.btnVerSpoiler.setOnClickListener {
+                itemBinding.txtComentario.visibility = View.VISIBLE
+                itemBinding.btnVerSpoiler.visibility = View.GONE
+            }
+        } else {
+            itemBinding.txtComentario.visibility = View.VISIBLE
+            itemBinding.btnVerSpoiler.visibility = View.GONE
+        }
+
+        // Clique de Denúncia
+        itemBinding.btnDenunciar.setOnClickListener { mostrarDialogDenuncia() }
+
+        // Clique de Curtir (Toggle)
+        itemBinding.btnCurtir.setOnClickListener {
+            curtido = !curtido
+            if (curtido) {
+                numCurtidas++
+                itemBinding.btnCurtir.setImageResource(R.drawable.ic_heart_filled)
+                itemBinding.btnCurtir.clearColorFilter() // Remove o tint se houver
+            } else {
+                numCurtidas--
+                itemBinding.btnCurtir.setImageResource(R.drawable.ic_heart)
+                itemBinding.btnCurtir.clearColorFilter() // Garante que as bordas pretas do XML apareçam
+            }
+            itemBinding.txtCurtidas.text = numCurtidas.toString()
         }
     }
 

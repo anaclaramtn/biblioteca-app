@@ -92,38 +92,10 @@
                 android:layout_marginTop="6dp"
                 android:background="@drawable/bg_status"/>
 
-            <!-- AVALIAÇÃO -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingStart="16dp"
-                android:paddingTop="8dp"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/txtMedia"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0.0"
-                    android:textStyle="bold"
-                    android:textSize="16sp"/>
-
-                <TextView
-                    android:id="@+id/txtEstrelasMedia"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="⭐⭐⭐⭐☆"
-                    android:layout_marginStart="6dp"/>
-
-                <TextView
-                    android:id="@+id/txtTotalAvaliacoes"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="(0 avaliações)"
-                    android:textColor="#777"
-                    android:layout_marginStart="8dp"/>
-            </LinearLayout>
+            <!-- RESUMO AVALIAÇÃO (PADRONIZADO) -->
+            <include
+                android:id="@+id/layoutResumo"
+                layout="@layout/layout_resumo_avaliacao" />
 
             <!-- SINOPSE -->
             <TextView
