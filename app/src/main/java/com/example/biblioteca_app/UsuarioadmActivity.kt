@@ -106,7 +106,7 @@ class UsuarioadmActivity : AppCompatActivity() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    startActivity(Intent(this, TelaHomeActivity::class.java))
+                    startActivity(Intent(this, AdminHomeActivity::class.java))
                     finish()
                     true
                 }
@@ -125,7 +125,7 @@ class UsuarioadmActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_menu -> {
-                    startActivity(Intent(this, MenuActivity::class.java))
+                    startActivity(Intent(this, AdminMenuActivity::class.java))
                     finish()
                     true
                 }

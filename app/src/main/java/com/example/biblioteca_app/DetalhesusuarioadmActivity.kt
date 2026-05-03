@@ -29,7 +29,14 @@ class DetalhesusuarioadmActivity : AppCompatActivity() {
             insets
         }
 
-        findViewById<ImageView>(R.id.btnVoltar).setOnClickListener {
+        val header = findViewById<View>(R.id.header)
+        val btnBack = header.findViewById<ImageView>(R.id.btnBack)
+        val titulo = header.findViewById<TextView>(R.id.txtTitulo)
+
+        titulo.text = "Usuários"
+
+        btnBack.visibility = View.VISIBLE
+        btnBack.setOnClickListener {
             finish()
         }
 
@@ -111,7 +118,7 @@ class DetalhesusuarioadmActivity : AppCompatActivity() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    startActivity(Intent(this, TelaHomeActivity::class.java))
+                    startActivity(Intent(this, AdminHomeActivity::class.java))
                     finish()
                     true
                 }
@@ -131,7 +138,7 @@ class DetalhesusuarioadmActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_menu -> {
-                    startActivity(Intent(this, MenuActivity::class.java))
+                    startActivity(Intent(this, AdminMenuActivity::class.java))
                     finish()
                     true
                 }

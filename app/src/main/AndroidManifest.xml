@@ -12,6 +12,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bibliotecaapp">
         <activity
+            android:name=".AdminAlteracaoSenhaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminConfiguracoesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminMenuActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminHomeActivity"
+            android:exported="false" />
+        <activity
             android:name=".AvaliarActivity"
             android:exported="false" />
         <activity

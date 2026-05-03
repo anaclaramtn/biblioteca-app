@@ -53,7 +53,7 @@ class LoginActivity : AppCompatActivity() {
             }
             // Login ADMIN
             else if (email == "Admin" && senha == "321") {
-                val intent = Intent(this, AcervoadmActivity::class.java)
+                val intent = Intent(this, AdminHomeActivity::class.java)
                 startActivity(intent)
                 finish()
             }
