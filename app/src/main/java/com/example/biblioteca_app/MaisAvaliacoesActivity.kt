@@ -65,7 +65,8 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         configurarItemAvaliacao(binding.avaliacao4, "Ana Oliveira", "Personagens muito bem construídos.", "10/07/2023")
 
         binding.btnAvaliar.setOnClickListener {
-            // Lógica para abrir tela de avaliação (se houver)
+            val intent = android.content.Intent(this, AvaliarActivity::class.java)
+            startActivity(intent)
         }
 
         binding.btnOrdenar.setOnClickListener {

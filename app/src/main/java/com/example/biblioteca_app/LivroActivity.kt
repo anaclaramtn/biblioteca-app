@@ -112,6 +112,11 @@ class LivroActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        binding.btnAvaliar.setOnClickListener {
+            val intent = android.content.Intent(this, AvaliarActivity::class.java)
+            startActivity(intent)
+        }
+
         // Configura cada item de avaliação com textos específicos
         configurarItemAvaliacao(
             binding.avaliacao1,
