@@ -37,33 +37,39 @@ class PerfilActivity : AppCompatActivity() {
 
         // Configurar livros curtidos (carrossel)
         setupLivrosCurtidos()
+
+        // Configurar clique no livro alugado (Título e Capa)
+        val cliqueLivroAlugado = View.OnClickListener {
+            abrirLivro()
+        }
+        findViewById<TextView>(R.id.tvTituloLivro).setOnClickListener(cliqueLivroAlugado)
+        findViewById<ImageView>(R.id.ivCapaLivro).setOnClickListener(cliqueLivroAlugado)
+
         setupNavBar()
     }
 
     private fun setupLivrosCurtidos() {
         // Livro 1
-        val livro1 = findViewById<View>(R.id.livro1)
-        livro1.findViewById<ImageView>(R.id.imgCapa).setImageResource(R.drawable.war)
-        livro1.findViewById<TextView>(R.id.txtTituloLivro).text = "Star Wars"
-        livro1.findViewById<TextView>(R.id.txtAutor).text = "George Lucas"
-
+        configurarItemLivro(R.id.livro1, R.drawable.capa_star_wars, "Star Wars", "George Lucas")
         // Livro 2
-        val livro2 = findViewById<View>(R.id.livro2)
-        livro2.findViewById<ImageView>(R.id.imgCapa).setImageResource(R.drawable.uno)
-        livro2.findViewById<TextView>(R.id.txtTituloLivro).text = "UNO"
-        livro2.findViewById<TextView>(R.id.txtAutor).text = "Mattel"
-
+        configurarItemLivro(R.id.livro2, R.drawable.frankstein, "Frankstein", "Mary Shelley")
         // Livro 3
-        val livro3 = findViewById<View>(R.id.livro3)
-        livro3.findViewById<ImageView>(R.id.imgCapa).setImageResource(R.drawable.capadomquixote)
-        livro3.findViewById<TextView>(R.id.txtTituloLivro).text = "Dom Quixote"
-        livro3.findViewById<TextView>(R.id.txtAutor).text = "Miguel de Cervantes"
-
+        configurarItemLivro(R.id.livro3, R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
         // Livro 4
-        val livro4 = findViewById<View>(R.id.livro4)
-        livro4.findViewById<ImageView>(R.id.imgCapa).setImageResource(R.drawable.logo)
-        livro4.findViewById<TextView>(R.id.txtTituloLivro).text = "Biblioteca"
-        livro4.findViewById<TextView>(R.id.txtAutor).text = "Unifor"
+        configurarItemLivro(R.id.livro4, R.drawable.logo, "Biblioteca", "Unifor")
+    }
+
+    private fun configurarItemLivro(id: Int, imagem: Int, titulo: String, autor: String) {
+        val itemView = findViewById<View>(id)
+        itemView.findViewById<ImageView>(R.id.imgCapa).setImageResource(imagem)
+        itemView.findViewById<TextView>(R.id.txtTituloLivro).text = titulo
+        itemView.findViewById<TextView>(R.id.txtAutor).text = autor
+        itemView.setOnClickListener { abrirLivro() }
+    }
+
+    private fun abrirLivro() {
+        val intent = Intent(this, LivroActivity::class.java)
+        startActivity(intent)
     }
 
     fun onDevolverClick(view: View) {
@@ -80,11 +86,10 @@ class PerfilActivity : AppCompatActivity() {
 
         Toast.makeText(this, "solicitacao enviada", Toast.LENGTH_SHORT).show()
     }
+
     private fun setupNavBar() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
-
         bottomNav.selectedItemId = R.id.nav_menu
-
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
@@ -111,5 +116,4 @@ class PerfilActivity : AppCompatActivity() {
             }
         }
     }
-
 }
