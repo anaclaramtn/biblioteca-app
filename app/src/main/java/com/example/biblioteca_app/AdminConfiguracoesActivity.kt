@@ -43,11 +43,11 @@ class AdminConfiguracoesActivity : AppCompatActivity() {
         setupNavBar()
     }
 
-    // 🔥 PADRÃO ADMIN (igual Home/AdminMenu)
+    // PADRÃO ADMIN (igual Home/AdminMenu)
     private fun setupNavBar() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavAdmin)
 
-        bottomNav.selectedItemId = R.id.nav_menu
+        bottomNav.selectedItemId = R.id.nav_home
 
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -58,8 +58,14 @@ class AdminConfiguracoesActivity : AppCompatActivity() {
                     true
                 }
 
-                R.id.nav_busca -> {
-                    startActivity(Intent(this, BuscaActivity::class.java))
+                R.id.nav_acervo -> {
+                    startActivity(Intent(this, AcervoadmActivity::class.java))
+                    finish()
+                    true
+                }
+
+                R.id.nav_usuarios -> {
+                    startActivity(Intent(this, UsuarioadmActivity::class.java))
                     finish()
                     true
                 }
