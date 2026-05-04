@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:orientation="vertical"
+    tools:context=".AdminNotificacoesActivity">
+
+    <!-- HEADER -->
+    <TextView
+        android:id="@+id/txtTitulo"
+        style="@style/AppHeader"
+        android:text="Solicitações Pendentes"/>
+
+    <!-- FILTROS (Fixo) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnFiltroTodas"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="2dp"
+                android:layout_weight="1"
+                android:text="Todas"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                app:backgroundTint="#D1E8F3"
+                app:strokeColor="#000000" />
+
+            <Button
+                android:id="@+id/btnFiltroLivros"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="2dp"
+                android:layout_weight="1"
+                android:text="Livros"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                app:strokeColor="#000000" />
+
+            <Button
+                android:id="@+id/btnFiltroJogos"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="2dp"
+                android:layout_weight="1"
+                android:text="Jogos"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                app:strokeColor="#000000" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnFiltroSalas"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="2dp"
+                android:layout_weight="1"
+                android:text="Salas"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                app:strokeColor="#000000" />
+
+            <Button
+                android:id="@+id/btnFiltroDevolucoes"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="2dp"
+                android:layout_weight="1"
+                android:text="Devoluções"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                app:strokeColor="#000000" />
+
+            <Button
+                android:id="@+id/btnFiltroDenuncias"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="2dp"
+                android:layout_weight="1"
+                android:text="Denúncias"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                app:strokeColor="#000000" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- CONTEUDO (Scrollable) -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/containerSolicitacoes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="16dp">
+            <!-- Os itens serão inseridos dinamicamente via Activity -->
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- NAVBAR ADMIN -->
+    <include layout="@layout/navbar_admin_layout" />
+
+</LinearLayout>
