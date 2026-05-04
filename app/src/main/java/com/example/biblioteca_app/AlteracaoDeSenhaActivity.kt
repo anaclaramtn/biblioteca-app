@@ -6,6 +6,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
 
 class AlteracaoDeSenhaActivity : AppCompatActivity() {
@@ -54,6 +55,7 @@ class AlteracaoDeSenhaActivity : AppCompatActivity() {
             Toast.makeText(this, "Senha alterada com sucesso!", Toast.LENGTH_SHORT).show()
             finish()
         }
+        setupNavBar()
     }
 
     private fun senhaValida(senha: String): Boolean {
@@ -63,4 +65,36 @@ class AlteracaoDeSenhaActivity : AppCompatActivity() {
 
         return temNumero && temMinuscula && temMaiuscula
     }
+    private fun setupNavBar() {
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
+
+        bottomNav.selectedItemId = R.id.nav_menu
+
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    startActivity(Intent(this, TelaHomeActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_busca -> {
+                    startActivity(Intent(this, BuscaActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_notif -> {
+                    startActivity(Intent(this, NotificacoesActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_menu -> {
+                    startActivity(Intent(this, MenuActivity::class.java))
+                    finish()
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
 }

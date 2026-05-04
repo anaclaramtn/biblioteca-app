@@ -14,6 +14,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class LudotecaActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,6 +64,7 @@ class LudotecaActivity : AppCompatActivity() {
             containerJogos.visibility = View.GONE
             containerSalas.visibility = View.VISIBLE
         }
+        setupNavBar()
     }
 
     fun onAlugarClick(view: View) {
@@ -85,4 +87,36 @@ class LudotecaActivity : AppCompatActivity() {
             botao.strokeWidth = 0
         }
     }
+    private fun setupNavBar() {
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
+
+        bottomNav.selectedItemId = R.id.nav_menu
+
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    startActivity(Intent(this, TelaHomeActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_busca -> {
+                    startActivity(Intent(this, BuscaActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_notif -> {
+                    startActivity(Intent(this, NotificacoesActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_menu -> {
+                    startActivity(Intent(this, MenuActivity::class.java))
+                    finish()
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
 }

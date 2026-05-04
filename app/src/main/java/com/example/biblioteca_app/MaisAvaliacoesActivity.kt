@@ -1,5 +1,6 @@
 package com.example.biblioteca_app
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -10,6 +11,7 @@ import com.example.biblioteca_app.databinding.DialogDenunciaBinding
 import com.example.biblioteca_app.databinding.DialogSucessoDenunciaBinding
 import com.example.biblioteca_app.databinding.ItemAvaliacaoBinding
 import com.example.biblioteca_app.databinding.TelaMaisAvaliacoesBinding
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MaisAvaliacoesActivity : AppCompatActivity() {
 
@@ -30,6 +32,7 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
 
         preencherResumo()
         configurarBotoes()
+        setupNavBar()
     }
 
     private fun preencherResumo() {
@@ -185,5 +188,36 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         }
 
         dialog.show()
+    }
+    private fun setupNavBar() {
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
+
+        bottomNav.selectedItemId = R.id.nav_menu
+
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    startActivity(Intent(this, TelaHomeActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_busca -> {
+                    startActivity(Intent(this, BuscaActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_notif -> {
+                    startActivity(Intent(this, NotificacoesActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_menu -> {
+                    startActivity(Intent(this, MenuActivity::class.java))
+                    finish()
+                    true
+                }
+                else -> false
+            }
+        }
     }
 }

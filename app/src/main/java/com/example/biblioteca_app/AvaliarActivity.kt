@@ -1,11 +1,13 @@
 package com.example.biblioteca_app
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.biblioteca_app.databinding.DialogConfirmacaoCancelarBinding
 import com.example.biblioteca_app.databinding.TelaAvaliarBinding
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class AvaliarActivity : AppCompatActivity() {
 
@@ -18,6 +20,7 @@ class AvaliarActivity : AppCompatActivity() {
 
         configurarHeader()
         configurarBotoes()
+        setupNavBar()
     }
 
     private fun configurarHeader() {
@@ -69,5 +72,36 @@ class AvaliarActivity : AppCompatActivity() {
         }
 
         dialog.show()
+    }
+    private fun setupNavBar() {
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
+
+        bottomNav.selectedItemId = R.id.nav_menu
+
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    startActivity(Intent(this, TelaHomeActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_busca -> {
+                    startActivity(Intent(this, BuscaActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_notif -> {
+                    startActivity(Intent(this, NotificacoesActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_menu -> {
+                    startActivity(Intent(this, MenuActivity::class.java))
+                    finish()
+                    true
+                }
+                else -> false
+            }
+        }
     }
 }

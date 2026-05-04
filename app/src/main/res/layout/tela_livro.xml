@@ -187,5 +187,5 @@
         android:textSize="20sp"
         android:backgroundTint="@color/padrao_app"
         android:textColor="#FFFFFF"/>
-
+    <include layout="@layout/navbar_layout"/>
 </LinearLayout>
