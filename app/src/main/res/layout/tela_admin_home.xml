@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -38,16 +38,22 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <!-- CARD -->
+                    <!-- CARD 1 -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="120dp"
                         android:layout_weight="1"
                         android:layout_margin="8dp"
                         android:background="@drawable/background_campo_input"
-                        android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="8dp">
+                        android:padding="12dp">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_gravity="start"
+                            android:src="@drawable/ic_book"
+                            app:tint="@android:color/black"/>
 
                         <TextView
                             android:layout_width="match_parent"
@@ -55,28 +61,32 @@
                             android:text="578"
                             android:textSize="24sp"
                             android:textStyle="bold"
-                            android:gravity="center"
-                            android:textAlignment="center"/>
+                            android:gravity="center"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Total de livros no acervo"
                             android:textSize="12sp"
-                            android:gravity="center"
-                            android:textAlignment="center"/>
+                            android:gravity="center"/>
                     </LinearLayout>
 
-                    <!-- CARD -->
+                    <!-- CARD 2 -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="120dp"
                         android:layout_weight="1"
                         android:layout_margin="8dp"
                         android:background="@drawable/background_campo_input"
-                        android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="8dp">
+                        android:padding="12dp">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_gravity="start"
+                            android:src="@drawable/ic_groups"
+                            app:tint="@android:color/black"/>
 
                         <TextView
                             android:layout_width="match_parent"
@@ -84,16 +94,14 @@
                             android:text="1.572"
                             android:textSize="24sp"
                             android:textStyle="bold"
-                            android:gravity="center"
-                            android:textAlignment="center"/>
+                            android:gravity="center"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Total de usuários"
                             android:textSize="12sp"
-                            android:gravity="center"
-                            android:textAlignment="center"/>
+                            android:gravity="center"/>
                     </LinearLayout>
                 </LinearLayout>
 
@@ -103,16 +111,22 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <!-- CARD -->
+                    <!-- CARD 3 -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="120dp"
                         android:layout_weight="1"
                         android:layout_margin="8dp"
                         android:background="@drawable/background_campo_input"
-                        android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="8dp">
+                        android:padding="12dp">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_gravity="start"
+                            android:src="@drawable/ic_notifications"
+                            app:tint="@android:color/black"/>
 
                         <TextView
                             android:layout_width="match_parent"
@@ -120,28 +134,32 @@
                             android:text="57"
                             android:textSize="24sp"
                             android:textStyle="bold"
-                            android:gravity="center"
-                            android:textAlignment="center"/>
+                            android:gravity="center"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Solicitações pendentes"
                             android:textSize="12sp"
-                            android:gravity="center"
-                            android:textAlignment="center"/>
+                            android:gravity="center"/>
                     </LinearLayout>
 
-                    <!-- CARD -->
+                    <!-- CARD 4 -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="120dp"
                         android:layout_weight="1"
                         android:layout_margin="8dp"
                         android:background="@drawable/background_campo_input"
-                        android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="8dp">
+                        android:padding="12dp">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_gravity="start"
+                            android:src="@drawable/ic_bookcheck"
+                            app:tint="@android:color/black"/>
 
                         <TextView
                             android:layout_width="match_parent"
@@ -149,16 +167,14 @@
                             android:text="129"
                             android:textSize="24sp"
                             android:textStyle="bold"
-                            android:gravity="center"
-                            android:textAlignment="center"/>
+                            android:gravity="center"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Empréstimos ativos"
                             android:textSize="12sp"
-                            android:gravity="center"
-                            android:textAlignment="center"/>
+                            android:gravity="center"/>
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
@@ -171,15 +187,14 @@
                 android:textStyle="bold"
                 android:paddingTop="16dp"
                 android:paddingBottom="8dp"
-                android:gravity="center"
-                android:textAlignment="center"/>
+                android:gravity="center"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <!-- BOTÃO -->
+                <!-- BOTÃO 1 -->
                 <LinearLayout
                     android:id="@+id/btnCadastroNoticias"
                     android:layout_width="0dp"
@@ -191,22 +206,21 @@
                     android:orientation="vertical"
                     android:padding="8dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="[ÍCONE]"
-                        android:gravity="center"
-                        android:textAlignment="center"/>
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginBottom="6dp"
+                        android:src="@drawable/ic_newspaper"
+                        app:tint="@android:color/black"/>
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Cadastro Notícias"
-                        android:gravity="center"
-                        android:textAlignment="center"/>
+                        android:gravity="center"/>
                 </LinearLayout>
 
-                <!-- BOTÃO -->
+                <!-- BOTÃO 2 -->
                 <LinearLayout
                     android:id="@+id/btnCadastroLivros"
                     android:layout_width="0dp"
@@ -218,22 +232,21 @@
                     android:orientation="vertical"
                     android:padding="8dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="[ÍCONE]"
-                        android:gravity="center"
-                        android:textAlignment="center"/>
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginBottom="6dp"
+                        android:src="@drawable/ic_menubook"
+                        app:tint="@android:color/black"/>
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Cadastro Livros"
-                        android:gravity="center"
-                        android:textAlignment="center"/>
+                        android:gravity="center"/>
                 </LinearLayout>
 
-                <!-- BOTÃO -->
+                <!-- BOTÃO 3 -->
                 <LinearLayout
                     android:id="@+id/btnCadastroJogos"
                     android:layout_width="0dp"
@@ -245,19 +258,18 @@
                     android:orientation="vertical"
                     android:padding="8dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="[ÍCONE]"
-                        android:gravity="center"
-                        android:textAlignment="center"/>
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginBottom="6dp"
+                        android:src="@drawable/ic_chess"
+                        app:tint="@android:color/black"/>
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Cadastro Jogos"
-                        android:gravity="center"
-                        android:textAlignment="center"/>
+                        android:gravity="center"/>
                 </LinearLayout>
 
             </LinearLayout>

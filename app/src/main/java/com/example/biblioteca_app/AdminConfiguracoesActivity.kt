@@ -47,7 +47,7 @@ class AdminConfiguracoesActivity : AppCompatActivity() {
     private fun setupNavBar() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavAdmin)
 
-        bottomNav.selectedItemId = R.id.nav_home
+        bottomNav.selectedItemId = R.id.nav_menu
 
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {

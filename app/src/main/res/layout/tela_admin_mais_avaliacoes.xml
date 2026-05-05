@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF">
+
+    <!-- HEADER -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/background_header">
+
+        <ImageButton
+            android:id="@+id/btnVoltar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_leftarrow"/>
+
+        <TextView
+            android:id="@+id/txtTituloHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Avaliações"
+            android:textColor="#FFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp"/>
+    </LinearLayout>
+
+    <!-- BOTÃO ORDENAR -->
+    <LinearLayout
+        android:id="@+id/btnOrdenar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="16dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ordenar"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+    <!-- LISTA -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <include
+                android:id="@+id/avaliacao1"
+                layout="@layout/item_admin_avaliacao"/>
+
+            <include
+                android:id="@+id/avaliacao2"
+                layout="@layout/item_admin_avaliacao"/>
+
+            <include
+                android:id="@+id/avaliacao3"
+                layout="@layout/item_admin_avaliacao"/>
+
+            <include
+                android:id="@+id/avaliacao4"
+                layout="@layout/item_admin_avaliacao"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- NAVBAR -->
+    <include layout="@layout/navbar_admin_layout"/>
+
+</LinearLayout>

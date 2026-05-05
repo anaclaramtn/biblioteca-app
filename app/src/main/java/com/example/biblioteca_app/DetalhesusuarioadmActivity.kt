@@ -113,35 +113,42 @@ class DetalhesusuarioadmActivity : AppCompatActivity() {
 
     private fun setupNavBar() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavAdmin)
+
         bottomNav.selectedItemId = R.id.nav_usuarios
 
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
+
                 R.id.nav_home -> {
                     startActivity(Intent(this, AdminHomeActivity::class.java))
                     finish()
                     true
                 }
+
                 R.id.nav_acervo -> {
                     startActivity(Intent(this, AcervoadmActivity::class.java))
                     finish()
                     true
                 }
+
                 R.id.nav_usuarios -> {
                     startActivity(Intent(this, UsuarioadmActivity::class.java))
                     finish()
                     true
                 }
+
                 R.id.nav_notif -> {
-                    startActivity(Intent(this, NotificacoesActivity::class.java))
+                    startActivity(Intent(this, AdminNotificacoesActivity::class.java))
                     finish()
                     true
                 }
+
                 R.id.nav_menu -> {
                     startActivity(Intent(this, AdminMenuActivity::class.java))
                     finish()
                     true
                 }
+
                 else -> false
             }
         }

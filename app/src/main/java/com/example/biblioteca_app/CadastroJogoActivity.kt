@@ -71,7 +71,7 @@ class CadastroJogoActivity : AppCompatActivity() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    startActivity(Intent(this, TelaHomeActivity::class.java))
+                    startActivity(Intent(this, AdminHomeActivity::class.java))
                     finish()
                     true
                 }
@@ -86,12 +86,12 @@ class CadastroJogoActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_notif -> {
-                    startActivity(Intent(this, NotificacoesActivity::class.java))
+                    startActivity(Intent(this, AdminNotificacoesActivity::class.java))
                     finish()
                     true
                 }
                 R.id.nav_menu -> {
-                    startActivity(Intent(this, MenuActivity::class.java))
+                    startActivity(Intent(this, AdminMenuActivity::class.java))
                     finish()
                     true
                 }

@@ -51,7 +51,11 @@ class AdminHomeActivity : AppCompatActivity() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
 
-                R.id.nav_home -> true
+                R.id.nav_home -> {
+                    startActivity(Intent(this, AdminHomeActivity::class.java))
+                    finish()
+                    true
+                }
 
                 R.id.nav_acervo -> {
                     startActivity(Intent(this, AcervoadmActivity::class.java))

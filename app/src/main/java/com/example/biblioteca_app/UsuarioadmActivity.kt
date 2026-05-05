@@ -120,7 +120,7 @@ class UsuarioadmActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_notif -> {
-                    startActivity(Intent(this, NotificacoesActivity::class.java))
+                    startActivity(Intent(this, AdminNotificacoesActivity::class.java))
                     finish()
                     true
                 }

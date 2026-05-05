@@ -76,7 +76,7 @@ class AvaliarActivity : AppCompatActivity() {
     private fun setupNavBar() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
 
-        bottomNav.selectedItemId = R.id.nav_menu
+        bottomNav.selectedItemId = R.id.nav_busca
 
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {

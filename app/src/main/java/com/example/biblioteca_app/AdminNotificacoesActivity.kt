@@ -177,11 +177,10 @@ class AdminNotificacoesActivity : AppCompatActivity() {
             }
             TipoNotificacao.DENUNCIAS -> {
                 itemView.findViewById<Button>(R.id.btnVerificar).setOnClickListener {
-                    startActivity(Intent(this, MaisAvaliacoesActivity::class.java))
+                    startActivity(Intent(this, AdminMaisAvaliacoesActivity::class.java))
                 }
             }
         }
-
         container.addView(itemView)
         itensNotificacao.add(Pair(itemView, tipo))
     }
@@ -202,7 +201,7 @@ class AdminNotificacoesActivity : AppCompatActivity() {
 
     private fun setupNavBar() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavAdmin)
-        bottomNav.selectedItemId = R.id.nav_menu
+        bottomNav.selectedItemId = R.id.nav_notif
 
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -226,12 +225,16 @@ class AdminNotificacoesActivity : AppCompatActivity() {
                 }
 
                 R.id.nav_notif -> {
-                    startActivity(Intent(this, AdminMenuActivity::class.java))
+                    startActivity(Intent(this, AdminNotificacoesActivity::class.java))
                     finish()
                     true
                 }
 
-                R.id.nav_menu -> true
+                R.id.nav_menu -> {
+                    startActivity(Intent(this, AdminMenuActivity::class.java))
+                    finish()
+                    true
+                }
 
                 else -> false
             }
