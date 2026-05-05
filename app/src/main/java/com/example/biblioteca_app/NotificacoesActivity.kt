@@ -51,14 +51,13 @@ class NotificacoesActivity : AppCompatActivity() {
         adapter = GenericAdapter(
             R.layout.item_notificacao,
             lista
-        ) { view, _, position ->
+        ) { view, item, position ->
 
             val titulo = view.findViewById<TextView>(R.id.titulo1)
             val msg = view.findViewById<TextView>(R.id.msg1)
             val data = view.findViewById<TextView>(R.id.data1)
             val indicador = view.findViewById<View>(R.id.indicadorNaoLido)
-
-            val item = lista[position] // 🔥 SEMPRE pega da lista
+            val card = view as? androidx.cardview.widget.CardView
 
             titulo.text = item.titulo
             msg.text = item.mensagem
@@ -68,10 +67,10 @@ class NotificacoesActivity : AppCompatActivity() {
             indicador.visibility = if (item.lida) View.GONE else View.VISIBLE
 
             // ✅ clicar = marcar como lido (sumir bolinha)
-            view.setOnClickListener {
-                val itemAtual = adapter.getItems()[position] as Notificacao
-                itemAtual.lida = true
-                adapter.updateItem(position, itemAtual)
+            card?.setOnClickListener {
+                item.lida = true
+                indicador.visibility = View.GONE
+                adapter.updateItem(position, item)
             }
         }
 

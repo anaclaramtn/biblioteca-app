@@ -121,13 +121,14 @@ class AcervoadmActivity : AppCompatActivity() {
 
     private fun setupLivros() {
         recycler.layoutManager = GridLayoutManager(this, 3)
-        recycler.adapter = GenericAdapter(R.layout.item_livro, listaLivros) { view, item, _ ->
+        recycler.adapter = GenericAdapter(R.layout.item_livro, listaLivros) { view, item, position ->
             view.findViewById<ImageView>(R.id.imgCapa).setImageResource(item.imagemRes)
             view.findViewById<TextView>(R.id.txtTituloLivro).text = item.titulo
             view.findViewById<TextView>(R.id.txtAutor).text = item.autor
 
             view.setOnClickListener {
                 val intent = Intent(this, AdminLivroActivity::class.java)
+                intent.putExtra("LIVRO_POS", position)
                 startActivity(intent)
             }
         }

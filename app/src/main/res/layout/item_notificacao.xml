@@ -8,11 +8,12 @@
     app:cardElevation="2dp">
 
     <RelativeLayout
+        android:id="@+id/root_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="12dp"
-        android:clickable="true"
-        android:focusable="true"
+        android:clickable="false"
+        android:focusable="false"
         android:background="?attr/selectableItemBackground">
 
         <!-- TÍTULO -->

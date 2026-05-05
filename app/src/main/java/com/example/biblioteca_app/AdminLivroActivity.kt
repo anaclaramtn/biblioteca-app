@@ -18,10 +18,14 @@ import android.widget.TextView
 
 class AdminLivroActivity : AppCompatActivity() {
 
+    private var livroPos: Int = -1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.tela_admin_livro)
+
+        livroPos = intent.getIntExtra("LIVRO_POS", -1)
         
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -29,19 +33,32 @@ class AdminLivroActivity : AppCompatActivity() {
             insets
         }
 
-        preencherDadosLivro()
         setupAcoes()
         setupComentarios()
         setupNavBar()
     }
 
+    override fun onResume() {
+        super.onResume()
+        preencherDadosLivro()
+    }
+
     private fun preencherDadosLivro() {
-        findViewById<TextView>(R.id.txtTitulo).text = "Star Wars: A Vingança dos Sith"
-        findViewById<TextView>(R.id.txtAutor).text = "George Lucas"
-        findViewById<TextView>(R.id.txtDescricao).text = "Anakin Skywalker se torna Darth Vader após ser seduzido pelo lado sombrio da Força. Uma história de queda, tragédia e redenção que marca o fim da República e o surgimento do Império. Anakin Skywalker se torna Darth Vader após ser seduzido pelo lado sombrio da Força. Uma história de queda, tragédia e redenção que marca o fim da República e o surgimento do Império."
-        findViewById<android.widget.ImageView>(R.id.imgCapa).setImageResource(R.drawable.capa_star_wars)
+        if (livroPos != -1 && livroPos < AcervoadmActivity.listaLivros.size) {
+            val livro = AcervoadmActivity.listaLivros[livroPos]
+            findViewById<TextView>(R.id.txtTitulo).text = livro.titulo
+            findViewById<TextView>(R.id.txtAutor).text = livro.autor
+            findViewById<TextView>(R.id.txtDescricao).text = livro.descricao
+            findViewById<android.widget.ImageView>(R.id.imgCapa).setImageResource(livro.imagemRes)
+        } else {
+            // Fallback para exemplo se não vier posição
+            findViewById<TextView>(R.id.txtTitulo).text = "Star Wars: A Vingança dos Sith"
+            findViewById<TextView>(R.id.txtAutor).text = "George Lucas"
+            findViewById<TextView>(R.id.txtDescricao).text = "Anakin Skywalker se torna Darth Vader após ser seduzido pelo lado sombrio da Força..."
+            findViewById<android.widget.ImageView>(R.id.imgCapa).setImageResource(R.drawable.capa_star_wars)
+        }
         
-        // Resumo de avaliações
+        // Resumo de avaliações (pode ser mockado ou vir do objeto se houver)
         val layoutResumo = findViewById<View>(R.id.layoutResumo)
         layoutResumo.findViewById<TextView>(R.id.txtMedia).text = "4.9"
         layoutResumo.findViewById<TextView>(R.id.txtTotalAvaliacoes).text = "(120 avaliações)"
@@ -68,10 +85,10 @@ class AdminLivroActivity : AppCompatActivity() {
             expandido = !expandido
             if (expandido) {
                 txtDescricao.maxLines = Int.MAX_VALUE
-                btnVerMaisDesc.text = getString(R.string.btn_ver_menos)
+                btnVerMaisDesc.text = "Ver menos"
             } else {
                 txtDescricao.maxLines = 4
-                btnVerMaisDesc.text = getString(R.string.btn_ver_mais)
+                btnVerMaisDesc.text = "Ver mais"
             }
         }
 
@@ -108,32 +125,43 @@ class AdminLivroActivity : AppCompatActivity() {
         data: String,
         estrelas: String
     ) {
+        val txtComentario = view.findViewById<TextView>(R.id.txtComentario)
+        val btnVerSpoiler = view.findViewById<Button>(R.id.btnVerSpoiler)
+
         view.findViewById<TextView>(R.id.txtNomeUsuario).text = nome
-        view.findViewById<TextView>(R.id.txtComentario).text = comentario
+        txtComentario.text = comentario
         view.findViewById<TextView>(R.id.txtData).text = data
         view.findViewById<TextView>(R.id.txtEstrelas).text = estrelas
+
+        // Lógica do botão de Spoiler (revelar texto)
+        btnVerSpoiler.setOnClickListener {
+            btnVerSpoiler.visibility = View.GONE
+            txtComentario.visibility = View.VISIBLE
+        }
 
         // Menu de moderação para o administrador
         view.findViewById<ImageButton>(R.id.btnMenu).setOnClickListener { v ->
             val popup = PopupMenu(this, v)
-            popup.menu.add("Censurar como Spoiler")
-            popup.menu.add("Banir Usuário")
+            popup.menu.add("Censurar")
+            popup.menu.add("Deletar")
 
             popup.setOnMenuItemClickListener { item ->
                 when (item.title) {
-                    "Censurar como Spoiler" -> {
-
-                        Toast.makeText(this, "Comentário ocultado", Toast.LENGTH_SHORT).show()
+                    "Censurar" -> {
+                        txtComentario.visibility = View.GONE
+                        btnVerSpoiler.visibility = View.VISIBLE
+                        Toast.makeText(this, "Comentário censurado", Toast.LENGTH_SHORT).show()
                         true
                     }
-                    "Banir Usuário" -> {
+                    "Deletar" -> {
                         AlertDialog.Builder(this)
-                            .setTitle("Banir Usuário")
-                            .setMessage("Deseja banir $nome?")
-                            .setPositiveButton("Banir") { _, _ ->
-                                Toast.makeText(this, "Usuário banido", Toast.LENGTH_SHORT).show()
+                            .setTitle("Confirmação")
+                            .setMessage("Tem certeza que deseja excluir o comentário?")
+                            .setPositiveButton("Sim") { _, _ ->
+                                (view.parent as? android.view.ViewGroup)?.removeView(view)
+                                Toast.makeText(this, "Comentário deletado", Toast.LENGTH_SHORT).show()
                             }
-                            .setNegativeButton("Cancelar", null)
+                            .setNegativeButton("Não", null)
                             .show()
                         true
                     }
@@ -152,7 +180,9 @@ class AdminLivroActivity : AppCompatActivity() {
         popup.setOnMenuItemClickListener { item ->
             when (item.title) {
                 "Editar" -> {
-                    Toast.makeText(this, "Abrindo tela de edição...", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this, AdminEdicaoActivity::class.java)
+                    intent.putExtra("LIVRO_POS", livroPos)
+                    startActivity(intent)
                     true
                 }
                 "Deletar" -> {

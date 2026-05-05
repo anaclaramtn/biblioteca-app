@@ -150,6 +150,11 @@ class AdminNotificacoesActivity : AppCompatActivity() {
         itemView.findViewById<TextView>(R.id.tvEmailUsuario).text = email
         itemView.findViewById<TextView>(R.id.tvDescricao).text = descricao
 
+        // ✅ Ao clicar na notificação, a bolinha azul desaparece
+        itemView.setOnClickListener {
+            itemView.findViewById<View>(R.id.indicadorStatus)?.visibility = View.GONE
+        }
+
         // Configurar ações específicas
         when (tipo) {
             TipoNotificacao.LIVROS, TipoNotificacao.JOGOS, TipoNotificacao.SALAS -> {

@@ -32,6 +32,7 @@
             android:layout_height="wrap_content"
             android:padding="12dp"
             android:button="@null"
+            android:background="@drawable/selector_radio_denuncia"
             android:text="@string/motivo_spoiler" />
 
         <View
@@ -45,6 +46,7 @@
             android:layout_height="wrap_content"
             android:padding="12dp"
             android:button="@null"
+            android:background="@drawable/selector_radio_denuncia"
             android:text="@string/motivo_inadequado" />
 
         <View
@@ -58,6 +60,7 @@
             android:layout_height="wrap_content"
             android:padding="12dp"
             android:button="@null"
+            android:background="@drawable/selector_radio_denuncia"
             android:text="@string/motivo_incorreto" />
 
         <View
@@ -71,6 +74,7 @@
             android:layout_height="wrap_content"
             android:padding="12dp"
             android:button="@null"
+            android:background="@drawable/selector_radio_denuncia"
             android:text="@string/motivo_spam" />
 
         <View
@@ -84,6 +88,7 @@
             android:layout_height="wrap_content"
             android:padding="12dp"
             android:button="@null"
+            android:background="@drawable/selector_radio_denuncia"
             android:text="@string/motivo_outro" />
     </RadioGroup>
 

@@ -3,6 +3,7 @@ package com.example.biblioteca_app
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -24,7 +25,6 @@ class AdminMaisAvaliacoesActivity : AppCompatActivity() {
         txtTitulo.text = "Avaliações"
 
         btnVoltar.setOnClickListener {
-            startActivity(Intent(this, AdminNotificacoesActivity::class.java))
             finish()
         }
 
@@ -83,7 +83,15 @@ class AdminMaisAvaliacoesActivity : AppCompatActivity() {
             AlertDialog.Builder(this)
                 .setTitle("Opções")
                 .setItems(opcoes) { _, which ->
-                    Toast.makeText(this, opcoes[which], Toast.LENGTH_SHORT).show()
+                    when (which) {
+                        0 -> { // Remover avaliação
+                            (view.parent as? ViewGroup)?.removeView(view)
+                            Toast.makeText(this, "Avaliação removida com sucesso", Toast.LENGTH_SHORT).show()
+                        }
+                        1 -> { // Editar avaliação
+                            Toast.makeText(this, "Funcionalidade de edição em breve", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
                 .show()
         }

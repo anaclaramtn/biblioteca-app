@@ -12,11 +12,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bibliotecaapp">
         <activity
-            android:name=".AdminLivroActivity"
+            android:name=".AdminEdicaoActivity"
             android:exported="false" />
         <activity
+            android:name=".AdminLivroActivity"
+            android:exported="true" />
+        <activity
             android:name=".AdminMaisAvaliacoesActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".AdminNotificacoesActivity"
             android:exported="false" />

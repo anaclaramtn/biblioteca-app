@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <!-- NAVBAR ADMIN FIXA NO RODAPÉ -->
+    <include
+        android:id="@+id/navbar"
+        layout="@layout/navbar_admin_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" />
+
+    <!-- BOTÃO ENVIAR FIXO ACIMA DA NAVBAR -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnEnviar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/navbar"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="#FFFFFF"
+        app:strokeWidth="1dp"
+        app:strokeColor="#000000"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:text="ENVIAR"
+        android:textColor="#000000"
+        android:textStyle="bold" />
+
+    <!-- CONTEÚDO SCROLLÁVEL -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/btnEnviar"
+        android:layout_marginBottom="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- HEADER -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:background="@drawable/background_header">
+
+                <!-- VOLTAR -->
+                <ImageButton
+                    android:id="@+id/btnVoltar"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="16dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_leftarrow"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:contentDescription="Voltar" />
+
+                <!-- MENU (3 PONTOS) -->
+                <ImageButton
+                    android:id="@+id/btnMenuOpcoes"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="16dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_trespontos"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="@android:color/white"
+                    android:contentDescription="Menu" />
+
+                <!-- CAPA centralizada -->
+                <ImageView
+                    android:id="@+id/imgCapa"
+                    android:layout_width="120dp"
+                    android:layout_height="180dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/capa_star_wars"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:contentDescription="Capa do livro" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- TÍTULO EDITÁVEL -->
+                <EditText
+                    android:id="@+id/edtTitulo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Título do Livro"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
+                    android:background="@null"
+                    android:layout_marginBottom="4dp"
+                    android:importantForAutofill="no"
+                    android:inputType="text" />
+
+                <!-- AUTOR EDITÁVEL -->
+                <EditText
+                    android:id="@+id/edtAutor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Autor"
+                    android:textColor="#666"
+                    android:background="@null"
+                    android:layout_marginBottom="12dp"
+                    android:importantForAutofill="no"
+                    android:inputType="textPersonName" />
+
+                <!-- SINOPSE -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sinopse"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="4dp"/>
+
+                <EditText
+                    android:id="@+id/edtDescricao"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Descrição do livro..."
+                    android:background="@drawable/background_campo_input"
+                    android:padding="12dp"
+                    android:minLines="5"
+                    android:gravity="top"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine"
+                    android:textSize="14sp" />
+
+                <!-- RESUMO AVALIAÇÃO (PADRONIZADO) -->
+                <include
+                    android:id="@+id/layoutResumo"
+                    layout="@layout/layout_resumo_avaliacao" />
+
+                <!-- AVALIAÇÕES -->
+                <include layout="@layout/item_admin_avaliacao" />
+                <include layout="@layout/item_admin_avaliacao" />
+
+                <TextView
+                    android:id="@+id/btnVerMaisAvaliacoes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ver Mais Avaliações >"
+                    android:textColor="@color/unifor_blue"
+                    android:layout_gravity="end"
+                    android:padding="8dp"/>
+
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>
