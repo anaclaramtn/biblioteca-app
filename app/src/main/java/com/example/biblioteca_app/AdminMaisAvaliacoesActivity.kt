@@ -4,10 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -40,7 +37,6 @@ class AdminMaisAvaliacoesActivity : AppCompatActivity() {
         configurarItem(findViewById(R.id.avaliacao3), "Carlos Alberto", "Spoiler pesado...", "02/07/2023")
         configurarItem(findViewById(R.id.avaliacao4), "Ana Oliveira", "Muito bom.", "10/07/2023")
 
-        // NAVBAR ADMIN
         setupNavBar()
     }
 
@@ -53,17 +49,21 @@ class AdminMaisAvaliacoesActivity : AppCompatActivity() {
 
         val btnCurtir = view.findViewById<ImageButton>(R.id.btnCurtir)
         val btnMenu = view.findViewById<ImageButton>(R.id.btnMenu)
+        val btnVerSpoiler = view.findViewById<Button>(R.id.btnVerSpoiler)
 
         txtNome.text = nome
         txtComentario.text = comentario
         txtData.text = data
 
+        // Estado inicial do spoiler (caso queira já deixar oculto algum)
+        btnVerSpoiler.visibility = View.GONE
+
+        // CURTIDAS
         var curtidas = (0..50).random()
         var curtido = false
 
         txtCurtidas.text = curtidas.toString()
 
-        // CURTIR
         btnCurtir.setOnClickListener {
             curtido = !curtido
             if (curtido) {
@@ -76,24 +76,46 @@ class AdminMaisAvaliacoesActivity : AppCompatActivity() {
             txtCurtidas.text = curtidas.toString()
         }
 
-        // MENU ADMIN (3 PONTOS)
-        btnMenu.setOnClickListener {
-            val opcoes = arrayOf("Remover avaliação", "Editar avaliação")
+        // BOTÃO SPOILER (revelar comentário)
+        btnVerSpoiler.setOnClickListener {
+            btnVerSpoiler.visibility = View.GONE
+            txtComentario.visibility = View.VISIBLE
+        }
 
-            AlertDialog.Builder(this)
-                .setTitle("Opções")
-                .setItems(opcoes) { _, which ->
-                    when (which) {
-                        0 -> { // Remover avaliação
-                            (view.parent as? ViewGroup)?.removeView(view)
-                            Toast.makeText(this, "Avaliação removida com sucesso", Toast.LENGTH_SHORT).show()
-                        }
-                        1 -> { // Editar avaliação
-                            Toast.makeText(this, "Funcionalidade de edição em breve", Toast.LENGTH_SHORT).show()
-                        }
+        // MENU ADMIN (IGUAL AO DA TELA DE LIVRO)
+        btnMenu.setOnClickListener { v ->
+            val popup = PopupMenu(this, v)
+            popup.menu.add("Censurar")
+            popup.menu.add("Deletar")
+
+            popup.setOnMenuItemClickListener { item ->
+                when (item.title) {
+
+                    "Censurar" -> {
+                        txtComentario.visibility = View.GONE
+                        btnVerSpoiler.visibility = View.VISIBLE
+                        Toast.makeText(this, "Comentário censurado", Toast.LENGTH_SHORT).show()
+                        true
                     }
+
+                    "Deletar" -> {
+                        AlertDialog.Builder(this)
+                            .setTitle("Confirmação")
+                            .setMessage("Tem certeza que deseja excluir o comentário?")
+                            .setPositiveButton("Sim") { _, _ ->
+                                (view.parent as? ViewGroup)?.removeView(view)
+                                Toast.makeText(this, "Comentário deletado", Toast.LENGTH_SHORT).show()
+                            }
+                            .setNegativeButton("Não", null)
+                            .show()
+                        true
+                    }
+
+                    else -> false
                 }
-                .show()
+            }
+
+            popup.show()
         }
     }
 
