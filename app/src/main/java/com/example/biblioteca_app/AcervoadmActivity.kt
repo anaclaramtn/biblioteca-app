@@ -125,6 +125,11 @@ class AcervoadmActivity : AppCompatActivity() {
             view.findViewById<ImageView>(R.id.imgCapa).setImageResource(item.imagemRes)
             view.findViewById<TextView>(R.id.txtTituloLivro).text = item.titulo
             view.findViewById<TextView>(R.id.txtAutor).text = item.autor
+
+            view.setOnClickListener {
+                val intent = Intent(this, AdminLivroActivity::class.java)
+                startActivity(intent)
+            }
         }
     }
 

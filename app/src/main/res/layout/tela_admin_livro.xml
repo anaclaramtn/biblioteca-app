@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF">
+
+    <!-- CONTEÚDO -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- HEADER -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="395dp"
+                android:background="@drawable/background_header">
+
+                <!-- VOLTAR -->
+                <ImageButton
+                    android:id="@+id/btnVoltar"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="16dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_leftarrow"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <!-- MENU ADMIN (3 PONTOS) -->
+                <ImageButton
+                    android:id="@+id/btnMenuOpcoes"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="16dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_trespontos"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="@android:color/white" />
+
+                <!-- CAPA centralizada -->
+                <ImageView
+                    android:id="@+id/imgCapa"
+                    android:layout_width="140dp"
+                    android:layout_height="200dp"
+                    android:scaleType="centerCrop"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- TÍTULO -->
+            <TextView
+                android:id="@+id/txtTitulo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Título do Livro"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:paddingStart="16dp"
+                android:paddingTop="12dp"/>
+
+            <!-- AUTOR -->
+            <TextView
+                android:id="@+id/txtAutor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Autor"
+                android:textColor="#666"
+                android:paddingStart="16dp"/>
+
+            <!-- STATUS -->
+            <TextView
+                android:id="@+id/txtStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Disponível"
+                android:padding="6dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_status"/>
+
+            <!-- RESUMO AVALIAÇÃO (PADRONIZADO) -->
+            <include
+                android:id="@+id/layoutResumo"
+                layout="@layout/layout_resumo_avaliacao" />
+
+            <!-- SINOPSE -->
+            <TextView
+                android:id="@+id/txtDescricao"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Descrição do livro..."
+                android:maxLines="4"
+                android:ellipsize="end"
+                android:padding="16dp"/>
+
+            <TextView
+                android:id="@+id/btnVerMais"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ver mais"
+                android:textColor="@color/padrao_app"
+                android:paddingStart="16dp"/>
+
+            <!-- AVALIAÇÕES (ADMIN) -->
+            <include
+                android:id="@+id/avaliacao1"
+                layout="@layout/item_admin_avaliacao" />
+
+            <include
+                android:id="@+id/avaliacao2"
+                layout="@layout/item_admin_avaliacao" />
+
+            <!-- SEM AVALIAÇÕES -->
+            <TextView
+                android:id="@+id/txtSemAvaliacoes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nenhuma avaliação ainda."
+                android:padding="16dp"
+                android:visibility="gone"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp">
+
+                <!-- Espaço vazio para empurrar o botão para o meio/direita -->
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/btnVerAvaliacoes"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/padrao_app"
+                    android:text="Ver mais avaliações"
+                    android:textColor="#FFFFFF" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+
+    <!-- NAVBAR ADMIN -->
+    <include layout="@layout/navbar_admin_layout"/>
+</LinearLayout>
