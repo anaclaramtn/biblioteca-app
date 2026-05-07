@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -96,6 +97,14 @@ class UsuarioadmActivity : AppCompatActivity() {
                 it.email.contains(texto, ignoreCase = true)
             }
         }
+
+        val txtSemResultados = findViewById<TextView>(R.id.txtSemResultados)
+        if (listaFiltrada.isEmpty()) {
+            txtSemResultados.visibility = View.VISIBLE
+        } else {
+            txtSemResultados.visibility = View.GONE
+        }
+
         adapter.updateList(listaFiltrada)
     }
 

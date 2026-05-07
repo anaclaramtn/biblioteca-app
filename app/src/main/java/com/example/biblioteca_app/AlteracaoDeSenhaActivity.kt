@@ -39,6 +39,11 @@ class AlteracaoDeSenhaActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            if (senhaAtualStr != "123"){
+                Toast.makeText(this, "Sua senha atual não é essa.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             // Validação de igualdade
             if (senhaNovaStr != confirmarStr) {
                 Toast.makeText(this, "As senhas não coincidem", Toast.LENGTH_SHORT).show()

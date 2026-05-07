@@ -68,6 +68,17 @@
             android:clipToPadding="false"
             tools:listitem="@layout/item_usuario" />
 
+        <!-- MENSAGEM DE VAZIO -->
+        <TextView
+            android:id="@+id/txtSemResultados"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="Nenhum usuário encontrado"
+            android:textSize="16sp"
+            android:textColor="#666666"
+            android:visibility="gone" />
+
     </LinearLayout>
 
     <include layout="@layout/navbar_admin_layout" />
