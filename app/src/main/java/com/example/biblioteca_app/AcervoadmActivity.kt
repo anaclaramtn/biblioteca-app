@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
@@ -134,49 +135,130 @@ class AcervoadmActivity : AppCompatActivity() {
 
     private fun setupNoticias() {
         recycler.layoutManager = LinearLayoutManager(this)
-        recycler.adapter = GenericAdapter(R.layout.item_noticia, listaNoticias) { view, item, _ ->
+        recycler.adapter = GenericAdapter(R.layout.item_noticia, listaNoticias) { view, item, position ->
             view.findViewById<TextView>(R.id.txtTituloNoticia).text = item.titulo
             view.findViewById<TextView>(R.id.txtDescricaoNoticia).text = item.descricao
 
-            view.setOnClickListener {
-                startActivity(Intent(this, CadastroNoticiaActivity::class.java))
+            view.setOnClickListener { v ->
+                val popup = PopupMenu(this, v)
+                popup.menu.add("Editar")
+                popup.menu.add("Deletar")
+
+                popup.setOnMenuItemClickListener { menuItem ->
+                    when (menuItem.title) {
+                        "Editar" -> {
+                            val intent = Intent(this, CadastroNoticiaActivity::class.java)
+                            startActivity(intent)
+                            true
+                        }
+                        "Deletar" -> {
+                            listaNoticias.removeAt(position)
+                            recycler.adapter?.notifyItemRemoved(position)
+                            recycler.adapter?.notifyItemRangeChanged(position, listaNoticias.size)
+                            Toast.makeText(this, "Notícia '${item.titulo}' deletada!", Toast.LENGTH_SHORT).show()
+                            true
+                        }
+                        else -> false
+                    }
+                }
+                popup.show()
             }
         }
     }
 
     private fun setupJogos() {
         recycler.layoutManager = GridLayoutManager(this, 3)
-        recycler.adapter = GenericAdapter(R.layout.item_jogo, listaJogos) { view, item, _ ->
+        recycler.adapter = GenericAdapter(R.layout.item_jogo, listaJogos) { view, item, position ->
             view.findViewById<ImageView>(R.id.imgJogo).setImageResource(item.imagemRes)
             view.findViewById<TextView>(R.id.txtNomeJogo).text = item.nome
 
-            view.setOnClickListener {
-                startActivity(Intent(this, CadastroJogoActivity::class.java))
+            view.setOnClickListener { v ->
+                val popup = PopupMenu(this, v)
+                popup.menu.add("Editar")
+                popup.menu.add("Deletar")
+
+                popup.setOnMenuItemClickListener { menuItem ->
+                    when (menuItem.title) {
+                        "Editar" -> {
+                            startActivity(Intent(this, CadastroJogoActivity::class.java))
+                            true
+                        }
+                        "Deletar" -> {
+                            listaJogos.removeAt(position)
+                            recycler.adapter?.notifyItemRemoved(position)
+                            recycler.adapter?.notifyItemRangeChanged(position, listaJogos.size)
+                            Toast.makeText(this, "Jogo '${item.nome}' deletado!", Toast.LENGTH_SHORT).show()
+                            true
+                        }
+                        else -> false
+                    }
+                }
+                popup.show()
             }
         }
     }
 
     private fun setupSalas() {
         recycler.layoutManager = GridLayoutManager(this, 3)
-        recycler.adapter = GenericAdapter(R.layout.item_sala, listaSalas) { view, item, _ ->
+        recycler.adapter = GenericAdapter(R.layout.item_sala, listaSalas) { view, item, position ->
             view.findViewById<TextView>(R.id.txtNomeSala).text = item.nome
             view.findViewById<TextView>(R.id.txtCapacidade).text = "capacidade: ${item.capacidade} pessoas"
 
-            view.setOnClickListener {
-                startActivity(Intent(this, CadastroSalaActivity::class.java))
+            view.setOnClickListener { v ->
+                val popup = PopupMenu(this, v)
+                popup.menu.add("Editar")
+                popup.menu.add("Deletar")
+
+                popup.setOnMenuItemClickListener { menuItem ->
+                    when (menuItem.title) {
+                        "Editar" -> {
+                            startActivity(Intent(this, CadastroSalaActivity::class.java))
+                            true
+                        }
+                        "Deletar" -> {
+                            listaSalas.removeAt(position)
+                            recycler.adapter?.notifyItemRemoved(position)
+                            recycler.adapter?.notifyItemRangeChanged(position, listaSalas.size)
+                            Toast.makeText(this, "Sala '${item.nome}' deletada!", Toast.LENGTH_SHORT).show()
+                            true
+                        }
+                        else -> false
+                    }
+                }
+                popup.show()
             }
         }
     }
 
     private fun setupPesquisa() {
         recycler.layoutManager = LinearLayoutManager(this)
-        recycler.adapter = GenericAdapter(R.layout.item_pesquisa_adm, listaPesquisas) { view, item, _ ->
+        recycler.adapter = GenericAdapter(R.layout.item_pesquisa_adm, listaPesquisas) { view, item, position ->
             view.findViewById<TextView>(R.id.txtNomePesquisa).text = item.nome
             view.findViewById<TextView>(R.id.txtDescricaoPesquisa).text = item.descricao
             view.findViewById<TextView>(R.id.txtDisponibilidade).text = item.disponibilidade
 
-            view.setOnClickListener {
-                startActivity(Intent(this, CadastroPesquisaActivity::class.java))
+            view.setOnClickListener { v ->
+                val popup = PopupMenu(this, v)
+                popup.menu.add("Editar")
+                popup.menu.add("Deletar")
+
+                popup.setOnMenuItemClickListener { menuItem ->
+                    when (menuItem.title) {
+                        "Editar" -> {
+                            startActivity(Intent(this, CadastroPesquisaActivity::class.java))
+                            true
+                        }
+                        "Deletar" -> {
+                            listaPesquisas.removeAt(position)
+                            recycler.adapter?.notifyItemRemoved(position)
+                            recycler.adapter?.notifyItemRangeChanged(position, listaPesquisas.size)
+                            Toast.makeText(this, "Pesquisa de '${item.nome}' deletada!", Toast.LENGTH_SHORT).show()
+                            true
+                        }
+                        else -> false
+                    }
+                }
+                popup.show()
             }
         }
     }
