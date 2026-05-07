@@ -29,7 +29,7 @@ class NoticiaCompletaActivity : AppCompatActivity() {
 
         // Receber dados da Intent
         val titulo = intent.getStringExtra("TITULO") ?: "Título da Notícia"
-        val imagemRes = intent.getIntExtra("IMAGEM", R.drawable.logo)
+        val imagemRes = intent.getIntExtra("IMAGEM", R.drawable.war)
         
         txtTitulo.text = titulo
         imgNoticia.setImageResource(imagemRes)

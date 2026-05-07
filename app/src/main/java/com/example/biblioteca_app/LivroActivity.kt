@@ -124,12 +124,14 @@ class LivroActivity : AppCompatActivity() {
         configurarItemAvaliacao(
             binding.avaliacao1,
             "João Silva",
+            "Incrível!",
             "Excelente leitura, recomendo a todos!",
             "15/05/2023"
         )
         configurarItemAvaliacao(
             binding.avaliacao2,
             "Maria Souza",
+            "Muito bom",
             "O livro é bom, mas o final poderia ser melhor.",
             "20/06/2023"
         )
@@ -139,6 +141,7 @@ class LivroActivity : AppCompatActivity() {
     private fun configurarItemAvaliacao(
         itemBinding: ItemAvaliacaoBinding,
         nome: String,
+        titulo: String,
         comentario: String,
         data: String,
         temSpoiler: Boolean = false
@@ -146,6 +149,7 @@ class LivroActivity : AppCompatActivity() {
         var curtido = false
         var numCurtidas = (0..20).random() // Valor inicial aleatório
         itemBinding.txtNomeUsuario.text = nome
+        itemBinding.txtTituloAvaliacao.text = titulo
         itemBinding.txtComentario.text = comentario
         itemBinding.txtData.text = data
         itemBinding.txtCurtidas.text = numCurtidas.toString()

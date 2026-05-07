@@ -41,6 +41,16 @@
         android:textSize="14sp"
         android:layout_marginTop="4dp"/>
 
+    <!-- TÍTULO DA AVALIAÇÃO -->
+    <TextView
+        android:id="@+id/txtTituloAvaliacao"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Título da Avaliação"
+        android:textStyle="bold"
+        android:textColor="#000"
+        android:layout_marginTop="8dp"/>
+
     <!-- COMENTÁRIO -->
     <TextView
         android:id="@+id/txtComentario"

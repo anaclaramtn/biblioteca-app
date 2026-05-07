@@ -62,10 +62,10 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         }
 
         // Configura cada item de avaliação com textos específicos
-        configurarItemAvaliacao(binding.avaliacao1, "João Silva", "Excelente leitura, recomendo a todos!", "15/05/2023")
-        configurarItemAvaliacao(binding.avaliacao2, "Maria Souza", "O livro é bom, mas o final poderia ser melhor.", "20/06/2023")
-        configurarItemAvaliacao(binding.avaliacao3, "Carlos Alberto", "SPOILER: Eu não acredito que o protagonista morre no final! Que choque.", "02/07/2023", temSpoiler = true)
-        configurarItemAvaliacao(binding.avaliacao4, "Ana Oliveira", "Personagens muito bem construídos.", "10/07/2023")
+        configurarItemAvaliacao(binding.avaliacao1, "João Silva", "Incrível!", "Excelente leitura, recomendo a todos!", "15/05/2023")
+        configurarItemAvaliacao(binding.avaliacao2, "Maria Souza", "Muito bom", "O livro é bom, mas o final poderia ser melhor.", "20/06/2023")
+        configurarItemAvaliacao(binding.avaliacao3, "Carlos Alberto", "Cuidado!", "SPOILER: Eu não acredito que o protagonista morre no final! Que choque.", "02/07/2023", temSpoiler = true)
+        configurarItemAvaliacao(binding.avaliacao4, "Ana Oliveira", "Gostei", "Personagens muito bem construídos.", "10/07/2023")
 
         binding.btnAvaliar.setOnClickListener {
             val intent = android.content.Intent(this, AvaliarActivity::class.java)
@@ -92,6 +92,7 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
     private fun configurarItemAvaliacao(
         itemBinding: ItemAvaliacaoBinding,
         nome: String,
+        titulo: String,
         comentario: String,
         data: String,
         temSpoiler: Boolean = false
@@ -99,6 +100,7 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         var curtido = false
         var numCurtidas = (0..50).random() // Valor inicial aleatório
         itemBinding.txtNomeUsuario.text = nome
+        itemBinding.txtTituloAvaliacao.text = titulo
         itemBinding.txtComentario.text = comentario
         itemBinding.txtData.text = data
         itemBinding.txtCurtidas.text = numCurtidas.toString()

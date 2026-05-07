@@ -93,12 +93,18 @@
                 android:layout_marginTop="6dp"
                 android:background="@drawable/bg_status"/>
 
-            <!-- RESUMO AVALIAÇÃO (PADRONIZADO) -->
-            <include
-                android:id="@+id/layoutResumo"
-                layout="@layout/layout_resumo_avaliacao" />
 
             <!-- SINOPSE -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sinopse:"
+                android:textStyle="bold"
+                android:paddingStart="16dp"
+                android:paddingTop="16dp"
+                android:paddingEnd="16dp"
+                android:textColor="@android:color/black"/>
+
             <TextView
                 android:id="@+id/txtDescricao"
                 android:layout_width="match_parent"
@@ -106,7 +112,12 @@
                 android:text="Descrição do livro..."
                 android:maxLines="4"
                 android:ellipsize="end"
-                android:padding="16dp"/>
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="8dp"/>
+            <!-- RESUMO AVALIAÇÃO (PADRONIZADO) -->
+
 
             <TextView
                 android:id="@+id/btnVerMais"
@@ -115,6 +126,10 @@
                 android:text="Ver mais"
                 android:textColor="@color/padrao_app"
                 android:paddingStart="16dp"/>
+
+            <include
+                android:id="@+id/layoutResumo"
+                layout="@layout/layout_resumo_avaliacao" />
 
             <!-- AVALIAÇÕES (ADMIN) -->
             <include

@@ -42,7 +42,7 @@ class TelaHomeActivity : AppCompatActivity() {
         val btnNext = findViewById<ImageButton>(R.id.btnNextNoticia)
 
         val listaNoticias = listOf(
-            Noticia("ENADE está chegando!", "A prova do ENADE será realizada em breve. Não perca os prazos de inscrição e prepare-se com os materiais da biblioteca.", R.drawable.logo),
+            Noticia("Novo jogo chega à biblioteca!", "Venha conferir o mais novo jogo de tabuleiro que chegou na ludoteca da biblioteca.", R.drawable.war),
             Noticia("Professor Boba Fett", "Inacreditável! Um professor de Computação deu aula totalmente fantasiado de Boba Fett de Star Wars hoje.", R.drawable.logo)
         )
 

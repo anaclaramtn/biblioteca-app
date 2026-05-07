@@ -32,17 +32,18 @@ class AdminMaisAvaliacoesActivity : AppCompatActivity() {
         }
 
         // ITENS
-        configurarItem(findViewById(R.id.avaliacao1), "João Silva", "Excelente leitura!", "15/05/2023")
-        configurarItem(findViewById(R.id.avaliacao2), "Maria Souza", "Bom livro.", "20/06/2023")
-        configurarItem(findViewById(R.id.avaliacao3), "Carlos Alberto", "Spoiler pesado...", "02/07/2023")
-        configurarItem(findViewById(R.id.avaliacao4), "Ana Oliveira", "Muito bom.", "10/07/2023")
+        configurarItem(findViewById(R.id.avaliacao1), "João Silva", "Incrível!", "Excelente leitura!", "15/05/2023")
+        configurarItem(findViewById(R.id.avaliacao2), "Maria Souza", "Muito bom", "Bom livro.", "20/06/2023")
+        configurarItem(findViewById(R.id.avaliacao3), "Carlos Alberto", "Cuidado!", "Spoiler pesado...", "02/07/2023")
+        configurarItem(findViewById(R.id.avaliacao4), "Ana Oliveira", "Gostei", "Muito bom.", "10/07/2023")
 
         setupNavBar()
     }
 
-    private fun configurarItem(view: View, nome: String, comentario: String, data: String) {
+    private fun configurarItem(view: View, nome: String, titulo: String, comentario: String, data: String) {
 
         val txtNome = view.findViewById<TextView>(R.id.txtNomeUsuario)
+        val txtTitulo = view.findViewById<TextView>(R.id.txtTituloAvaliacao)
         val txtComentario = view.findViewById<TextView>(R.id.txtComentario)
         val txtData = view.findViewById<TextView>(R.id.txtData)
         val txtCurtidas = view.findViewById<TextView>(R.id.txtCurtidas)
@@ -52,6 +53,7 @@ class AdminMaisAvaliacoesActivity : AppCompatActivity() {
         val btnVerSpoiler = view.findViewById<Button>(R.id.btnVerSpoiler)
 
         txtNome.text = nome
+        txtTitulo.text = titulo
         txtComentario.text = comentario
         txtData.text = data
 

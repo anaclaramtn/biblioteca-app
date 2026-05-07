@@ -104,6 +104,7 @@ class AdminLivroActivity : AppCompatActivity() {
         configurarItemAvaliacaoAdmin(
             findViewById(R.id.avaliacao1),
             "João Silva",
+            "Incrível!",
             "Excelente leitura, recomendo a todos!",
             "15/05/2023",
             "⭐⭐⭐⭐⭐"
@@ -112,6 +113,7 @@ class AdminLivroActivity : AppCompatActivity() {
         configurarItemAvaliacaoAdmin(
             findViewById(R.id.avaliacao2),
             "Maria Souza",
+            "Muito bom",
             "O livro é bom, mas o final poderia ser melhor.",
             "20/06/2023",
             "⭐⭐⭐⭐☆"
@@ -121,6 +123,7 @@ class AdminLivroActivity : AppCompatActivity() {
     private fun configurarItemAvaliacaoAdmin(
         view: View,
         nome: String,
+        titulo: String,
         comentario: String,
         data: String,
         estrelas: String
@@ -129,6 +132,7 @@ class AdminLivroActivity : AppCompatActivity() {
         val btnVerSpoiler = view.findViewById<Button>(R.id.btnVerSpoiler)
 
         view.findViewById<TextView>(R.id.txtNomeUsuario).text = nome
+        view.findViewById<TextView>(R.id.txtTituloAvaliacao).text = titulo
         txtComentario.text = comentario
         view.findViewById<TextView>(R.id.txtData).text = data
         view.findViewById<TextView>(R.id.txtEstrelas).text = estrelas
