@@ -148,8 +148,16 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         }
 
         dialogBinding.btnEnviar.setOnClickListener {
-            dialog.dismiss()
-            mostrarSucessoDenuncia()
+            val selectedId = dialogBinding.radioGroup.checkedRadioButtonId
+
+            if (selectedId == -1) {
+                Toast.makeText(this, "Por favor, selecione um motivo para a denúncia", Toast.LENGTH_SHORT).show()
+            } else if (selectedId == R.id.rbOutro && dialogBinding.edtOutro.text.toString().trim().isEmpty()) {
+                Toast.makeText(this, "Por favor, descreva o motivo da denúncia", Toast.LENGTH_SHORT).show()
+            } else {
+                dialog.dismiss()
+                mostrarSucessoDenuncia()
+            }
         }
 
         dialog.show()
