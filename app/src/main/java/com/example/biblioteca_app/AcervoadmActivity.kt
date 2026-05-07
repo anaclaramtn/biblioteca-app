@@ -121,15 +121,13 @@ class AcervoadmActivity : AppCompatActivity() {
 
     private fun setupLivros() {
         recycler.layoutManager = GridLayoutManager(this, 3)
-        recycler.adapter = GenericAdapter(R.layout.item_livro, listaLivros) { view, item, position ->
+        recycler.adapter = GenericAdapter(R.layout.item_livro, listaLivros) { view, item, _ ->
             view.findViewById<ImageView>(R.id.imgCapa).setImageResource(item.imagemRes)
             view.findViewById<TextView>(R.id.txtTituloLivro).text = item.titulo
             view.findViewById<TextView>(R.id.txtAutor).text = item.autor
 
             view.setOnClickListener {
-                val intent = Intent(this, AdminLivroActivity::class.java)
-                intent.putExtra("LIVRO_POS", position)
-                startActivity(intent)
+                startActivity(Intent(this, AdminLivroActivity::class.java))
             }
         }
     }
@@ -139,6 +137,10 @@ class AcervoadmActivity : AppCompatActivity() {
         recycler.adapter = GenericAdapter(R.layout.item_noticia, listaNoticias) { view, item, _ ->
             view.findViewById<TextView>(R.id.txtTituloNoticia).text = item.titulo
             view.findViewById<TextView>(R.id.txtDescricaoNoticia).text = item.descricao
+
+            view.setOnClickListener {
+                startActivity(Intent(this, CadastroNoticiaActivity::class.java))
+            }
         }
     }
 
@@ -147,6 +149,10 @@ class AcervoadmActivity : AppCompatActivity() {
         recycler.adapter = GenericAdapter(R.layout.item_jogo, listaJogos) { view, item, _ ->
             view.findViewById<ImageView>(R.id.imgJogo).setImageResource(item.imagemRes)
             view.findViewById<TextView>(R.id.txtNomeJogo).text = item.nome
+
+            view.setOnClickListener {
+                startActivity(Intent(this, CadastroJogoActivity::class.java))
+            }
         }
     }
 
@@ -155,6 +161,10 @@ class AcervoadmActivity : AppCompatActivity() {
         recycler.adapter = GenericAdapter(R.layout.item_sala, listaSalas) { view, item, _ ->
             view.findViewById<TextView>(R.id.txtNomeSala).text = item.nome
             view.findViewById<TextView>(R.id.txtCapacidade).text = "capacidade: ${item.capacidade} pessoas"
+
+            view.setOnClickListener {
+                startActivity(Intent(this, CadastroSalaActivity::class.java))
+            }
         }
     }
 
@@ -164,6 +174,10 @@ class AcervoadmActivity : AppCompatActivity() {
             view.findViewById<TextView>(R.id.txtNomePesquisa).text = item.nome
             view.findViewById<TextView>(R.id.txtDescricaoPesquisa).text = item.descricao
             view.findViewById<TextView>(R.id.txtDisponibilidade).text = item.disponibilidade
+
+            view.setOnClickListener {
+                startActivity(Intent(this, CadastroPesquisaActivity::class.java))
+            }
         }
     }
 
