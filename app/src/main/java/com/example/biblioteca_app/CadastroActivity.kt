@@ -101,57 +101,34 @@ class CadastroActivity : AppCompatActivity() {
             // Cria usuário no Authentication
             auth.createUserWithEmailAndPassword(emailStr, senhaStr)
                 .addOnCompleteListener { task ->
-
                     if (task.isSuccessful) {
-
-                        // Pega usuário criado
                         val usuarioAtual = auth.currentUser
+                        val uid = usuarioAtual?.uid
 
-                        // Cria objeto com os dados
-                        val dadosUsuario = hashMapOf(
-                            "nome" to nomeStr,
-                            "email" to emailStr,
-                            "uid" to usuarioAtual?.uid
-                        )
+                        if (uid != null) {
+                            // Objeto com os dados do usuário para o Firestore
+                            val dadosUsuario = hashMapOf(
+                                "nome" to nomeStr,
+                                "email" to emailStr,
+                                "uid" to uid,
+                                "isAdmin" to false // Controle de acesso
+                            )
 
-                        // Salva no Firestore
-                        db.collection("usuarios")
-                            .document(usuarioAtual!!.uid)
-                            .set(dadosUsuario)
-                            .addOnSuccessListener {
-
-                                Toast.makeText(
-                                    this,
-                                    "Cadastro realizado com sucesso",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-
-                                startActivity(
-                                    Intent(
-                                        this,
-                                        LoginActivity::class.java
-                                    )
-                                )
-
-                                finish()
-                            }
-
-                            .addOnFailureListener {
-
-                                Toast.makeText(
-                                    this,
-                                    "Erro ao salvar dados",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-
+                            // Salva no Firestore usando o UID do Auth como ID do documento
+                            db.collection("usuarios")
+                                .document(uid)
+                                .set(dadosUsuario)
+                                .addOnSuccessListener {
+                                    Toast.makeText(this, "Cadastro realizado com sucesso", Toast.LENGTH_SHORT).show()
+                                    startActivity(Intent(this, LoginActivity::class.java))
+                                    finish()
+                                }
+                                .addOnFailureListener { e ->
+                                    Toast.makeText(this, "Erro ao salvar dados: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
+                        }
                     } else {
-
-                        Toast.makeText(
-                            this,
-                            "Erro: ${task.exception?.message}",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        Toast.makeText(this, "Erro: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                     }
                 }
         }

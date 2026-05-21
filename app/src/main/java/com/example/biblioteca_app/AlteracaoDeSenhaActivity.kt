@@ -8,11 +8,19 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
+import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.auth.FirebaseAuth
 
 class AlteracaoDeSenhaActivity : AppCompatActivity() {
+
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.tela_alteracao_de_senha)
+
+        // Inicializa Firebase
+        auth = FirebaseAuth.getInstance()
 
         // 1. Referenciar os componentes do XML com os IDs padronizados
         val btnVoltar = findViewById<ImageView>(R.id.ButtonVoltar)
@@ -29,36 +37,51 @@ class AlteracaoDeSenhaActivity : AppCompatActivity() {
 
         // 2. Lógica do botão Concluir
         btnConcluir.setOnClickListener {
-            val senhaAtualStr = editSenhaAtual.text.toString()
-            val senhaNovaStr = editSenhaNova.text.toString()
-            val confirmarStr = editConfirmarSenha.text.toString()
+            val senhaAtualStr = editSenhaAtual.text.toString().trim()
+            val senhaNovaStr = editSenhaNova.text.toString().trim()
+            val confirmarStr = editConfirmarSenha.text.toString().trim()
 
-            // Validação de campos vazios
+            // Validação de campos vazios (Padrão CadastroActivity)
             if (senhaAtualStr.isEmpty() || senhaNovaStr.isEmpty() || confirmarStr.isEmpty()) {
                 Toast.makeText(this, "Preencha todos os campos para continuar", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            if (senhaAtualStr != "123"){
-                Toast.makeText(this, "Sua senha atual não é essa.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // Validação de igualdade
+            // Validação de igualdade (Padrão CadastroActivity)
             if (senhaNovaStr != confirmarStr) {
                 Toast.makeText(this, "As senhas não coincidem", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Validação de requisitos
+            // Validação de requisitos (Padrão CadastroActivity)
             if (!senhaValida(senhaNovaStr)) {
-                Toast.makeText(this, "A nova senha não cumpre os requisitos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Digite uma senha que cumpra os requisitos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Sucesso
-            Toast.makeText(this, "Senha alterada com sucesso!", Toast.LENGTH_SHORT).show()
-            finish()
+            val usuarioAtual = auth.currentUser
+            if (usuarioAtual != null && usuarioAtual.email != null) {
+                // Para trocar a senha, o Firebase exige reautenticação por segurança
+                val credencial = EmailAuthProvider.getCredential(usuarioAtual.email!!, senhaAtualStr)
+
+                usuarioAtual.reauthenticate(credencial).addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        // Se a senha atual estiver correta, atualiza para a nova
+                        usuarioAtual.updatePassword(senhaNovaStr).addOnCompleteListener { updateTask ->
+                            if (updateTask.isSuccessful) {
+                                Toast.makeText(this, "Senha alterada com sucesso!", Toast.LENGTH_SHORT).show()
+                                finish()
+                            } else {
+                                Toast.makeText(this, "Erro: ${updateTask.exception?.message}", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    } else {
+                        Toast.makeText(this, "Sua senha atual não é essa.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } else {
+                Toast.makeText(this, "Usuário não autenticado", Toast.LENGTH_SHORT).show()
+            }
         }
         setupNavBar()
     }
@@ -70,6 +93,7 @@ class AlteracaoDeSenhaActivity : AppCompatActivity() {
 
         return temNumero && temMinuscula && temMaiuscula
     }
+
     private fun setupNavBar() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
 
@@ -101,5 +125,4 @@ class AlteracaoDeSenhaActivity : AppCompatActivity() {
             }
         }
     }
-
 }
