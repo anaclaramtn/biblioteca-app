@@ -6,12 +6,17 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
+import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : AppCompatActivity() {
+
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.tela_login)
+
+        auth = FirebaseAuth.getInstance()
 
         val btnCriarConta = findViewById<MaterialButton>(R.id.ButtonCriarConta1)
         val btnEsqueceuSenha = findViewById<MaterialButton>(R.id.ButtonEsqueceuSenha)
@@ -37,34 +42,41 @@ class LoginActivity : AppCompatActivity() {
 
             // Verifica campos vazios
             if (email.isEmpty() || senha.isEmpty()) {
+
                 Toast.makeText(
                     this,
-                    "Preencha todos os campos\nPara prosseguir com o login, favor, preencher todos os campos",
-                    Toast.LENGTH_LONG
+                    "Preencha todos os campos",
+                    Toast.LENGTH_SHORT
                 ).show()
+
                 return@setOnClickListener
             }
 
-            // Login USER
-            if (email == "User" && senha == "123") {
-                val intent = Intent(this, TelaHomeActivity::class.java)
-                startActivity(intent)
-                finish()
-            }
-            // Login ADMIN
-            else if (email == "Admin" && senha == "321") {
-                val intent = Intent(this, AdminHomeActivity::class.java)
-                startActivity(intent)
-                finish()
-            }
-            // Login inválido
-            else {
-                Toast.makeText(
-                    this,
-                    "Login inválido\nVerifique suas credenciais",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+            // LOGIN FIREBASE
+            auth.signInWithEmailAndPassword(email, senha)
+                .addOnCompleteListener { task ->
+
+                    if (task.isSuccessful) {
+
+                        Toast.makeText(
+                            this,
+                            "Login realizado com sucesso",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        val intent = Intent(this, TelaHomeActivity::class.java)
+                        startActivity(intent)
+                        finish()
+
+                    } else {
+
+                        Toast.makeText(
+                            this,
+                            "E-mail ou senha inválidos",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
         }
     }
 }
