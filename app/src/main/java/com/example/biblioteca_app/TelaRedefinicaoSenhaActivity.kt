@@ -7,11 +7,17 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
+import com.google.firebase.auth.FirebaseAuth
 
 class TelaRedefinicaoSenhaActivity : AppCompatActivity() {
+
+    lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.tela_redefinicao_senha)
+
+        auth = FirebaseAuth.getInstance()
 
         val btnVoltar = findViewById<ImageButton>(R.id.ButtonVoltar)
 
@@ -26,19 +32,22 @@ class TelaRedefinicaoSenhaActivity : AppCompatActivity() {
 
         btnRedefinicao.setOnClickListener {
             val email = emailRedefSenha.text.toString()
-            if (email == "narakao@gmail.com") {
-                Toast.makeText(
-                    this,
-                    "O codigo foi enviado!\nFavor, verificar a caixa do email!",
-                    Toast.LENGTH_LONG
-                ).show()
-            } else {
-                Toast.makeText(
-                    this,
-                    "Seu email nao existe em nosso banco\nPara prosseguir com a recuperacao de senha,\nfavor, preencher o email correto ",
-                    Toast.LENGTH_LONG
-                ).show()
+
+            if(email.isEmpty()){
+
+                Toast.makeText(this, "Digite um email", Toast.LENGTH_LONG).show()
+                } else {
+                    auth.sendPasswordResetEmail(email).addOnCompleteListener {
+                        task ->
+                        if (task.isSuccessful){
+                            Toast.makeText(this, "O codigo foi enviado!\nVerifique seu email!",
+                                Toast.LENGTH_LONG).show()
+                        } else {
+                            Toast.makeText(this, "Email nao encontrado!", Toast.LENGTH_LONG).show()
+                        }
+                    }
+            }
             }
         }
     }
-}
+

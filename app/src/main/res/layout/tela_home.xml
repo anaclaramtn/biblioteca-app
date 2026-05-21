@@ -1,170 +1,188 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#FFFFFF">
+    android:layout_height="match_parent">
 
-    <!-- Conteudo principal -->
-    <ScrollView
+    <LinearLayout
+        android:id="@+id/main"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="#FFFFFF">
 
-        <LinearLayout
+        <!-- Conteudo principal -->
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-            <!-- Titulo -->
-            <include
-                android:id="@+id/header"
-                layout="@layout/header_layout"/>
-
-            <!-- Notícias da Biblioteca -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="16dp"
-                android:paddingTop="16dp"
-                android:text="Notícias da Biblioteca"
-                android:textColor="#000000"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_marginTop="8dp">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvNoticias"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/item_noticia" />
-
-                <!-- Botões de Navegação Sobrepostos -->
-                <ImageButton
-                    android:id="@+id/btnPrevNoticia"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginStart="8dp"
-                    android:background="@android:color/transparent"
-                    android:src="@drawable/ic_leftarrow"
-                    app:tint="#FFFFFF"
-                    android:elevation="5dp"
-                    android:contentDescription="Anterior" />
-
-                <ImageButton
-                    android:id="@+id/btnNextNoticia"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="8dp"
-                    android:background="@android:color/transparent"
-                    android:rotation="180"
-                    android:src="@drawable/ic_leftarrow"
-                    app:tint="#FFFFFF"
-                    android:elevation="5dp"
-                    android:contentDescription="Próxima" />
-            </RelativeLayout>
-
-            <!-- Indicador de página (bolinhas) -->
             <LinearLayout
-                android:id="@+id/layoutDots"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="4dp"
-                android:orientation="horizontal" />
-
-            <!-- Livros Populares -->
-            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                android:paddingTop="16dp"
-                android:text="Livros Populares Essa Semana"
-                android:textStyle="bold"
-                android:textSize="14sp" />
+                android:orientation="vertical">
 
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="8dp"
-                android:scrollbars="none">
+                <!-- Titulo -->
+                <include
+                    android:id="@+id/header"
+                    layout="@layout/header_layout"/>
 
+                <!-- Notícias da Biblioteca -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingTop="16dp"
+                    android:text="Notícias da Biblioteca"
+                    android:textColor="#000000"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_marginTop="8dp">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvNoticias"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        tools:listitem="@layout/item_noticia" />
+
+                    <!-- Botões de Navegação Sobrepostos -->
+                    <ImageButton
+                        android:id="@+id/btnPrevNoticia"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="8dp"
+                        android:background="@android:color/transparent"
+                        android:src="@drawable/ic_leftarrow"
+                        app:tint="#FFFFFF"
+                        android:elevation="5dp"
+                        android:contentDescription="Anterior" />
+
+                    <ImageButton
+                        android:id="@+id/btnNextNoticia"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="8dp"
+                        android:background="@android:color/transparent"
+                        android:rotation="180"
+                        android:src="@drawable/ic_leftarrow"
+                        app:tint="#FFFFFF"
+                        android:elevation="5dp"
+                        android:contentDescription="Próxima" />
+                </RelativeLayout>
+
+                <!-- Indicador de página (bolinhas) -->
                 <LinearLayout
+                    android:id="@+id/layoutDots"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="4dp"
+                    android:orientation="horizontal" />
 
-                    <include android:id="@+id/livroPop1" layout="@layout/item_livro" />
-                    <include android:id="@+id/livroPop2" layout="@layout/item_livro" />
-                    <include android:id="@+id/livroPop3" layout="@layout/item_livro" />
-
-                </LinearLayout>
-            </HorizontalScrollView>
-
-            <!-- Livros Mais Curtidos -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                android:paddingTop="8dp"
-                android:text="Livros Mais Curtidos"
-                android:textStyle="bold"
-                android:textSize="14sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:text="Nenhum livro curtido por enquanto"
-                android:textColor="#999999"
-                android:fontFamily="cursive"
-                android:textSize="14sp" />
-
-            <!-- Livros Mais Bem Avaliados -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                android:paddingTop="8dp"
-                android:text="Livros Mais Bem Avaliados"
-                android:textStyle="bold"
-                android:textSize="14sp" />
-
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="8dp"
-                android:scrollbars="none">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
+                <!-- Livros Populares -->
+                <TextView
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="16dp"
+                    android:text="Livros Populares Essa Semana"
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
 
-                    <include android:id="@+id/livroAval1" layout="@layout/item_livro" />
-                    <include android:id="@+id/livroAval2" layout="@layout/item_livro" />
-                    <include android:id="@+id/livroAval3" layout="@layout/item_livro" />
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:scrollbars="none">
 
-                </LinearLayout>
-            </HorizontalScrollView>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
 
-        </LinearLayout>
-    </ScrollView>
+                        <include android:id="@+id/livroPop1" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroPop2" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroPop3" layout="@layout/item_livro" />
 
-    <include layout="@layout/navbar_layout"/>
+                    </LinearLayout>
+                </HorizontalScrollView>
 
-</LinearLayout>
+                <!-- Livros Mais Curtidos -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="8dp"
+                    android:text="Livros Mais Curtidos"
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text="Nenhum livro curtido por enquanto"
+                    android:textColor="#999999"
+                    android:fontFamily="cursive"
+                    android:textSize="14sp" />
+
+                <!-- Livros Mais Bem Avaliados -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="8dp"
+                    android:text="Livros Mais Bem Avaliados"
+                    android:textStyle="bold"
+                    android:textSize="14sp" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <include android:id="@+id/livroAval1" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroAval2" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroAval3" layout="@layout/item_livro" />
+
+                    </LinearLayout>
+                </HorizontalScrollView>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <include layout="@layout/navbar_layout"/>
+
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabChatBot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="72dp"
+        app:srcCompat="@drawable/ic_chat"
+        app:backgroundTint="@color/unifor_blue"
+        app:tint="#FFFFFF"
+        android:contentDescription="Chat com Bot" />
+
+</FrameLayout>

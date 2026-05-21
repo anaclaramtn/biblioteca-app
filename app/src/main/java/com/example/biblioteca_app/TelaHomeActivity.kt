@@ -100,6 +100,10 @@ class TelaHomeActivity : AppCompatActivity() {
 
         setupLivrosCarrossel()
         setupNavBar()
+
+        findViewById<View>(R.id.fabChatBot).setOnClickListener {
+            startActivity(Intent(this, ChatBotActivity::class.java))
+        }
     }
 
     private fun setupNavBar() {

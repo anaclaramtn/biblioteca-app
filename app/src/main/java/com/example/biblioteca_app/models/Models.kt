@@ -56,3 +56,8 @@ data class PesquisaAdm(
     val descricao: String,
     val disponibilidade: String
 )
+
+data class ChatMessage(
+    val text: String,
+    val isFromUser: Boolean
+)

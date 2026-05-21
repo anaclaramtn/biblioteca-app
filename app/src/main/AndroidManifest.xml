@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bibliotecaapp">
         <activity
+            android:name=".ChatBotActivity"
+            android:exported="false" />
+        <activity
             android:name=".AdminEdicaoActivity"
             android:exported="false" />
         <activity
@@ -109,7 +112,7 @@
             android:exported="false" />
         <activity
             android:name=".TelaRedefinicaoSenhaActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".LoginActivity"
             android:exported="true">
