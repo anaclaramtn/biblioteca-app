@@ -54,31 +54,16 @@ class TelaRedefinicaoSenhaActivity : AppCompatActivity() {
 
             } else {
 
-                // RF03.5
                 auth.sendPasswordResetEmail(email)
-                    .addOnCompleteListener { task ->
+                    .addOnCompleteListener {
 
-                        if (task.isSuccessful()) {
-
-                            Toast.makeText(
-                                this,
-                                "O link foi enviado! Verifique seu email.",
-                                Toast.LENGTH_LONG
-                            ).show()
-
-                        } else {
-
-                            Toast.makeText(
-                                this,
-                                "Seu email não existe em nosso banco",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
+                        Toast.makeText(
+                            this,
+                            "Se o email estiver cadastrado, o link de recuperação será enviado.",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
-
-
             }
-        }
-    }
+        }    }
 }
 
