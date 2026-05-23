@@ -31,23 +31,54 @@ class TelaRedefinicaoSenhaActivity : AppCompatActivity() {
         val btnRedefinicao = findViewById<MaterialButton>(R.id.ButtonRedefinicao)
 
         btnRedefinicao.setOnClickListener {
-            val email = emailRedefSenha.text.toString()
 
-            if(email.isEmpty()){
+            val email = emailRedefSenha.text.toString().trim()
 
-                Toast.makeText(this, "Digite um email", Toast.LENGTH_LONG).show()
-                } else {
-                    auth.sendPasswordResetEmail(email).addOnCompleteListener {
-                        task ->
-                        if (task.isSuccessful){
-                            Toast.makeText(this, "O codigo foi enviado!\nVerifique seu email!",
-                                Toast.LENGTH_LONG).show()
+            // RF03.3
+            if (email.isEmpty()) {
+
+                Toast.makeText(
+                    this,
+                    "Preencha todos os campos",
+                    Toast.LENGTH_LONG
+                ).show()
+
+                // RF03.4
+            } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+
+                Toast.makeText(
+                    this,
+                    "Digite um email que siga o padrão",
+                    Toast.LENGTH_LONG
+                ).show()
+
+            } else {
+
+                // RF03.5
+                auth.sendPasswordResetEmail(email)
+                    .addOnCompleteListener { task ->
+
+                        if (task.isSuccessful()) {
+
+                            Toast.makeText(
+                                this,
+                                "O link foi enviado! Verifique seu email.",
+                                Toast.LENGTH_LONG
+                            ).show()
+
                         } else {
-                            Toast.makeText(this, "Email nao encontrado!", Toast.LENGTH_LONG).show()
+
+                            Toast.makeText(
+                                this,
+                                "Seu email não existe em nosso banco",
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     }
-            }
+
+
             }
         }
     }
+}
 
