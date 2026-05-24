@@ -54,6 +54,12 @@ class GenericAdapter<T>(
         }
     }
 
+    // 🔹 Adicionar item
+    fun addItem(item: T) {
+        items.add(item)
+        notifyItemInserted(items.size - 1)
+    }
+
     // 🔹 Acesso à lista (se precisar)
     fun getItems(): List<T> = items
 }
