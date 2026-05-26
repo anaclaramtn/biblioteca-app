@@ -27,20 +27,6 @@
         android:layout_height="wrap_content">
 
         <RadioButton
-            android:id="@+id/rbSpoiler"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:button="@null"
-            android:background="@drawable/selector_radio_denuncia"
-            android:text="@string/motivo_spoiler" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#DDD" />
-
-        <RadioButton
             android:id="@+id/rbInadequado"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

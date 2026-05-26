@@ -64,7 +64,7 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         // Configura cada item de avaliação com textos específicos
         configurarItemAvaliacao(binding.avaliacao1, "João Silva", "Incrível!", "Excelente leitura, recomendo a todos!", "15/05/2023")
         configurarItemAvaliacao(binding.avaliacao2, "Maria Souza", "Muito bom", "O livro é bom, mas o final poderia ser melhor.", "20/06/2023")
-        configurarItemAvaliacao(binding.avaliacao3, "Carlos Alberto", "Cuidado!", "SPOILER: Eu não acredito que o protagonista morre no final! Que choque.", "02/07/2023", temSpoiler = true)
+        configurarItemAvaliacao(binding.avaliacao3, "Carlos Alberto", "Cuidado!", "Eu não acredito que o protagonista morre no final! Que choque.", "02/07/2023")
         configurarItemAvaliacao(binding.avaliacao4, "Ana Oliveira", "Gostei", "Personagens muito bem construídos.", "10/07/2023")
 
         binding.btnAvaliar.setOnClickListener {
@@ -94,8 +94,7 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         nome: String,
         titulo: String,
         comentario: String,
-        data: String,
-        temSpoiler: Boolean = false
+        data: String
     ) {
         var curtido = false
         var numCurtidas = (0..50).random() // Valor inicial aleatório
@@ -105,18 +104,8 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         itemBinding.txtData.text = data
         itemBinding.txtCurtidas.text = numCurtidas.toString()
 
-        // Lógica de Spoiler
-        if (temSpoiler) {
-            itemBinding.txtComentario.visibility = View.GONE
-            itemBinding.btnVerSpoiler.visibility = View.VISIBLE
-            itemBinding.btnVerSpoiler.setOnClickListener {
-                itemBinding.txtComentario.visibility = View.VISIBLE
-                itemBinding.btnVerSpoiler.visibility = View.GONE
-            }
-        } else {
-            itemBinding.txtComentario.visibility = View.VISIBLE
-            itemBinding.btnVerSpoiler.visibility = View.GONE
-        }
+        // Garantir que o comentário esteja sempre visível
+        itemBinding.txtComentario.visibility = View.VISIBLE
 
         // Clique de Denúncia
         itemBinding.btnDenunciar.setOnClickListener { mostrarDialogDenuncia() }

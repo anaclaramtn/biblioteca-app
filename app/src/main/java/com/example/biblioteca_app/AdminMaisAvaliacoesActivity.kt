@@ -34,7 +34,7 @@ class AdminMaisAvaliacoesActivity : AppCompatActivity() {
         // ITENS
         configurarItem(findViewById(R.id.avaliacao1), "João Silva", "Incrível!", "Excelente leitura!", "15/05/2023")
         configurarItem(findViewById(R.id.avaliacao2), "Maria Souza", "Muito bom", "Bom livro.", "20/06/2023")
-        configurarItem(findViewById(R.id.avaliacao3), "Carlos Alberto", "Cuidado!", "Spoiler pesado...", "02/07/2023")
+        configurarItem(findViewById(R.id.avaliacao3), "Carlos Alberto", "Cuidado!", "Eu não acredito que o protagonista morre no final! Que choque.", "02/07/2023")
         configurarItem(findViewById(R.id.avaliacao4), "Ana Oliveira", "Gostei", "Muito bom.", "10/07/2023")
 
         setupNavBar()
@@ -50,15 +50,14 @@ class AdminMaisAvaliacoesActivity : AppCompatActivity() {
 
         val btnCurtir = view.findViewById<ImageButton>(R.id.btnCurtir)
         val btnMenu = view.findViewById<ImageButton>(R.id.btnMenu)
-        val btnVerSpoiler = view.findViewById<Button>(R.id.btnVerSpoiler)
 
         txtNome.text = nome
         txtTitulo.text = titulo
         txtComentario.text = comentario
         txtData.text = data
 
-        // Estado inicial do spoiler (caso queira já deixar oculto algum)
-        btnVerSpoiler.visibility = View.GONE
+        // Garantir que o comentário esteja visível
+        txtComentario.visibility = View.VISIBLE
 
         // CURTIDAS
         var curtidas = (0..50).random()
@@ -78,27 +77,13 @@ class AdminMaisAvaliacoesActivity : AppCompatActivity() {
             txtCurtidas.text = curtidas.toString()
         }
 
-        // BOTÃO SPOILER (revelar comentário)
-        btnVerSpoiler.setOnClickListener {
-            btnVerSpoiler.visibility = View.GONE
-            txtComentario.visibility = View.VISIBLE
-        }
-
         // MENU ADMIN (IGUAL AO DA TELA DE LIVRO)
         btnMenu.setOnClickListener { v ->
             val popup = PopupMenu(this, v)
-            popup.menu.add("Censurar")
             popup.menu.add("Deletar")
 
             popup.setOnMenuItemClickListener { item ->
                 when (item.title) {
-
-                    "Censurar" -> {
-                        txtComentario.visibility = View.GONE
-                        btnVerSpoiler.visibility = View.VISIBLE
-                        Toast.makeText(this, "Comentário censurado", Toast.LENGTH_SHORT).show()
-                        true
-                    }
 
                     "Deletar" -> {
                         AlertDialog.Builder(this)

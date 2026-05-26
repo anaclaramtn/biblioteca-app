@@ -152,6 +152,7 @@ class ChatBotActivity : AppCompatActivity() {
                     - Nunca fale palavrão.
                     - Seu nome é IAurelio.
                     - Quando o assunto fugir do tema biblioteca, redirecione para tal.
+                    - Foque em sempre oferecer uma resposta concisa, curta, objetiva. Na maioria dos diálogos curtos, ter mais de 4 linhas é desnecessário. Reserve textos longos apenas para quando for estritamente necessário.
                     
                     Pergunta do usuário:
                     $userMessage

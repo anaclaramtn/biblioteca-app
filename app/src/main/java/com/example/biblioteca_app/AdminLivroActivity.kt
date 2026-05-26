@@ -129,7 +129,6 @@ class AdminLivroActivity : AppCompatActivity() {
         estrelas: String
     ) {
         val txtComentario = view.findViewById<TextView>(R.id.txtComentario)
-        val btnVerSpoiler = view.findViewById<Button>(R.id.btnVerSpoiler)
 
         view.findViewById<TextView>(R.id.txtNomeUsuario).text = nome
         view.findViewById<TextView>(R.id.txtTituloAvaliacao).text = titulo
@@ -137,26 +136,16 @@ class AdminLivroActivity : AppCompatActivity() {
         view.findViewById<TextView>(R.id.txtData).text = data
         view.findViewById<TextView>(R.id.txtEstrelas).text = estrelas
 
-        // Lógica do botão de Spoiler (revelar texto)
-        btnVerSpoiler.setOnClickListener {
-            btnVerSpoiler.visibility = View.GONE
-            txtComentario.visibility = View.VISIBLE
-        }
+        // Garantir que o comentário esteja sempre visível
+        txtComentario.visibility = View.VISIBLE
 
         // Menu de moderação para o administrador
         view.findViewById<ImageButton>(R.id.btnMenu).setOnClickListener { v ->
             val popup = PopupMenu(this, v)
-            popup.menu.add("Censurar")
             popup.menu.add("Deletar")
 
             popup.setOnMenuItemClickListener { item ->
                 when (item.title) {
-                    "Censurar" -> {
-                        txtComentario.visibility = View.GONE
-                        btnVerSpoiler.visibility = View.VISIBLE
-                        Toast.makeText(this, "Comentário censurado", Toast.LENGTH_SHORT).show()
-                        true
-                    }
                     "Deletar" -> {
                         AlertDialog.Builder(this)
                             .setTitle("Confirmação")

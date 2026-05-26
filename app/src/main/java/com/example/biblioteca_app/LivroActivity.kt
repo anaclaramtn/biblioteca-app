@@ -143,8 +143,7 @@ class LivroActivity : AppCompatActivity() {
         nome: String,
         titulo: String,
         comentario: String,
-        data: String,
-        temSpoiler: Boolean = false
+        data: String
     ) {
         var curtido = false
         var numCurtidas = (0..20).random() // Valor inicial aleatório
@@ -154,18 +153,8 @@ class LivroActivity : AppCompatActivity() {
         itemBinding.txtData.text = data
         itemBinding.txtCurtidas.text = numCurtidas.toString()
 
-        // Lógica de Spoiler
-        if (temSpoiler) {
-            itemBinding.txtComentario.visibility = View.GONE
-            itemBinding.btnVerSpoiler.visibility = View.VISIBLE
-            itemBinding.btnVerSpoiler.setOnClickListener {
-                itemBinding.txtComentario.visibility = View.VISIBLE
-                itemBinding.btnVerSpoiler.visibility = View.GONE
-            }
-        } else {
-            itemBinding.txtComentario.visibility = View.VISIBLE
-            itemBinding.btnVerSpoiler.visibility = View.GONE
-        }
+        // Garantir que o comentário esteja sempre visível
+        itemBinding.txtComentario.visibility = View.VISIBLE
 
         // Clique de Denúncia
         itemBinding.btnDenunciar.setOnClickListener { mostrarDialogDenuncia() }

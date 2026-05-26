@@ -60,21 +60,6 @@
         android:textColor="#555"
         android:layout_marginTop="4dp"/>
 
-    <!-- SPOILER -->
-    <Button
-        android:id="@+id/btnVerSpoiler"
-        android:layout_width="wrap_content"
-        android:layout_height="32dp"
-        android:layout_marginTop="8dp"
-        android:text="Ver Spoiler"
-        android:textSize="10sp"
-        android:backgroundTint="#FFCC00"
-        android:textColor="#000000"
-        android:visibility="gone"
-        android:paddingHorizontal="8dp"
-        android:minHeight="0dp"
-        android:minWidth="0dp"/>
-
     <!-- AÇÕES -->
     <RelativeLayout
         android:layout_width="match_parent"
