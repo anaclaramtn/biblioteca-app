@@ -47,20 +47,26 @@
 
             <!-- Seleção de Imagem -->
             <LinearLayout
+                android:id="@+id/containerSelecaoImagem"
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
                 android:layout_marginBottom="16dp"
                 android:background="@drawable/background_campo_input"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true">
 
                 <ImageView
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
+                    android:id="@+id/imgNoticia"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
                     android:src="@android:drawable/ic_menu_gallery"
                     app:tint="#666666" />
 
                 <TextView
+                    android:id="@+id/txtMensagemImagem"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="selecione uma imagem"

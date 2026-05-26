@@ -1,11 +1,18 @@
 package com.example.biblioteca_app
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
@@ -17,10 +24,32 @@ import com.example.biblioteca_app.models.Jogo
 
 class CadastroJogoActivity : AppCompatActivity() {
 
+    // Guarda a URI da imagem selecionada
+    private var imageUri: Uri? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.tela_cadastro_jogo)
+
+        // Configura o seletor de galeria
+        val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            if (uri != null) {
+                imageUri = uri
+                val imageView = findViewById<ImageView>(R.id.imgCapaJogo)
+                val textView = findViewById<TextView>(R.id.txtMensagemImagem)
+
+                imageView.setImageURI(uri)
+                imageView.scaleType = ImageView.ScaleType.CENTER_CROP
+                imageView.imageTintList = null
+                textView.visibility = View.GONE
+            }
+        }
+
+        // Clique para abrir a galeria
+        findViewById<LinearLayout>(R.id.containerSelecaoImagem).setOnClickListener {
+            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        }
         
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -35,9 +64,11 @@ class CadastroJogoActivity : AppCompatActivity() {
         findViewById<AppCompatButton>(R.id.btnEnviar).setOnClickListener {
             val titulo = findViewById<EditText>(R.id.edtTituloJogo).text.toString()
 
-            if (titulo.isBlank()) {
+            // Valida se o título e a imagem foram preenchidos
+            if (titulo.isBlank() || imageUri == null) {
                 exibirAviso()
             } else {
+                // Adiciona o novo jogo com a imagem selecionada (ou padrão)
                 AcervoadmActivity.listaJogos.add(0, Jogo(titulo, R.drawable.uno)) // Usando ícone padrão para novos
                 Toast.makeText(this, "Acervo Atualizado!", Toast.LENGTH_SHORT).show()
                 finish()

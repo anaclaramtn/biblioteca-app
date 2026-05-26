@@ -7,16 +7,19 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.tela_login)
 
         auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
 
         val btnCriarConta = findViewById<MaterialButton>(R.id.ButtonCriarConta1)
         val btnEsqueceuSenha = findViewById<MaterialButton>(R.id.ButtonEsqueceuSenha)
@@ -57,17 +60,33 @@ class LoginActivity : AppCompatActivity() {
                 .addOnCompleteListener { task ->
 
                     if (task.isSuccessful) {
+                        val uid = auth.currentUser?.uid
+                        if (uid != null) {
+                            // Verifica se o usuário é administrador no Firestore
+                            db.collection("usuarios").document(uid).get()
+                                .addOnSuccessListener { document ->
+                                    val isAdmin = document.getBoolean("isAdmin") ?: false
+                                    
+                                    Toast.makeText(
+                                        this,
+                                        "Login realizado com sucesso",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
 
-                        Toast.makeText(
-                            this,
-                            "Login realizado com sucesso",
-                            Toast.LENGTH_SHORT
-                        ).show()
-
-                        val intent = Intent(this, TelaHomeActivity::class.java)
-                        startActivity(intent)
-                        finish()
-
+                                    // Redireciona para AdminHomeActivity se for admin, senão TelaHomeActivity
+                                    val destination = if (isAdmin) {
+                                        AdminHomeActivity::class.java
+                                    } else {
+                                        TelaHomeActivity::class.java
+                                    }
+                                    
+                                    startActivity(Intent(this, destination))
+                                    finish()
+                                }
+                                .addOnFailureListener {
+                                    Toast.makeText(this, "Erro ao recuperar dados do perfil", Toast.LENGTH_SHORT).show()
+                                }
+                        }
                     } else {
 
                         Toast.makeText(
