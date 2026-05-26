@@ -20,16 +20,21 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.biblioteca_app.models.Livro
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.firestore.FirebaseFirestore
 
 class CadastroLivroActivity : AppCompatActivity() {
 
     // Guarda a URI da imagem selecionada
     private var imageUri: Uri? = null
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.tela_cadastro_livro)
+
+        // Inicializa o Firestore
+        db = FirebaseFirestore.getInstance()
 
         // Configura o seletor de galeria
         val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -69,10 +74,30 @@ class CadastroLivroActivity : AppCompatActivity() {
             if (titulo.isBlank() || autor.isBlank() || sinopse.isBlank() || imageUri == null) {
                 exibirAviso()
             } else {
-        // Adiciona o novo livro com a imagem selecionada (ou padrão)
-                AcervoadmActivity.listaLivros.add(0, Livro(titulo, autor, sinopse, R.drawable.hobbit, true, 0.0f, 0))
-                Toast.makeText(this, "Acervo Atualizado!", Toast.LENGTH_SHORT).show()
-                finish()
+                // Prepara os dados do livro para o Firestore
+                val dadosLivro = hashMapOf(
+                    "titulo" to titulo,
+                    "autor" to autor,
+                    "sinopse" to sinopse,
+                    "imagemUri" to imageUri.toString(),
+                    "disponivel" to true,
+                    "media" to 0.0,
+                    "totalAvaliacoes" to 0
+                )
+
+                // Salva o livro no banco de dados (Firestore)
+                db.collection("livros")
+                    .add(dadosLivro)
+                    .addOnSuccessListener {
+                        // Também adiciona na lista local para feedback imediato (opcional)
+                        AcervoadmActivity.listaLivros.add(0, Livro(titulo, autor, sinopse, R.drawable.hobbit, true, 0.0f, 0))
+                        
+                        Toast.makeText(this, "Livro cadastrado com sucesso!", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Erro ao salvar no banco: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
             }
         }
 

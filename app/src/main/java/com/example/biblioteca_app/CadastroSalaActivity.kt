@@ -12,15 +12,21 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.firestore.FirebaseFirestore
 
 import com.example.biblioteca_app.models.Sala
 
 class CadastroSalaActivity : AppCompatActivity() {
 
+    private lateinit var db: FirebaseFirestore
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.tela_cadastro_sala)
+
+        // Inicializa o Firestore
+        db = FirebaseFirestore.getInstance()
         
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -40,9 +46,27 @@ class CadastroSalaActivity : AppCompatActivity() {
                 exibirAviso()
             } else {
                 val capacidadeInt = cap.toIntOrNull() ?: 0
-                AcervoadmActivity.listaSalas.add(0, Sala(nome, capacidadeInt))
-                Toast.makeText(this, "Acervo Atualizado!", Toast.LENGTH_SHORT).show()
-                finish()
+
+                // Prepara os dados da sala para o Firestore
+                val dadosSala = hashMapOf(
+                    "nome" to nome,
+                    "capacidade" to capacidadeInt,
+                    "isDisponivel" to true
+                )
+
+                // Salva a sala no banco de dados (Firestore)
+                db.collection("salas")
+                    .add(dadosSala)
+                    .addOnSuccessListener {
+                        // Também adiciona na lista local para feedback imediato (opcional)
+                        AcervoadmActivity.listaSalas.add(0, Sala(nome, capacidadeInt))
+                        
+                        Toast.makeText(this, "Sala cadastrada com sucesso!", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Erro ao salvar no banco: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
             }
         }
 

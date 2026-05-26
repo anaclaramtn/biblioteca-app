@@ -19,6 +19,7 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.firestore.FirebaseFirestore
 
 import com.example.biblioteca_app.models.Noticia
 
@@ -26,11 +27,15 @@ class CadastroNoticiaActivity : AppCompatActivity() {
 
     // Guarda a URI da imagem selecionada
     private var imageUri: Uri? = null
+    private lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.tela_cadastro_noticia)
+
+        // Inicializa o Firestore
+        db = FirebaseFirestore.getInstance()
 
         // Configura o seletor de galeria
         val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -70,10 +75,27 @@ class CadastroNoticiaActivity : AppCompatActivity() {
             if (titulo.isBlank() || desc.isBlank() || corpo.isBlank() || imageUri == null) {
                 exibirAviso()
             } else {
-                // Adiciona a nova notícia com a imagem selecionada (ou padrão)
-                AcervoadmActivity.listaNoticias.add(0, Noticia(titulo, desc))
-                Toast.makeText(this, "Acervo Atualizado!", Toast.LENGTH_SHORT).show()
-                finish()
+                // Prepara os dados da notícia para o Firestore
+                val dadosNoticia = hashMapOf(
+                    "nome" to titulo,
+                    "descricaoCurta" to desc,
+                    "descricaoLonga" to corpo,
+                    "imagemCapa" to imageUri.toString()
+                )
+
+                // Salva a notícia no banco de dados (Firestore)
+                db.collection("noticias")
+                    .add(dadosNoticia)
+                    .addOnSuccessListener {
+                        // Também adiciona na lista local para feedback imediato (opcional)
+                        AcervoadmActivity.listaNoticias.add(0, Noticia(titulo, desc))
+                        
+                        Toast.makeText(this, "Notícia cadastrada com sucesso!", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Erro ao salvar no banco: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
             }
         }
 

@@ -12,15 +12,21 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.firestore.FirebaseFirestore
 
 import com.example.biblioteca_app.models.PesquisaAdm
 
 class CadastroPesquisaActivity : AppCompatActivity() {
 
+    private lateinit var db: FirebaseFirestore
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.tela_cadastro_pesquisa)
+
+        // Inicializa o Firestore
+        db = FirebaseFirestore.getInstance()
         
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -40,9 +46,26 @@ class CadastroPesquisaActivity : AppCompatActivity() {
             if (prof.isBlank() || desc.isBlank() || info.isBlank()) {
                 exibirAviso()
             } else {
-                AcervoadmActivity.listaPesquisas.add(0, PesquisaAdm(prof, desc, info))
-                Toast.makeText(this, "Acervo Atualizado!", Toast.LENGTH_SHORT).show()
-                finish()
+                // Prepara os dados da pesquisa para o Firestore
+                val dadosPesquisa = hashMapOf(
+                    "nome" to prof,
+                    "descricao" to desc,
+                    "informacoesAdicionais" to info
+                )
+
+                // Salva a pesquisa no banco de dados (Firestore)
+                db.collection("pesquisaCientifica")
+                    .add(dadosPesquisa)
+                    .addOnSuccessListener {
+                        // Também adiciona na lista local para feedback imediato (opcional)
+                        AcervoadmActivity.listaPesquisas.add(0, PesquisaAdm(prof, desc, info))
+                        
+                        Toast.makeText(this, "Pesquisa cadastrada com sucesso!", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Erro ao salvar no banco: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
             }
         }
 
