@@ -80,7 +80,7 @@ class AvaliarActivity : AppCompatActivity() {
 
         val avaliacao = Avaliacao(
             id = idAvaliacao,
-            idLivro = idLivro ?: "ID_DESCONHECIDO",
+            idLivro = idLivro ?: "ID_LIVRO_TESTE_123",
             idUsuario = idUsuario,
             titulo = titulo,
             descricao = comentario,

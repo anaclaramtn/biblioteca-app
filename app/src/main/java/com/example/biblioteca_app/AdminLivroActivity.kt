@@ -11,18 +11,24 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.biblioteca_app.models.Avaliacao
+import com.example.biblioteca_app.models.Livro
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 import android.widget.Button
 import android.widget.TextView
 
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 class AdminLivroActivity : AppCompatActivity() {
 
     private var livroPos: Int = -1
+    private var livroAtual: Livro? = null
+    private val db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +36,7 @@ class AdminLivroActivity : AppCompatActivity() {
         setContentView(R.layout.tela_admin_livro)
 
         livroPos = intent.getIntExtra("LIVRO_POS", -1)
+        livroAtual = intent.getSerializableExtra("LIVRO") as? Livro
         
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -38,7 +45,6 @@ class AdminLivroActivity : AppCompatActivity() {
         }
 
         setupAcoes()
-        setupComentarios()
         setupNavBar()
     }
 
@@ -48,25 +54,98 @@ class AdminLivroActivity : AppCompatActivity() {
     }
 
     private fun preencherDadosLivro() {
-        if (livroPos != -1 && livroPos < AcervoadmActivity.listaLivros.size) {
-            val livro = AcervoadmActivity.listaLivros[livroPos]
-            findViewById<TextView>(R.id.txtTitulo).text = livro.titulo
-            findViewById<TextView>(R.id.txtAutor).text = livro.autor
-            findViewById<TextView>(R.id.txtDescricao).text = livro.descricao
-            findViewById<android.widget.ImageView>(R.id.imgCapa).setImageResource(livro.imagemRes)
+        val livro = if (livroAtual != null) {
+            livroAtual!!
+        } else if (livroPos != -1 && livroPos < AcervoadmActivity.listaLivros.size) {
+            AcervoadmActivity.listaLivros[livroPos]
         } else {
-            // Fallback para exemplo se não vier posição
-            findViewById<TextView>(R.id.txtTitulo).text = "Star Wars: A Vingança dos Sith"
-            findViewById<TextView>(R.id.txtAutor).text = "George Lucas"
-            findViewById<TextView>(R.id.txtDescricao).text = "Anakin Skywalker se torna Darth Vader após ser seduzido pelo lado sombrio da Força..."
-            findViewById<android.widget.ImageView>(R.id.imgCapa).setImageResource(R.drawable.capa_star_wars)
+            // Fallback para exemplo
+            Livro(
+                id = "ID_LIVRO_TESTE_123",
+                titulo = "Star Wars: A Vingança dos Sith",
+                autor = "George Lucas",
+                descricao = "Anakin Skywalker se torna Darth Vader...",
+                imagemRes = R.drawable.capa_star_wars,
+                disponivel = true,
+                media = 4.9f,
+                totalAvaliacoes = 120
+            )
         }
+
+        findViewById<TextView>(R.id.txtTitulo).text = livro.titulo
+        findViewById<TextView>(R.id.txtAutor).text = livro.autor
+        findViewById<TextView>(R.id.txtDescricao).text = livro.descricao
+        findViewById<android.widget.ImageView>(R.id.imgCapa).setImageResource(livro.imagemRes)
         
-        // Resumo de avaliações (pode ser mockado ou vir do objeto se houver)
         val layoutResumo = findViewById<View>(R.id.layoutResumo)
-        layoutResumo.findViewById<TextView>(R.id.txtMedia).text = "4.9"
-        layoutResumo.findViewById<TextView>(R.id.txtTotalAvaliacoes).text = "(120 avaliações)"
-        layoutResumo.findViewById<TextView>(R.id.txtEstrelasMedia).text = "⭐⭐⭐⭐⭐"
+        layoutResumo.findViewById<TextView>(R.id.txtMedia).text = livro.media.toString()
+        layoutResumo.findViewById<TextView>(R.id.txtTotalAvaliacoes).text = "(${livro.totalAvaliacoes} avaliações)"
+        layoutResumo.findViewById<TextView>(R.id.txtEstrelasMedia).text = converterMediaParaEstrelas(livro.media)
+
+        carregarAvaliacoes(livro.id)
+    }
+
+    private fun converterMediaParaEstrelas(media: Float): String {
+        return when {
+            media >= 4.5 -> "⭐⭐⭐⭐⭐"
+            media >= 3.5 -> "⭐⭐⭐⭐☆"
+            media >= 2.5 -> "⭐⭐⭐☆☆"
+            media >= 1.5 -> "⭐⭐☆☆☆"
+            media >= 0.5 -> "⭐☆☆☆☆"
+            else -> "☆☆☆☆☆"
+        }
+    }
+
+    private fun carregarAvaliacoes(idLivro: String) {
+        db.collection("avaliacoes")
+            .whereEqualTo("idLivro", idLivro)
+            .orderBy("data", Query.Direction.DESCENDING)
+            .limit(3)
+            .get()
+            .addOnSuccessListener { documents ->
+                val avaliacoes = documents.mapNotNull { it.toObject(Avaliacao::class.java).copy(id = it.id) }
+                exibirAvaliacoes(avaliacoes)
+            }
+            .addOnFailureListener {
+                findViewById<TextView>(R.id.txtSemAvaliacoes).visibility = View.VISIBLE
+                findViewById<TextView>(R.id.txtSemAvaliacoes).text = "Erro ao carregar avaliações."
+            }
+    }
+
+    private fun exibirAvaliacoes(avaliacoes: List<Avaliacao>) {
+        val views = listOf(
+            findViewById<View>(R.id.avaliacao1),
+            findViewById<View>(R.id.avaliacao2),
+            findViewById<View>(R.id.avaliacao3)
+        )
+        
+        val txtSemAvaliacoes = findViewById<TextView>(R.id.txtSemAvaliacoes)
+        
+        if (avaliacoes.isEmpty()) {
+            txtSemAvaliacoes.visibility = View.VISIBLE
+            views.forEach { it.visibility = View.GONE }
+        } else {
+            txtSemAvaliacoes.visibility = View.GONE
+            avaliacoes.forEachIndexed { index, avaliacao ->
+                if (index < views.size) {
+                    val itemView = views[index]
+                    itemView.visibility = View.VISIBLE
+                    
+                    db.collection("usuarios").document(avaliacao.idUsuario).get()
+                        .addOnSuccessListener { userDoc ->
+                            val nome = userDoc.getString("nome") ?: "Usuário"
+                            configurarItemAvaliacaoAdmin(
+                                itemView,
+                                nome,
+                                avaliacao.titulo,
+                                avaliacao.descricao,
+                                avaliacao.data,
+                                converterMediaParaEstrelas(avaliacao.nota)
+                            )
+                        }
+                }
+            }
+        }
     }
 
     private fun setupAcoes() {
@@ -99,29 +178,14 @@ class AdminLivroActivity : AppCompatActivity() {
         // Botão Ver mais avaliações -> AdminMaisAvaliacoesActivity
         findViewById<Button>(R.id.btnVerAvaliacoes).setOnClickListener {
             val intent = Intent(this, AdminMaisAvaliacoesActivity::class.java)
+            val livro = livroAtual ?: (if (livroPos != -1) AcervoadmActivity.listaLivros[livroPos] else null)
+            livro?.let {
+                intent.putExtra("ID_LIVRO", it.id)
+                intent.putExtra("MEDIA", it.media)
+                intent.putExtra("TOTAL", it.totalAvaliacoes)
+            }
             startActivity(intent)
         }
-    }
-
-    private fun setupComentarios() {
-        // Mesmos comentários da LivroActivity
-        configurarItemAvaliacaoAdmin(
-            findViewById(R.id.avaliacao1),
-            "João Silva",
-            "Incrível!",
-            "Excelente leitura, recomendo a todos!",
-            Timestamp.now(), // Usando timestamp atual para os mocks
-            "⭐⭐⭐⭐⭐"
-        )
-
-        configurarItemAvaliacaoAdmin(
-            findViewById(R.id.avaliacao2),
-            "Maria Souza",
-            "Muito bom",
-            "O livro é bom, mas o final poderia ser melhor.",
-            Timestamp.now(), // Usando timestamp atual para os mocks
-            "⭐⭐⭐⭐☆"
-        )
     }
 
     private fun configurarItemAvaliacaoAdmin(

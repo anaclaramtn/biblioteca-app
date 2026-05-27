@@ -11,41 +11,85 @@ import com.example.biblioteca_app.databinding.DialogDenunciaBinding
 import com.example.biblioteca_app.databinding.DialogSucessoDenunciaBinding
 import com.example.biblioteca_app.databinding.ItemAvaliacaoBinding
 import com.example.biblioteca_app.databinding.TelaMaisAvaliacoesBinding
+import com.example.biblioteca_app.models.Avaliacao
 import com.google.android.material.bottomnavigation.BottomNavigationView
-
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 class MaisAvaliacoesActivity : AppCompatActivity() {
 
     private lateinit var binding: TelaMaisAvaliacoesBinding
+    private val db = FirebaseFirestore.getInstance()
 
-    // Variáveis para representar a média e o total de avaliações
-    private var media: Float = 4.9f
-    private var totalAvaliacoes: Int = 4
+    private var idLivro: String = ""
+    private var media: Float = 0.0f
+    private var totalAvaliacoes: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = TelaMaisAvaliacoesBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Recupera dados passados pela Intent (ou usa valores padrão)
+        idLivro = intent.getStringExtra("ID_LIVRO") ?: "ID_LIVRO_TESTE_123"
         media = intent.getFloatExtra("MEDIA", 0.0f)
         totalAvaliacoes = intent.getIntExtra("TOTAL", 0)
 
         preencherResumo()
         configurarBotoes()
+        carregarAvaliacoes()
         setupNavBar()
     }
 
+    private fun carregarAvaliacoes(ordem: Query.Direction = Query.Direction.DESCENDING) {
+        if (idLivro.isEmpty()) return
+
+        db.collection("avaliacoes")
+            .whereEqualTo("idLivro", idLivro)
+            .orderBy("data", ordem)
+            .get()
+            .addOnSuccessListener { documents ->
+                binding.containerAvaliacoes.removeAllViews()
+                val avaliacoes = documents.mapNotNull { it.toObject(Avaliacao::class.java).copy(id = it.id) }
+                
+                if (avaliacoes.isEmpty()) {
+                    binding.txtSemAvaliacoes.visibility = View.VISIBLE
+                } else {
+                    binding.txtSemAvaliacoes.visibility = View.GONE
+                    avaliacoes.forEach { avaliacao ->
+                        adicionarItemAvaliacao(avaliacao)
+                    }
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Erro ao carregar avaliações", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun adicionarItemAvaliacao(avaliacao: Avaliacao) {
+        val itemBinding = ItemAvaliacaoBinding.inflate(layoutInflater, binding.containerAvaliacoes, false)
+        binding.containerAvaliacoes.addView(itemBinding.root)
+
+        db.collection("usuarios").document(avaliacao.idUsuario).get()
+            .addOnSuccessListener { userDoc ->
+                val nome = userDoc.getString("nome") ?: "Usuário"
+                configurarItemAvaliacao(
+                    itemBinding,
+                    nome,
+                    avaliacao.titulo,
+                    avaliacao.descricao,
+                    avaliacao.data,
+                    avaliacao.curtidas
+                )
+            }
+    }
+
     private fun preencherResumo() {
-        // Preenche o resumo de avaliações usando o molde padronizado
         binding.layoutResumo.txtMedia.text = media.toString()
         binding.layoutResumo.txtTotalAvaliacoes.text = "($totalAvaliacoes avaliações)"
         binding.layoutResumo.txtEstrelasMedia.text = converterMediaParaEstrelas(media)
-
-        // Atualiza o título do header com o total se desejar, ou mantém fixo
         binding.txtTituloHeader.text = "Avaliações ($totalAvaliacoes)"
     }
 
@@ -65,14 +109,9 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
             finish()
         }
 
-        // Configura cada item de avaliação com textos específicos
-        configurarItemAvaliacao(binding.avaliacao1, "João Silva", "Incrível!", "Excelente leitura, recomendo a todos!", Timestamp.now())
-        configurarItemAvaliacao(binding.avaliacao2, "Maria Souza", "Muito bom", "O livro é bom, mas o final poderia ser melhor.", Timestamp.now())
-        configurarItemAvaliacao(binding.avaliacao3, "Carlos Alberto", "Cuidado!", "Eu não acredito que o protagonista morre no final! Que choque.", Timestamp.now())
-        configurarItemAvaliacao(binding.avaliacao4, "Ana Oliveira", "Gostei", "Personagens muito bem construídos.", Timestamp.now())
-
         binding.btnAvaliar.setOnClickListener {
             val intent = android.content.Intent(this, AvaliarActivity::class.java)
+            intent.putExtra("ID_LIVRO", idLivro)
             startActivity(intent)
         }
 
@@ -82,13 +121,15 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
     }
 
     private fun mostrarDialogOrdenacao() {
-        val opcoes = arrayOf("Mais curtidas", "Menos curtidas", "Mais recentes", "Mais antigos")
+        val opcoes = arrayOf("Mais recentes", "Mais antigos")
 
         AlertDialog.Builder(this)
             .setTitle("Ordenar por")
             .setItems(opcoes) { _, which ->
-                val opcaoSelecionada = opcoes[which]
-                Toast.makeText(this, "Ordenando por: $opcaoSelecionada", Toast.LENGTH_SHORT).show()
+                when (which) {
+                    0 -> carregarAvaliacoes(Query.Direction.DESCENDING)
+                    1 -> carregarAvaliacoes(Query.Direction.ASCENDING)
+                }
             }
             .show()
     }
@@ -98,10 +139,11 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         nome: String,
         titulo: String,
         comentario: String,
-        data: Timestamp?
+        data: Timestamp?,
+        curtidas: Int = 0
     ) {
         var curtido = false
-        var numCurtidas = (0..50).random() // Valor inicial aleatório
+        var numCurtidas = curtidas
         itemBinding.txtNomeUsuario.text = nome
         itemBinding.txtTituloAvaliacao.text = titulo
         itemBinding.txtComentario.text = comentario
@@ -110,24 +152,17 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         val dataFormatada = data?.toDate()?.let { sdf.format(it) } ?: "Data desconhecida"
         itemBinding.txtData.text = dataFormatada
         itemBinding.txtCurtidas.text = numCurtidas.toString()
-
-        // Garantir que o comentário esteja sempre visível
         itemBinding.txtComentario.visibility = View.VISIBLE
-
-        // Clique de Denúncia
         itemBinding.btnDenunciar.setOnClickListener { mostrarDialogDenuncia() }
 
-        // Clique de Curtir (Toggle)
         itemBinding.btnCurtir.setOnClickListener {
             curtido = !curtido
             if (curtido) {
                 numCurtidas++
                 itemBinding.btnCurtir.setImageResource(R.drawable.ic_heart_filled)
-                itemBinding.btnCurtir.clearColorFilter()
             } else {
                 numCurtidas--
                 itemBinding.btnCurtir.setImageResource(R.drawable.ic_heart)
-                itemBinding.btnCurtir.clearColorFilter()
             }
             itemBinding.txtCurtidas.text = numCurtidas.toString()
         }

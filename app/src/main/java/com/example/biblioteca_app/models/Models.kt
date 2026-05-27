@@ -29,8 +29,8 @@ data class Notificacao(
 
 data class Usuario(
     val uid: String = "",
-    val nome: String,
-    val email: String,
+    val nome: String = "",
+    val email: String = "",
     var notaMedia: Double = 0.0,
     var isAdmin: Boolean = false
 )

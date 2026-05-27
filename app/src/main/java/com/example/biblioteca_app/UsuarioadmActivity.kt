@@ -24,12 +24,12 @@ class UsuarioadmActivity : AppCompatActivity() {
 
     private lateinit var adapter: GenericAdapter<Usuario>
     private val listaUsuariosOriginal = listOf(
-        Usuario("Bruno Facó", "bruno@fuja.com", 2, 0.0),
-        Usuario("Ygor Costa", "ygor@gmail.com", 3, 0.0),
-        Usuario("Breno Faca", "breno@fuja.com", 4, 0.0),
-        Usuario("Igor Frente", "igor@gmail.com", 5, 0.0),
-        Usuario("Maria Clara", "maria@fuja.com", 1, 0.0),
-        Usuario("Joao Pedro", "jp@gmail.com", 3, 0.0)
+        Usuario(nome = "Bruno Facó", email = "bruno@fuja.com"),
+        Usuario(nome = "Ygor Costa", email = "ygor@gmail.com"),
+        Usuario(nome = "Breno Faca", email = "breno@fuja.com"),
+        Usuario(nome = "Igor Frente", email = "igor@gmail.com"),
+        Usuario(nome = "Maria Clara", email = "maria@fuja.com"),
+        Usuario(nome = "Joao Pedro", email = "jp@gmail.com")
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,8 +58,8 @@ class UsuarioadmActivity : AppCompatActivity() {
         ) { view, usuario, _ ->
             view.findViewById<TextView>(R.id.txtNomeUsuario).text = usuario.nome
             view.findViewById<TextView>(R.id.txtEmailUsuario).text = usuario.email
-            view.findViewById<TextView>(R.id.txtQtdLivros).text = usuario.qtdLivros.toString()
-            view.findViewById<TextView>(R.id.txtMulta).text = String.format(Locale.getDefault(), "R$: %.2f", usuario.multa)
+            view.findViewById<TextView>(R.id.txtQtdLivros).text = "-"
+            view.findViewById<TextView>(R.id.txtMulta).text = "R$: 0,00"
 
             // Facilitando a alteração pelo Admin
             view.setOnClickListener {

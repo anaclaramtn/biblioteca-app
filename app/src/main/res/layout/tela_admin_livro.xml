@@ -134,11 +134,18 @@
             <!-- AVALIAÇÕES (ADMIN) -->
             <include
                 android:id="@+id/avaliacao1"
-                layout="@layout/item_admin_avaliacao" />
+                layout="@layout/item_admin_avaliacao"
+                android:visibility="gone" />
 
             <include
                 android:id="@+id/avaliacao2"
-                layout="@layout/item_admin_avaliacao" />
+                layout="@layout/item_admin_avaliacao"
+                android:visibility="gone" />
+
+            <include
+                android:id="@+id/avaliacao3"
+                layout="@layout/item_admin_avaliacao"
+                android:visibility="gone" />
 
             <!-- SEM AVALIAÇÕES -->
             <TextView

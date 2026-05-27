@@ -13,15 +13,20 @@ import com.example.biblioteca_app.databinding.DialogDenunciaBinding
 import com.example.biblioteca_app.databinding.DialogSucessoDenunciaBinding
 import com.example.biblioteca_app.databinding.ItemAvaliacaoBinding
 import com.example.biblioteca_app.databinding.TelaLivroBinding
+import com.example.biblioteca_app.models.Avaliacao
 import com.example.biblioteca_app.models.Livro
+import com.example.biblioteca_app.models.Usuario
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 class LivroActivity : AppCompatActivity() {
 
     private lateinit var binding: TelaLivroBinding
+    private val db = FirebaseFirestore.getInstance()
 
     private var curtido = false
     private var expandido = false
@@ -32,13 +37,61 @@ class LivroActivity : AppCompatActivity() {
         binding = TelaLivroBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val livro = criarLivro()
+        val livro = intent.getSerializableExtra("LIVRO") as? Livro ?: criarLivro()
         preencherTela(livro)
         configurarBotoes(livro)
+        carregarAvaliacoes(livro.id)
         setupNavBar()
     }
 
+    private fun carregarAvaliacoes(idLivro: String) {
+        db.collection("avaliacoes")
+            .whereEqualTo("idLivro", idLivro)
+            .orderBy("data", Query.Direction.DESCENDING)
+            .limit(3)
+            .get()
+            .addOnSuccessListener { documents ->
+                val avaliacoes = documents.mapNotNull { it.toObject(Avaliacao::class.java).copy(id = it.id) }
+                exibirAvaliacoes(avaliacoes)
+            }
+            .addOnFailureListener {
+                binding.txtSemAvaliacoes.visibility = View.VISIBLE
+                binding.txtSemAvaliacoes.text = "Erro ao carregar avaliações."
+            }
+    }
+
+    private fun exibirAvaliacoes(avaliacoes: List<Avaliacao>) {
+        val bindings = listOf(binding.avaliacao1, binding.avaliacao2, binding.avaliacao3)
+        
+        if (avaliacoes.isEmpty()) {
+            binding.txtSemAvaliacoes.visibility = View.VISIBLE
+        } else {
+            binding.txtSemAvaliacoes.visibility = View.GONE
+            avaliacoes.forEachIndexed { index, avaliacao ->
+                if (index < bindings.size) {
+                    val itemBinding = bindings[index]
+                    itemBinding.root.visibility = View.VISIBLE
+                    
+                    // Buscar nome do usuário
+                    db.collection("usuarios").document(avaliacao.idUsuario).get()
+                        .addOnSuccessListener { userDoc ->
+                            val nome = userDoc.getString("nome") ?: "Usuário"
+                            configurarItemAvaliacao(
+                                itemBinding,
+                                nome,
+                                avaliacao.titulo,
+                                avaliacao.descricao,
+                                avaliacao.data,
+                                avaliacao.curtidas
+                            )
+                        }
+                }
+            }
+        }
+    }
+
     private fun criarLivro(): Livro {
+        // ... (mantido apenas como fallback se não vier pela intent, mas idealmente deve vir)
         return Livro(
             id = "ID_LIVRO_TESTE_123", // ID fictício para teste
             titulo = "Star Wars: A Vingança dos Sith",
@@ -115,8 +168,8 @@ class LivroActivity : AppCompatActivity() {
         binding.btnVerAvaliacoes.setOnClickListener {
             val intent = android.content.Intent(this, MaisAvaliacoesActivity::class.java)
             intent.putExtra("ID_LIVRO", livro.id)
-            intent.putExtra("MEDIA", 4.9f)
-            intent.putExtra("TOTAL", 4)
+            intent.putExtra("MEDIA", livro.media)
+            intent.putExtra("TOTAL", livro.totalAvaliacoes)
             startActivity(intent)
         }
 
@@ -125,23 +178,6 @@ class LivroActivity : AppCompatActivity() {
             intent.putExtra("ID_LIVRO", livro.id)
             startActivity(intent)
         }
-
-        // Configura cada item de avaliação com textos específicos
-        configurarItemAvaliacao(
-            binding.avaliacao1,
-            "João Silva",
-            "Incrível!",
-            "Excelente leitura, recomendo a todos!",
-            Timestamp.now()
-        )
-        configurarItemAvaliacao(
-            binding.avaliacao2,
-            "Maria Souza",
-            "Muito bom",
-            "O livro é bom, mas o final poderia ser melhor.",
-            Timestamp.now()
-        )
-
     }
 
     private fun configurarItemAvaliacao(
@@ -149,10 +185,11 @@ class LivroActivity : AppCompatActivity() {
         nome: String,
         titulo: String,
         comentario: String,
-        data: Timestamp?
+        data: Timestamp?,
+        curtidas: Int = 0
     ) {
         var curtido = false
-        var numCurtidas = (0..20).random() // Valor inicial aleatório
+        var numCurtidas = curtidas
         itemBinding.txtNomeUsuario.text = nome
         itemBinding.txtTituloAvaliacao.text = titulo
         itemBinding.txtComentario.text = comentario

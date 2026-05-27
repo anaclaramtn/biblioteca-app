@@ -7,17 +7,25 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.example.biblioteca_app.models.Avaliacao
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 class AdminMaisAvaliacoesActivity : AppCompatActivity() {
 
+    private val db = FirebaseFirestore.getInstance()
+    private var idLivro: String = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.tela_admin_mais_avaliacoes)
+
+        idLivro = intent.getStringExtra("ID_LIVRO") ?: ""
 
         // HEADER
         val btnVoltar = findViewById<ImageButton>(R.id.btnVoltar)
@@ -35,63 +43,68 @@ class AdminMaisAvaliacoesActivity : AppCompatActivity() {
             mostrarDialogOrdenacao()
         }
 
-        // ITENS
-        configurarItem(findViewById(R.id.avaliacao1), "João Silva", "Incrível!", "Excelente leitura!", Timestamp.now())
-        configurarItem(findViewById(R.id.avaliacao2), "Maria Souza", "Muito bom", "Bom livro.", Timestamp.now())
-        configurarItem(findViewById(R.id.avaliacao3), "Carlos Alberto", "Cuidado!", "Eu não acredito que o protagonista morre no final! Que choque.", Timestamp.now())
-        configurarItem(findViewById(R.id.avaliacao4), "Ana Oliveira", "Gostei", "Muito bom.", Timestamp.now())
-
+        carregarAvaliacoes()
         setupNavBar()
     }
 
-    private fun configurarItem(view: View, nome: String, titulo: String, comentario: String, data: Timestamp?) {
+    private fun carregarAvaliacoes(ordem: Query.Direction = Query.Direction.DESCENDING) {
+        if (idLivro.isEmpty()) return
 
+        db.collection("avaliacoes")
+            .whereEqualTo("idLivro", idLivro)
+            .orderBy("data", ordem)
+            .get()
+            .addOnSuccessListener { documents ->
+                val container = findViewById<LinearLayout>(R.id.containerAvaliacoes)
+                container.removeAllViews()
+                val avaliacoes = documents.mapNotNull { it.toObject(Avaliacao::class.java).copy(id = it.id) }
+                
+                avaliacoes.forEach { avaliacao ->
+                    adicionarItemAvaliacao(avaliacao)
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Erro ao carregar avaliações", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun adicionarItemAvaliacao(avaliacao: Avaliacao) {
+        val container = findViewById<LinearLayout>(R.id.containerAvaliacoes)
+        val itemView = layoutInflater.inflate(R.layout.item_admin_avaliacao, container, false)
+        container.addView(itemView)
+
+        db.collection("usuarios").document(avaliacao.idUsuario).get()
+            .addOnSuccessListener { userDoc ->
+                val nome = userDoc.getString("nome") ?: "Usuário"
+                configurarItem(itemView, nome, avaliacao.titulo, avaliacao.descricao, avaliacao.data, avaliacao.nota)
+            }
+    }
+
+    private fun configurarItem(view: View, nome: String, titulo: String, comentario: String, data: Timestamp?, nota: Float) {
         val txtNome = view.findViewById<TextView>(R.id.txtNomeUsuario)
         val txtTitulo = view.findViewById<TextView>(R.id.txtTituloAvaliacao)
         val txtComentario = view.findViewById<TextView>(R.id.txtComentario)
         val txtData = view.findViewById<TextView>(R.id.txtData)
-        val txtCurtidas = view.findViewById<TextView>(R.id.txtCurtidas)
+        val txtEstrelas = view.findViewById<TextView>(R.id.txtEstrelas)
 
-        val btnCurtir = view.findViewById<ImageButton>(R.id.btnCurtir)
         val btnMenu = view.findViewById<ImageButton>(R.id.btnMenu)
 
         txtNome.text = nome
         txtTitulo.text = titulo
         txtComentario.text = comentario
+        txtEstrelas.text = converterMediaParaEstrelas(nota)
         
         val sdf = SimpleDateFormat("MMM dd, yyyy 'at' h:mm:ss a", Locale.ENGLISH)
         val dataFormatada = data?.toDate()?.let { sdf.format(it) } ?: "Data desconhecida"
         txtData.text = dataFormatada
 
-        // Garantir que o comentário esteja visível
         txtComentario.visibility = View.VISIBLE
 
-        // CURTIDAS
-        var curtidas = (0..50).random()
-        var curtido = false
-
-        txtCurtidas.text = curtidas.toString()
-
-        btnCurtir.setOnClickListener {
-            curtido = !curtido
-            if (curtido) {
-                curtidas++
-                btnCurtir.setImageResource(R.drawable.ic_heart_filled)
-            } else {
-                curtidas--
-                btnCurtir.setImageResource(R.drawable.ic_heart)
-            }
-            txtCurtidas.text = curtidas.toString()
-        }
-
-        // MENU ADMIN (IGUAL AO DA TELA DE LIVRO)
         btnMenu.setOnClickListener { v ->
             val popup = PopupMenu(this, v)
             popup.menu.add("Deletar")
-
             popup.setOnMenuItemClickListener { item ->
                 when (item.title) {
-
                     "Deletar" -> {
                         AlertDialog.Builder(this)
                             .setTitle("Confirmação")
@@ -104,22 +117,34 @@ class AdminMaisAvaliacoesActivity : AppCompatActivity() {
                             .show()
                         true
                     }
-
                     else -> false
                 }
             }
-
             popup.show()
         }
     }
 
+    private fun converterMediaParaEstrelas(media: Float): String {
+        return when {
+            media >= 4.5 -> "⭐⭐⭐⭐⭐"
+            media >= 3.5 -> "⭐⭐⭐⭐☆"
+            media >= 2.5 -> "⭐⭐⭐☆☆"
+            media >= 1.5 -> "⭐⭐☆☆☆"
+            media >= 0.5 -> "⭐☆☆☆☆"
+            else -> "☆☆☆☆☆"
+        }
+    }
+
     private fun mostrarDialogOrdenacao() {
-        val opcoes = arrayOf("Mais curtidas", "Menos curtidas", "Mais recentes", "Mais antigos")
+        val opcoes = arrayOf("Mais recentes", "Mais antigos")
 
         AlertDialog.Builder(this)
             .setTitle("Ordenar por")
             .setItems(opcoes) { _, which ->
-                Toast.makeText(this, opcoes[which], Toast.LENGTH_SHORT).show()
+                when (which) {
+                    0 -> carregarAvaliacoes(Query.Direction.DESCENDING)
+                    1 -> carregarAvaliacoes(Query.Direction.ASCENDING)
+                }
             }
             .show()
     }

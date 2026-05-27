@@ -57,25 +57,10 @@
         android:layout_weight="1">
 
         <LinearLayout
+            android:id="@+id/containerAvaliacoes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
-            <include
-                android:id="@+id/avaliacao1"
-                layout="@layout/item_admin_avaliacao"/>
-
-            <include
-                android:id="@+id/avaliacao2"
-                layout="@layout/item_admin_avaliacao"/>
-
-            <include
-                android:id="@+id/avaliacao3"
-                layout="@layout/item_admin_avaliacao"/>
-
-            <include
-                android:id="@+id/avaliacao4"
-                layout="@layout/item_admin_avaliacao"/>
 
         </LinearLayout>
     </ScrollView>
