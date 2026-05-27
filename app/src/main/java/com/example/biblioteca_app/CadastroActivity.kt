@@ -108,10 +108,11 @@ class CadastroActivity : AppCompatActivity() {
                         if (uid != null) {
                             // Objeto com os dados do usuário para o Firestore
                             val dadosUsuario = hashMapOf(
+                                "uid" to uid,
                                 "nome" to nomeStr,
                                 "email" to emailStr,
-                                "uid" to uid,
-                                "isAdmin" to false // Controle de acesso
+                                "notaMedia" to 0.0,
+                                "isAdmin" to false
                             )
 
                             // Salva no Firestore usando o UID do Auth como ID do documento

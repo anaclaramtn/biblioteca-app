@@ -28,10 +28,11 @@ data class Notificacao(
 )
 
 data class Usuario(
+    val uid: String = "",
     val nome: String,
     val email: String,
-    var qtdLivros: Int,
-    var multa: Double = 0.0
+    var notaMedia: Double = 0.0,
+    var isAdmin: Boolean = false
 )
 
 data class Emprestimo(
