@@ -1,5 +1,6 @@
 package com.example.biblioteca_app.models
 
+import com.google.firebase.Timestamp
 import java.io.Serializable
 
 data class Noticia(
@@ -9,6 +10,7 @@ data class Noticia(
 )
 
 data class Livro(
+    val id: String = "",
     val titulo: String,
     val autor: String,
     val descricao: String,
@@ -60,4 +62,15 @@ data class PesquisaAdm(
 data class ChatMessage(
     val text: String,
     val isFromUser: Boolean
+)
+
+data class Avaliacao(
+    val id: String = "",
+    val idLivro: String = "",
+    val idUsuario: String = "",
+    val titulo: String = "",
+    val descricao: String = "",
+    val nota: Float = 0f,
+    val data: Timestamp? = null,
+    val curtidas: Int = 0
 )

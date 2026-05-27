@@ -15,6 +15,9 @@ import com.example.biblioteca_app.databinding.ItemAvaliacaoBinding
 import com.example.biblioteca_app.databinding.TelaLivroBinding
 import com.example.biblioteca_app.models.Livro
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class LivroActivity : AppCompatActivity() {
 
@@ -31,12 +34,13 @@ class LivroActivity : AppCompatActivity() {
 
         val livro = criarLivro()
         preencherTela(livro)
-        configurarBotoes()
+        configurarBotoes(livro)
         setupNavBar()
     }
 
     private fun criarLivro(): Livro {
         return Livro(
+            id = "ID_LIVRO_TESTE_123", // ID fictício para teste
             titulo = "Star Wars: A Vingança dos Sith",
             autor = "George Lucas",
             descricao = "Anakin Skywalker se torna Darth Vader após ser seduzido pelo lado sombrio da Força. Uma história de queda, tragédia e redenção que marca o fim da República e o surgimento do Império. Anakin Skywalker se torna Darth Vader após ser seduzido pelo lado sombrio da Força. Uma história de queda, tragédia e redenção que marca o fim da República e o surgimento do Império.",
@@ -76,7 +80,7 @@ class LivroActivity : AppCompatActivity() {
         }
     }
 
-    private fun configurarBotoes() {
+    private fun configurarBotoes(livro: Livro) {
         binding.btnVoltar.setOnClickListener {
             finish()
         }
@@ -110,6 +114,7 @@ class LivroActivity : AppCompatActivity() {
 
         binding.btnVerAvaliacoes.setOnClickListener {
             val intent = android.content.Intent(this, MaisAvaliacoesActivity::class.java)
+            intent.putExtra("ID_LIVRO", livro.id)
             intent.putExtra("MEDIA", 4.9f)
             intent.putExtra("TOTAL", 4)
             startActivity(intent)
@@ -117,6 +122,7 @@ class LivroActivity : AppCompatActivity() {
 
         binding.btnAvaliar.setOnClickListener {
             val intent = android.content.Intent(this, AvaliarActivity::class.java)
+            intent.putExtra("ID_LIVRO", livro.id)
             startActivity(intent)
         }
 
@@ -126,14 +132,14 @@ class LivroActivity : AppCompatActivity() {
             "João Silva",
             "Incrível!",
             "Excelente leitura, recomendo a todos!",
-            "15/05/2023"
+            Timestamp.now()
         )
         configurarItemAvaliacao(
             binding.avaliacao2,
             "Maria Souza",
             "Muito bom",
             "O livro é bom, mas o final poderia ser melhor.",
-            "20/06/2023"
+            Timestamp.now()
         )
 
     }
@@ -143,14 +149,17 @@ class LivroActivity : AppCompatActivity() {
         nome: String,
         titulo: String,
         comentario: String,
-        data: String
+        data: Timestamp?
     ) {
         var curtido = false
         var numCurtidas = (0..20).random() // Valor inicial aleatório
         itemBinding.txtNomeUsuario.text = nome
         itemBinding.txtTituloAvaliacao.text = titulo
         itemBinding.txtComentario.text = comentario
-        itemBinding.txtData.text = data
+
+        val sdf = SimpleDateFormat("MMM dd, yyyy 'at' h:mm:ss a", Locale.ENGLISH)
+        val dataFormatada = data?.toDate()?.let { sdf.format(it) } ?: "Data desconhecida"
+        itemBinding.txtData.text = dataFormatada
         itemBinding.txtCurtidas.text = numCurtidas.toString()
 
         // Garantir que o comentário esteja sempre visível

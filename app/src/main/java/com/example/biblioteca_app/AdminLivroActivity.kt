@@ -16,6 +16,10 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import android.widget.Button
 import android.widget.TextView
 
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Locale
+
 class AdminLivroActivity : AppCompatActivity() {
 
     private var livroPos: Int = -1
@@ -106,7 +110,7 @@ class AdminLivroActivity : AppCompatActivity() {
             "João Silva",
             "Incrível!",
             "Excelente leitura, recomendo a todos!",
-            "15/05/2023",
+            Timestamp.now(), // Usando timestamp atual para os mocks
             "⭐⭐⭐⭐⭐"
         )
 
@@ -115,7 +119,7 @@ class AdminLivroActivity : AppCompatActivity() {
             "Maria Souza",
             "Muito bom",
             "O livro é bom, mas o final poderia ser melhor.",
-            "20/06/2023",
+            Timestamp.now(), // Usando timestamp atual para os mocks
             "⭐⭐⭐⭐☆"
         )
     }
@@ -125,7 +129,7 @@ class AdminLivroActivity : AppCompatActivity() {
         nome: String,
         titulo: String,
         comentario: String,
-        data: String,
+        data: Timestamp?,
         estrelas: String
     ) {
         val txtComentario = view.findViewById<TextView>(R.id.txtComentario)
@@ -133,7 +137,10 @@ class AdminLivroActivity : AppCompatActivity() {
         view.findViewById<TextView>(R.id.txtNomeUsuario).text = nome
         view.findViewById<TextView>(R.id.txtTituloAvaliacao).text = titulo
         txtComentario.text = comentario
-        view.findViewById<TextView>(R.id.txtData).text = data
+
+        val sdf = SimpleDateFormat("MMM dd, yyyy 'at' h:mm:ss a", Locale.ENGLISH)
+        val dataFormatada = data?.toDate()?.let { sdf.format(it) } ?: "Data desconhecida"
+        view.findViewById<TextView>(R.id.txtData).text = dataFormatada
         view.findViewById<TextView>(R.id.txtEstrelas).text = estrelas
 
         // Garantir que o comentário esteja sempre visível

@@ -28,12 +28,12 @@ class AcervoadmActivity : AppCompatActivity() {
 
     companion object {
         val listaLivros = mutableListOf(
-            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500),
-            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500),
-            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500),
-            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500),
-            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500),
-            Livro("As Duas Torres", "J. R. R. Tolkien", "", R.drawable.hobbit, true, 4.9f, 500)
+            Livro(titulo = "As Duas Torres", autor = "J. R. R. Tolkien", descricao = "", imagemRes = R.drawable.hobbit, disponivel = true, media = 4.9f, totalAvaliacoes = 500),
+            Livro(titulo = "As Duas Torres", autor = "J. R. R. Tolkien", descricao = "", imagemRes = R.drawable.hobbit, disponivel = true, media = 4.9f, totalAvaliacoes = 500),
+            Livro(titulo = "As Duas Torres", autor = "J. R. R. Tolkien", descricao = "", imagemRes = R.drawable.hobbit, disponivel = true, media = 4.9f, totalAvaliacoes = 500),
+            Livro(titulo = "As Duas Torres", autor = "J. R. R. Tolkien", descricao = "", imagemRes = R.drawable.hobbit, disponivel = true, media = 4.9f, totalAvaliacoes = 500),
+            Livro(titulo = "As Duas Torres", autor = "J. R. R. Tolkien", descricao = "", imagemRes = R.drawable.hobbit, disponivel = true, media = 4.9f, totalAvaliacoes = 500),
+            Livro(titulo = "As Duas Torres", autor = "J. R. R. Tolkien", descricao = "", imagemRes = R.drawable.hobbit, disponivel = true, media = 4.9f, totalAvaliacoes = 500)
         )
         val listaNoticias = mutableListOf(
             Noticia("Título da notícia", "Descrição breve da notícia para o admin."),

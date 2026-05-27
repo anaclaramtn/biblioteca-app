@@ -13,6 +13,10 @@ import com.example.biblioteca_app.databinding.ItemAvaliacaoBinding
 import com.example.biblioteca_app.databinding.TelaMaisAvaliacoesBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Locale
+
 class MaisAvaliacoesActivity : AppCompatActivity() {
 
     private lateinit var binding: TelaMaisAvaliacoesBinding
@@ -62,10 +66,10 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         }
 
         // Configura cada item de avaliação com textos específicos
-        configurarItemAvaliacao(binding.avaliacao1, "João Silva", "Incrível!", "Excelente leitura, recomendo a todos!", "15/05/2023")
-        configurarItemAvaliacao(binding.avaliacao2, "Maria Souza", "Muito bom", "O livro é bom, mas o final poderia ser melhor.", "20/06/2023")
-        configurarItemAvaliacao(binding.avaliacao3, "Carlos Alberto", "Cuidado!", "Eu não acredito que o protagonista morre no final! Que choque.", "02/07/2023")
-        configurarItemAvaliacao(binding.avaliacao4, "Ana Oliveira", "Gostei", "Personagens muito bem construídos.", "10/07/2023")
+        configurarItemAvaliacao(binding.avaliacao1, "João Silva", "Incrível!", "Excelente leitura, recomendo a todos!", Timestamp.now())
+        configurarItemAvaliacao(binding.avaliacao2, "Maria Souza", "Muito bom", "O livro é bom, mas o final poderia ser melhor.", Timestamp.now())
+        configurarItemAvaliacao(binding.avaliacao3, "Carlos Alberto", "Cuidado!", "Eu não acredito que o protagonista morre no final! Que choque.", Timestamp.now())
+        configurarItemAvaliacao(binding.avaliacao4, "Ana Oliveira", "Gostei", "Personagens muito bem construídos.", Timestamp.now())
 
         binding.btnAvaliar.setOnClickListener {
             val intent = android.content.Intent(this, AvaliarActivity::class.java)
@@ -94,14 +98,17 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         nome: String,
         titulo: String,
         comentario: String,
-        data: String
+        data: Timestamp?
     ) {
         var curtido = false
         var numCurtidas = (0..50).random() // Valor inicial aleatório
         itemBinding.txtNomeUsuario.text = nome
         itemBinding.txtTituloAvaliacao.text = titulo
         itemBinding.txtComentario.text = comentario
-        itemBinding.txtData.text = data
+
+        val sdf = SimpleDateFormat("MMM dd, yyyy 'at' h:mm:ss a", Locale.ENGLISH)
+        val dataFormatada = data?.toDate()?.let { sdf.format(it) } ?: "Data desconhecida"
+        itemBinding.txtData.text = dataFormatada
         itemBinding.txtCurtidas.text = numCurtidas.toString()
 
         // Garantir que o comentário esteja sempre visível

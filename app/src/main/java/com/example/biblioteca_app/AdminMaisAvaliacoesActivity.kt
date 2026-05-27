@@ -9,6 +9,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Locale
+
 class AdminMaisAvaliacoesActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,15 +36,15 @@ class AdminMaisAvaliacoesActivity : AppCompatActivity() {
         }
 
         // ITENS
-        configurarItem(findViewById(R.id.avaliacao1), "João Silva", "Incrível!", "Excelente leitura!", "15/05/2023")
-        configurarItem(findViewById(R.id.avaliacao2), "Maria Souza", "Muito bom", "Bom livro.", "20/06/2023")
-        configurarItem(findViewById(R.id.avaliacao3), "Carlos Alberto", "Cuidado!", "Eu não acredito que o protagonista morre no final! Que choque.", "02/07/2023")
-        configurarItem(findViewById(R.id.avaliacao4), "Ana Oliveira", "Gostei", "Muito bom.", "10/07/2023")
+        configurarItem(findViewById(R.id.avaliacao1), "João Silva", "Incrível!", "Excelente leitura!", Timestamp.now())
+        configurarItem(findViewById(R.id.avaliacao2), "Maria Souza", "Muito bom", "Bom livro.", Timestamp.now())
+        configurarItem(findViewById(R.id.avaliacao3), "Carlos Alberto", "Cuidado!", "Eu não acredito que o protagonista morre no final! Que choque.", Timestamp.now())
+        configurarItem(findViewById(R.id.avaliacao4), "Ana Oliveira", "Gostei", "Muito bom.", Timestamp.now())
 
         setupNavBar()
     }
 
-    private fun configurarItem(view: View, nome: String, titulo: String, comentario: String, data: String) {
+    private fun configurarItem(view: View, nome: String, titulo: String, comentario: String, data: Timestamp?) {
 
         val txtNome = view.findViewById<TextView>(R.id.txtNomeUsuario)
         val txtTitulo = view.findViewById<TextView>(R.id.txtTituloAvaliacao)
@@ -54,7 +58,10 @@ class AdminMaisAvaliacoesActivity : AppCompatActivity() {
         txtNome.text = nome
         txtTitulo.text = titulo
         txtComentario.text = comentario
-        txtData.text = data
+        
+        val sdf = SimpleDateFormat("MMM dd, yyyy 'at' h:mm:ss a", Locale.ENGLISH)
+        val dataFormatada = data?.toDate()?.let { sdf.format(it) } ?: "Data desconhecida"
+        txtData.text = dataFormatada
 
         // Garantir que o comentário esteja visível
         txtComentario.visibility = View.VISIBLE
