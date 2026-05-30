@@ -44,6 +44,7 @@ class LivroActivity : AppCompatActivity() {
         setupNavBar()
     }
 
+
     private fun carregarAvaliacoes(idLivro: String) {
         db.collection("avaliacoes")
             .whereEqualTo("idLivro", idLivro)
