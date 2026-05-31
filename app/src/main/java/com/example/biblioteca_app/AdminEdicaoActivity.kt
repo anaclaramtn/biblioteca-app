@@ -1,6 +1,7 @@
 package com.example.biblioteca_app
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -15,10 +16,13 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.biblioteca_app.models.Livro
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.firestore.FirebaseFirestore
 
 class AdminEdicaoActivity : AppCompatActivity() {
-
     private var livroPos: Int = -1
+    private var livroAtual: Livro? = null
+
+    private val db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +30,7 @@ class AdminEdicaoActivity : AppCompatActivity() {
         setContentView(R.layout.tela_admin_edicao)
 
         livroPos = intent.getIntExtra("LIVRO_POS", -1)
+        livroAtual = intent.getSerializableExtra("LIVRO") as? Livro
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -39,12 +44,19 @@ class AdminEdicaoActivity : AppCompatActivity() {
     }
 
     private fun preencherDados() {
-        if (livroPos != -1 && livroPos < AcervoadmActivity.listaLivros.size) {
-            val livro = AcervoadmActivity.listaLivros[livroPos]
-            findViewById<EditText>(R.id.edtTitulo).setText(livro.titulo)
-            findViewById<EditText>(R.id.edtAutor).setText(livro.autor)
-            findViewById<EditText>(R.id.edtDescricao).setText(livro.descricao)
-            findViewById<ImageView>(R.id.imgCapa).setImageResource(livro.imagemRes)
+        livroAtual?.let { livro ->
+
+            findViewById<EditText>(R.id.edtTitulo)
+                .setText(livro.titulo)
+
+            findViewById<EditText>(R.id.edtAutor)
+                .setText(livro.autor)
+
+            findViewById<EditText>(R.id.edtDescricao)
+                .setText(livro.descricao)
+
+            findViewById<ImageView>(R.id.imgCapa)
+                .setImageURI(android.net.Uri.parse(livro.imagemUri))
         }
     }
 
@@ -59,6 +71,7 @@ class AdminEdicaoActivity : AppCompatActivity() {
     }
 
     private fun salvarAlteracoes() {
+
         val novoTitulo = findViewById<EditText>(R.id.edtTitulo).text.toString()
         val novoAutor = findViewById<EditText>(R.id.edtAutor).text.toString()
         val novaDesc = findViewById<EditText>(R.id.edtDescricao).text.toString()
@@ -68,17 +81,47 @@ class AdminEdicaoActivity : AppCompatActivity() {
             return
         }
 
-        if (livroPos != -1 && livroPos < AcervoadmActivity.listaLivros.size) {
-            val livroOriginal = AcervoadmActivity.listaLivros[livroPos]
-            val livroEditado = livroOriginal.copy(
-                titulo = novoTitulo,
-                autor = novoAutor,
-                descricao = novaDesc
-            )
-            AcervoadmActivity.listaLivros[livroPos] = livroEditado
-            Toast.makeText(this, "Acervo Atualizado!", Toast.LENGTH_SHORT).show()
-            finish()
-        }
+        val livro = livroAtual ?: return
+
+        val dadosAtualizados = hashMapOf(
+            "titulo" to novoTitulo,
+            "autor" to novoAutor,
+            "sinopse" to novaDesc
+        )
+
+        db.collection("livros")
+            .document(livro.id)
+            .update(dadosAtualizados as Map<String, Any>)
+            .addOnSuccessListener {
+
+                val index = AcervoadmActivity.listaLivros.indexOfFirst {
+                    it.id == livro.id
+                }
+
+                if (index != -1) {
+                    AcervoadmActivity.listaLivros[index] =
+                        AcervoadmActivity.listaLivros[index].copy(
+                            titulo = novoTitulo,
+                            autor = novoAutor,
+                            descricao = novaDesc
+                        )
+                }
+
+                Toast.makeText(
+                    this,
+                    "Livro atualizado com sucesso!",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                finish()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(
+                    this,
+                    "Erro ao atualizar: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
     }
 
     private fun confirmarSaida() {

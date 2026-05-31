@@ -249,9 +249,15 @@ class AdminLivroActivity : AppCompatActivity() {
         popup.setOnMenuItemClickListener { item ->
             when (item.title) {
                 "Editar" -> {
+
                     val intent = Intent(this, AdminEdicaoActivity::class.java)
-                    intent.putExtra("LIVRO_POS", livroPos)
+
+                    livroAtual?.let {
+                        intent.putExtra("LIVRO", it)
+                    }
+
                     startActivity(intent)
+
                     true
                 }
                 "Deletar" -> {

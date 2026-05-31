@@ -166,7 +166,7 @@ class TelaHomeActivity : AppCompatActivity() {
             titulo = "Dom Quixote",
             autor = "Miguel de Cervantes",
             descricao = "A história de um cavaleiro errante...",
-            imagemRes = R.drawable.capadomquixote,
+            imagemUri = "",
             disponivel = true,
             media = 4.5f,
             totalAvaliacoes = 50
@@ -198,7 +198,7 @@ class TelaHomeActivity : AppCompatActivity() {
                         titulo = documento.getString("titulo") ?: "",
                         autor = documento.getString("autor") ?: "",
                         descricao = documento.getString("sinopse") ?: "",
-                        imagemRes = R.drawable.capadomquixote,
+                        imagemUri = documento.getString("imagemUri") ?: "",
                         disponivel = documento.getBoolean("disponivel") ?: true,
                         media = documento.getDouble("media")?.toFloat() ?: 0f,
                         totalAvaliacoes = documento.getLong("totalAvaliacoes")?.toInt() ?: 0
@@ -222,7 +222,7 @@ class TelaHomeActivity : AppCompatActivity() {
                         titulo = documento.getString("titulo") ?: "",
                         autor = documento.getString("autor") ?: "",
                         descricao = documento.getString("sinopse") ?: "",
-                        imagemRes = R.drawable.capadomquixote,
+                        imagemUri = documento.getString("imagemUri") ?: "",
                         disponivel = documento.getBoolean("disponivel") ?: true,
                         media = documento.getDouble("media")?.toFloat() ?: 0f,
                         totalAvaliacoes = documento.getLong("totalAvaliacoes")?.toInt() ?: 0
@@ -246,7 +246,7 @@ class TelaHomeActivity : AppCompatActivity() {
                         titulo = documento.getString("titulo") ?: "",
                         autor = documento.getString("autor") ?: "",
                         descricao = documento.getString("sinopse") ?: "",
-                        imagemRes = R.drawable.capadomquixote,
+                        imagemUri = documento.getString("imagemUri") ?: "",
                         disponivel = documento.getBoolean("disponivel") ?: true,
                         media = documento.getDouble("media")?.toFloat() ?: 0f,
                         totalAvaliacoes = documento.getLong("totalAvaliacoes")?.toInt() ?: 0
@@ -308,7 +308,13 @@ class TelaHomeActivity : AppCompatActivity() {
     private fun setupItemLivro(view: View, livro: Livro) {
         view.findViewById<TextView>(R.id.txtTituloLivro).text = livro.titulo
         view.findViewById<TextView>(R.id.txtAutor).text = livro.autor
-        view.findViewById<ImageView>(R.id.imgCapa).setImageResource(R.drawable.capadomquixote)
+        val img = view.findViewById<ImageView>(R.id.imgCapa)
+
+        if (livro.imagemUri.isNotEmpty()) {
+            img.setImageURI(android.net.Uri.parse(livro.imagemUri))
+        } else {
+            img.setImageResource(R.drawable.capadomquixote)
+        }
 
         view.setOnClickListener {
             val intent = Intent(this, LivroActivity::class.java)

@@ -94,11 +94,11 @@ class LivroActivity : AppCompatActivity() {
     private fun criarLivro(): Livro {
         // ... (mantido apenas como fallback se não vier pela intent, mas idealmente deve vir)
         return Livro(
-            id = "ID_LIVRO_TESTE_123", // ID fictício para teste
+            id = "ID_LIVRO_TESTE_123",
             titulo = "Star Wars: A Vingança dos Sith",
             autor = "George Lucas",
-            descricao = "Anakin Skywalker se torna Darth Vader após ser seduzido pelo lado sombrio da Força. Uma história de queda, tragédia e redenção que marca o fim da República e o surgimento do Império. Anakin Skywalker se torna Darth Vader após ser seduzido pelo lado sombrio da Força. Uma história de queda, tragédia e redenção que marca o fim da República e o surgimento do Império.",
-            imagemRes = R.drawable.capa_star_wars,
+            descricao = "...",
+            imagemUri = "",
             disponivel = true,
             media = 4.9f,
             totalAvaliacoes = 120
@@ -106,21 +106,28 @@ class LivroActivity : AppCompatActivity() {
     }
 
     private fun preencherTela(livro: Livro) {
+
         binding.txtTitulo.text = livro.titulo
         binding.txtAutor.text = livro.autor
         binding.txtDescricao.text = livro.descricao
-        binding.imgCapa.setImageResource(livro.imagemRes)
 
-        binding.txtStatus.text = if (livro.disponivel) getString(R.string.status_disponivel) else getString(R.string.status_indisponivel)
-
-        // Preenche o resumo de avaliações (molde padronizado)
-        binding.layoutResumo.txtMedia.text = livro.media.toString()
-        binding.layoutResumo.txtTotalAvaliacoes.text = "(${livro.totalAvaliacoes} avaliações)"
-        binding.layoutResumo.txtEstrelasMedia.text = converterMediaParaEstrelas(livro.media)
-
-        if (livro.totalAvaliacoes == 0) {
-            binding.txtSemAvaliacoes.visibility = View.VISIBLE
+        if (livro.imagemUri.isNotEmpty()) {
+            binding.imgCapa.setImageURI(
+                android.net.Uri.parse(livro.imagemUri)
+            )
         }
+
+        binding.txtStatus.text =
+            if (livro.disponivel)
+                getString(R.string.status_disponivel)
+            else
+                getString(R.string.status_indisponivel)
+
+        binding.layoutResumo.txtMedia.text = livro.media.toString()
+        binding.layoutResumo.txtTotalAvaliacoes.text =
+            "(${livro.totalAvaliacoes} avaliações)"
+        binding.layoutResumo.txtEstrelasMedia.text =
+            converterMediaParaEstrelas(livro.media)
     }
 
     private fun converterMediaParaEstrelas(media: Float): String {
