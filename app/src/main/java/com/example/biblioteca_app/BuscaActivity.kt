@@ -1,7 +1,10 @@
 package com.example.biblioteca_app
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Base64
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
@@ -14,106 +17,82 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.biblioteca_app.adapters.LivroAdapter
+import com.example.biblioteca_app.models.Livro
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.firestore.FirebaseFirestore
 
 class BuscaActivity : AppCompatActivity() {
+    private val db = FirebaseFirestore.getInstance()
+    private lateinit var adapter: LivroAdapter
+
+    private val livros = mutableListOf<Livro>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.tela_busca)
 
-        // Configuração da Pesquisa
+        val rvLivros = findViewById<RecyclerView>(R.id.rvLivros)
         val etPesquisa = findViewById<EditText>(R.id.etPesquisa)
-        val btnLimpar = findViewById<ImageView>(R.id.btnLimparPesquisa)
-        val gridLivros = findViewById<View>(R.id.gridLivros)
-        val layoutSemResultados = findViewById<View>(R.id.layoutSemResultados)
-        val txtMensagemErro = findViewById<TextView>(R.id.txtMensagemErro)
-        val ids = listOf(R.id.item1, R.id.item2, R.id.item3, R.id.item4)
 
-        btnLimpar.setOnClickListener {
-            etPesquisa.text.clear()
+        adapter = LivroAdapter(emptyList()) { livro ->
+            val intent = Intent(this, LivroActivity::class.java)
+            intent.putExtra("LIVRO", livro)
+            startActivity(intent)
         }
+
+        rvLivros.layoutManager = LinearLayoutManager(this)
+        rvLivros.adapter = adapter
+
+        carregarLivros()
 
         etPesquisa.doAfterTextChanged { text ->
-            val query = text.toString().lowercase()
-            
-            if (query.isEmpty()) {
-                gridLivros.visibility = View.VISIBLE
-                layoutSemResultados.visibility = View.GONE
-                ids.forEach { findViewById<View>(it).visibility = View.VISIBLE }
-            } else {
-                val matches = mutableListOf<Int>()
-                
-                // Simulação de pesquisa para os 4 livros específicos
-                if ("star wars".contains(query) || "george lucas".contains(query)) matches.add(R.id.item1)
-                if ("frankenstein".contains(query) || "mary shelley".contains(query)) matches.add(R.id.item2)
-                if ("the hobbit".contains(query) || "j.r.r. tolkien".contains(query)) matches.add(R.id.item3)
-                if ("it".contains(query) || "stephen king".contains(query)) matches.add(R.id.item4)
+            val query = text.toString().trim()
 
-                if (matches.isNotEmpty()) {
-                    gridLivros.visibility = View.VISIBLE
-                    layoutSemResultados.visibility = View.GONE
-                    ids.forEach { id -> 
-                        findViewById<View>(id).visibility = if (matches.contains(id)) View.VISIBLE else View.GONE 
-                    }
-                } else {
-                    gridLivros.visibility = View.GONE
-                    layoutSemResultados.visibility = View.VISIBLE
-                    txtMensagemErro.text = "Nenhum resultado encontrado para\n\"$text\""
+            val filtrados = if (query.isEmpty()) {
+                livros
+            } else {
+                livros.filter {
+                    it.titulo.contains(query, true) ||
+                            it.autor.contains(query, true)
                 }
             }
+
+            adapter.updateList(filtrados)
         }
-
-        // Configuração da Ordenação
-        val btnOrdenar = findViewById<LinearLayout>(R.id.btnOrdenar)
-        btnOrdenar.setOnClickListener {
-            showOrderDialog()
-        }
-
-        // Configurar Livros (Star Wars no primeiro, demais Dom Quixote)
-        setupLivros(ids)
-
-        // Configurar NavBar
-        setupNavBar()
     }
 
-    private fun setupLivros(ids: List<Int>) {
-        val txtQtdLivros = findViewById<TextView>(R.id.txtQtdLivros)
-        txtQtdLivros.text = "${ids.size} livro(s) registrado(s) no\nacervo"
-        
-        for (i in ids.indices) {
-            val id = ids[i]
-            val view = findViewById<View>(id)
-            
-            when (i) {
-                0 -> {
-                    view.findViewById<ImageView>(R.id.imgCapa).setImageResource(R.drawable.capa_star_wars)
-                    view.findViewById<TextView>(R.id.txtTituloLivro).text = "Star Wars"
-                    view.findViewById<TextView>(R.id.txtAutor).text = "George Lucas"
+    fun base64ToBitmap(base64: String): Bitmap {
+        val decodedBytes = Base64.decode(base64, Base64.DEFAULT)
+        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+    }
+
+    private fun carregarLivros() {
+        db.collection("livros")
+            .get()
+            .addOnSuccessListener { documents ->
+
+                livros.clear()
+
+                for (doc in documents) {
+                    livros.add(
+                        Livro(
+                            id = doc.id,
+                            titulo = doc.getString("titulo") ?: "",
+                            autor = doc.getString("autor") ?: "",
+                            descricao = doc.getString("sinopse") ?: "",
+                            imagemBase64 = doc.getString("imagemBase64"),
+                            disponivel = doc.getBoolean("disponivel") ?: true,
+                            media = doc.getDouble("media")?.toFloat() ?: 0f,
+                            totalAvaliacoes = doc.getLong("totalAvaliacoes")?.toInt() ?: 0
+                        )
+                    )
                 }
-                1 -> {
-                    view.findViewById<ImageView>(R.id.imgCapa).setImageResource(R.drawable.frankstein)
-                    view.findViewById<TextView>(R.id.txtTituloLivro).text = "Frankenstein"
-                    view.findViewById<TextView>(R.id.txtAutor).text = "Mary Shelley"
-                }
-                2 -> {
-                    view.findViewById<ImageView>(R.id.imgCapa).setImageResource(R.drawable.hobbit)
-                    view.findViewById<TextView>(R.id.txtTituloLivro).text = "The Hobbit"
-                    view.findViewById<TextView>(R.id.txtAutor).text = "J.R.R. Tolkien"
-                }
-                3 -> {
-                    view.findViewById<ImageView>(R.id.imgCapa).setImageResource(R.drawable.it)
-                    view.findViewById<TextView>(R.id.txtTituloLivro).text = "It"
-                    view.findViewById<TextView>(R.id.txtAutor).text = "Stephen King"
-                }
+
+                adapter.notifyDataSetChanged()
             }
-            
-            view.setOnClickListener {
-                val intent = Intent(this, LivroActivity::class.java)
-                startActivity(intent)
-            }
-        }
     }
 
     private fun showOrderDialog() {
