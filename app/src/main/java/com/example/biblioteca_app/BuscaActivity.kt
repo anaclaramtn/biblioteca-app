@@ -91,7 +91,11 @@ class BuscaActivity : AppCompatActivity() {
                     )
                 }
 
-                adapter.notifyDataSetChanged()
+                adapter.updateList(livros)
+
+                // atualizando a contagem de livros
+                findViewById<TextView>(R.id.txtQtdLivros).text =
+                    "${livros.size} livro(s) no acervo"
             }
     }
 
