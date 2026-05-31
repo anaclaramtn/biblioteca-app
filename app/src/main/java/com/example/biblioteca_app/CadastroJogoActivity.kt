@@ -41,6 +41,15 @@ class CadastroJogoActivity : AppCompatActivity() {
         val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
             if (uri != null) {
                 imageUri = uri
+
+                // Solicita permissão persistente para a URI
+                try {
+                    val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    contentResolver.takePersistableUriPermission(uri, takeFlags)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
                 val imageView = findViewById<ImageView>(R.id.imgCapaJogo)
                 val textView = findViewById<TextView>(R.id.txtMensagemImagem)
 

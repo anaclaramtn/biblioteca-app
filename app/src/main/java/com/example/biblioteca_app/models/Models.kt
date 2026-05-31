@@ -15,6 +15,8 @@ data class Livro(
     val autor: String = "",
     val descricao: String = "",
     val imagemUri: String = "",
+    val imagemRes: Int? = null,
+    val imagemBase64: String? = null,
     val disponivel: Boolean = true,
     val media: Float = 0f,
     val totalAvaliacoes: Int = 0

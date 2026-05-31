@@ -21,6 +21,10 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.biblioteca_app.models.Livro
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.firestore.FirebaseFirestore
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import java.io.ByteArrayOutputStream
 
 class CadastroLivroActivity : AppCompatActivity() {
 
@@ -40,6 +44,15 @@ class CadastroLivroActivity : AppCompatActivity() {
         val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
             if (uri != null) {
                 imageUri = uri
+
+                // Solicita permissão persistente para a URI
+                try {
+                    val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    contentResolver.takePersistableUriPermission(uri, takeFlags)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
                 val imageView = findViewById<ImageView>(R.id.imgCapaLivro)
                 val textView = findViewById<TextView>(R.id.txtMensagemImagem)
                 
@@ -74,12 +87,24 @@ class CadastroLivroActivity : AppCompatActivity() {
             if (titulo.isBlank() || autor.isBlank() || sinopse.isBlank() || imageUri == null) {
                 exibirAviso()
             } else {
+                // Converte a imagem para Base64
+                val base64Image = try {
+                    val inputStream = contentResolver.openInputStream(imageUri!!)
+                    val bitmap = BitmapFactory.decodeStream(inputStream)
+                    inputStream?.close()
+                    bitmap?.let { bitmapToBase64(it) }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    null
+                }
+
                 // Prepara os dados do livro para o Firestore
                 val dadosLivro = hashMapOf(
                     "titulo" to titulo,
                     "autor" to autor,
                     "sinopse" to sinopse,
                     "imagemUri" to imageUri.toString(),
+                    "imagemBase64" to base64Image,
                     "disponivel" to true,
                     "media" to 0.0,
                     "totalAvaliacoes" to 0
@@ -97,6 +122,7 @@ class CadastroLivroActivity : AppCompatActivity() {
                                 autor = autor,
                                 descricao = sinopse,
                                 imagemUri = imageUri.toString(),
+                                imagemBase64 = base64Image,
                                 disponivel = true,
                                 media = 0.0f,
                                 totalAvaliacoes = 0
@@ -173,5 +199,16 @@ class CadastroLivroActivity : AppCompatActivity() {
                 else -> false
             }
         }
+    }
+
+    fun bitmapToBase64(bitmap: Bitmap): String {
+        val outputStream = ByteArrayOutputStream()
+
+        // Compressão para reduzir o tamanho
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
+
+        val byteArray = outputStream.toByteArray()
+
+        return Base64.encodeToString(byteArray, Base64.DEFAULT)
     }
 }

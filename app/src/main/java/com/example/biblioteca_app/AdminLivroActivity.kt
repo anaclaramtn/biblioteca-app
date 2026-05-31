@@ -77,9 +77,31 @@ class AdminLivroActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.txtAutor).text = livro.autor
         findViewById<TextView>(R.id.txtDescricao).text = livro.descricao
         val img = findViewById<android.widget.ImageView>(R.id.imgCapa)
-
-        if (livro.imagemUri.isNotEmpty()) {
-            img.setImageURI(Uri.parse(livro.imagemUri))
+        when {
+            !livro.imagemBase64.isNullOrEmpty() -> {
+                try {
+                    val decodedBytes = android.util.Base64.decode(livro.imagemBase64, android.util.Base64.DEFAULT)
+                    val bitmap = android.graphics.BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                    img.setImageBitmap(bitmap)
+                } catch (e: Exception) {
+                    img.setImageResource(R.drawable.capadomquixote)
+                }
+            }
+            livro.imagemUri.isNotEmpty() -> {
+                try {
+                    img.setImageURI(Uri.parse(livro.imagemUri))
+                } catch (e: SecurityException) {
+                    img.setImageResource(R.drawable.capadomquixote)
+                } catch (e: Exception) {
+                    img.setImageResource(R.drawable.capadomquixote)
+                }
+            }
+            livro.imagemRes != null && livro.imagemRes != 0 -> {
+                img.setImageResource(livro.imagemRes)
+            }
+            else -> {
+                img.setImageResource(R.drawable.capadomquixote)
+            }
         }
         
         val layoutResumo = findViewById<View>(R.id.layoutResumo)

@@ -44,7 +44,33 @@ class AdminEdicaoActivity : AppCompatActivity() {
             findViewById<EditText>(R.id.edtTitulo).setText(livro.titulo)
             findViewById<EditText>(R.id.edtAutor).setText(livro.autor)
             findViewById<EditText>(R.id.edtDescricao).setText(livro.descricao)
-            findViewById<ImageView>(R.id.imgCapa).setImageResource(livro.imagemRes)
+            val imgCapa = findViewById<ImageView>(R.id.imgCapa)
+            when {
+                !livro.imagemBase64.isNullOrEmpty() -> {
+                    try {
+                        val decodedBytes = android.util.Base64.decode(livro.imagemBase64, android.util.Base64.DEFAULT)
+                        val bitmap = android.graphics.BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                        imgCapa.setImageBitmap(bitmap)
+                    } catch (e: Exception) {
+                        imgCapa.setImageResource(R.drawable.capadomquixote)
+                    }
+                }
+                livro.imagemUri.isNotEmpty() -> {
+                    try {
+                        imgCapa.setImageURI(android.net.Uri.parse(livro.imagemUri))
+                    } catch (e: SecurityException) {
+                        imgCapa.setImageResource(R.drawable.capadomquixote)
+                    } catch (e: Exception) {
+                        imgCapa.setImageResource(R.drawable.capadomquixote)
+                    }
+                }
+                livro.imagemRes != null && livro.imagemRes != 0 -> {
+                    imgCapa.setImageResource(livro.imagemRes)
+                }
+                else -> {
+                    imgCapa.setImageResource(R.drawable.capadomquixote)
+                }
+            }
         }
     }
 

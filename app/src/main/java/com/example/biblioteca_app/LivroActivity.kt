@@ -1,5 +1,6 @@
 package com.example.biblioteca_app
 
+
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -22,6 +23,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
 import java.util.Locale
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import java.io.ByteArrayOutputStream
+
+
 
 class LivroActivity : AppCompatActivity() {
 
@@ -109,7 +116,32 @@ class LivroActivity : AppCompatActivity() {
         binding.txtTitulo.text = livro.titulo
         binding.txtAutor.text = livro.autor
         binding.txtDescricao.text = livro.descricao
-        binding.imgCapa.setImageResource(livro.imagemRes)
+        
+        when {
+            !livro.imagemBase64.isNullOrEmpty() -> {
+                try {
+                    val bitmap = base64ToBitmap(livro.imagemBase64!!)
+                    binding.imgCapa.setImageBitmap(bitmap)
+                } catch (e: Exception) {
+                    binding.imgCapa.setImageResource(R.drawable.capadomquixote)
+                }
+            }
+            livro.imagemRes != null && livro.imagemRes != 0 -> {
+                binding.imgCapa.setImageResource(livro.imagemRes!!)
+            }
+            livro.imagemUri.isNotEmpty() -> {
+                try {
+                    binding.imgCapa.setImageURI(android.net.Uri.parse(livro.imagemUri))
+                } catch (e: SecurityException) {
+                    binding.imgCapa.setImageResource(R.drawable.capadomquixote)
+                } catch (e: Exception) {
+                    binding.imgCapa.setImageResource(R.drawable.capadomquixote)
+                }
+            }
+            else -> {
+                binding.imgCapa.setImageResource(R.drawable.capadomquixote)
+            }
+        }
 
         binding.txtStatus.text = if (livro.disponivel) getString(R.string.status_disponivel) else getString(R.string.status_indisponivel)
 
@@ -315,5 +347,15 @@ class LivroActivity : AppCompatActivity() {
                 else -> false
             }
         }
+    }
+
+    fun base64ToBitmap(base64: String): Bitmap {
+        val decodedBytes = Base64.decode(base64, Base64.DEFAULT)
+
+        return BitmapFactory.decodeByteArray(
+            decodedBytes,
+            0,
+            decodedBytes.size
+        )
     }
 }

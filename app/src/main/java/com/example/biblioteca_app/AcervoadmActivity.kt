@@ -109,6 +109,7 @@ class AcervoadmActivity : AppCompatActivity() {
                         autor = doc.getString("autor") ?: "",
                         descricao = doc.getString("sinopse") ?: "",
                         imagemUri = doc.getString("imagemUri") ?: "",
+                        imagemBase64 = doc.getString("imagemBase64"),
                         disponivel = doc.getBoolean("disponivel") ?: true,
                         media = (doc.getDouble("media") ?: 0.0).toFloat(),
                         totalAvaliacoes = (doc.getLong("totalAvaliacoes") ?: 0).toInt()
@@ -152,9 +153,34 @@ class AcervoadmActivity : AppCompatActivity() {
             R.layout.item_livro,
             listaLivros
         ) { view, item, position ->
-
-            view.findViewById<ImageView>(R.id.imgCapa)
-                .setImageURI(Uri.parse(item.imagemUri))
+            val imgCapa = view.findViewById<ImageView>(R.id.imgCapa)
+            
+            when {
+                !item.imagemBase64.isNullOrEmpty() -> {
+                    try {
+                        val decodedBytes = android.util.Base64.decode(item.imagemBase64, android.util.Base64.DEFAULT)
+                        val bitmap = android.graphics.BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                        imgCapa.setImageBitmap(bitmap)
+                    } catch (e: Exception) {
+                        imgCapa.setImageResource(R.drawable.capadomquixote)
+                    }
+                }
+                item.imagemUri.isNotEmpty() -> {
+                    try {
+                        imgCapa.setImageURI(Uri.parse(item.imagemUri))
+                    } catch (e: SecurityException) {
+                        imgCapa.setImageResource(R.drawable.capadomquixote)
+                    } catch (e: Exception) {
+                        imgCapa.setImageResource(R.drawable.capadomquixote)
+                    }
+                }
+                item.imagemRes != null && item.imagemRes != 0 -> {
+                    imgCapa.setImageResource(item.imagemRes!!)
+                }
+                else -> {
+                    imgCapa.setImageResource(R.drawable.capadomquixote)
+                }
+            }
 
             view.findViewById<TextView>(R.id.txtTituloLivro).text = item.titulo
             view.findViewById<TextView>(R.id.txtAutor).text = item.autor
