@@ -7,16 +7,10 @@ import android.os.Bundle
 import android.util.Base64
 import android.view.View
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.core.widget.doAfterTextChanged
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.biblioteca_app.adapters.LivroAdapter
@@ -25,9 +19,10 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.firestore.FirebaseFirestore
 
 class BuscaActivity : AppCompatActivity() {
-    private val db = FirebaseFirestore.getInstance()
-    private lateinit var adapter: LivroAdapter
 
+    private val db = FirebaseFirestore.getInstance()
+
+    private lateinit var adapter: LivroAdapter
     private val livros = mutableListOf<Livro>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +31,9 @@ class BuscaActivity : AppCompatActivity() {
 
         val rvLivros = findViewById<RecyclerView>(R.id.rvLivros)
         val etPesquisa = findViewById<EditText>(R.id.etPesquisa)
+
+        val txtQtd = findViewById<TextView>(R.id.txtQtdLivros)
+        val layoutSemResultados = findViewById<LinearLayout>(R.id.layoutSemResultados)
 
         adapter = LivroAdapter(emptyList()) { livro ->
             val intent = Intent(this, LivroActivity::class.java)
@@ -46,7 +44,7 @@ class BuscaActivity : AppCompatActivity() {
         rvLivros.layoutManager = LinearLayoutManager(this)
         rvLivros.adapter = adapter
 
-        carregarLivros()
+        carregarLivros(txtQtd, layoutSemResultados)
 
         etPesquisa.doAfterTextChanged { text ->
             val query = text.toString().trim()
@@ -60,16 +58,16 @@ class BuscaActivity : AppCompatActivity() {
                 }
             }
 
-            adapter.updateList(filtrados)
+            atualizarLista(filtrados, txtQtd, layoutSemResultados)
         }
+
+        setupNavBar()
     }
 
-    fun base64ToBitmap(base64: String): Bitmap {
-        val decodedBytes = Base64.decode(base64, Base64.DEFAULT)
-        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-    }
-
-    private fun carregarLivros() {
+    private fun carregarLivros(
+        txtQtd: TextView,
+        layoutSemResultados: LinearLayout
+    ) {
         db.collection("livros")
             .get()
             .addOnSuccessListener { documents ->
@@ -91,28 +89,33 @@ class BuscaActivity : AppCompatActivity() {
                     )
                 }
 
-                adapter.updateList(livros)
-
-                // atualizando a contagem de livros
-                findViewById<TextView>(R.id.txtQtdLivros).text =
-                    "${livros.size} livro(s) no acervo"
+                atualizarLista(livros, txtQtd, layoutSemResultados)
             }
     }
 
-    private fun showOrderDialog() {
-        val options = arrayOf("A - Z (Título)", "Z - A (Título)", "A - Z (Autor)", "Z - A (Autor)")
-        
-        AlertDialog.Builder(this)
-            .setTitle("Ordenar por")
-            .setItems(options) { _, which ->
-                Toast.makeText(this, "Ordenando por: ${options[which]}", Toast.LENGTH_SHORT).show()
-            }
-            .show()
+    private fun atualizarLista(
+        lista: List<Livro>,
+        txtQtd: TextView,
+        layoutSemResultados: LinearLayout
+    ) {
+        adapter.updateList(lista)
+
+        txtQtd.text = "${lista.size} livro(s) no acervo"
+
+        if (lista.isEmpty()) {
+            layoutSemResultados.visibility = View.VISIBLE
+            findViewById<RecyclerView>(R.id.rvLivros).visibility = View.GONE
+        } else {
+            layoutSemResultados.visibility = View.GONE
+            findViewById<RecyclerView>(R.id.rvLivros).visibility = View.VISIBLE
+        }
     }
 
     private fun setupNavBar() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
+
         bottomNav.selectedItemId = R.id.nav_busca
+
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
@@ -120,11 +123,7 @@ class BuscaActivity : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_busca -> {
-                    startActivity(Intent(this, BuscaActivity::class.java))
-                    finish()
-                    true
-                }
+                R.id.nav_busca -> true
                 R.id.nav_notif -> {
                     startActivity(Intent(this, NotificacoesActivity::class.java))
                     finish()
@@ -138,5 +137,10 @@ class BuscaActivity : AppCompatActivity() {
                 else -> false
             }
         }
+    }
+
+    fun base64ToBitmap(base64: String): Bitmap {
+        val decodedBytes = Base64.decode(base64, Base64.DEFAULT)
+        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
     }
 }
