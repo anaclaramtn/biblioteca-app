@@ -56,9 +56,10 @@ data class Sala(
 )
 
 data class PesquisaAdm(
-    val nome: String,
-    val descricao: String,
-    val disponibilidade: String
+    var id: String = "",
+    val nome: String = "",
+    val descricao: String = "",
+    val disponibilidade: String = ""
 )
 
 data class ChatMessage(

@@ -66,6 +66,7 @@ class AcervoadmActivity : AppCompatActivity() {
 
         recycler = findViewById(R.id.recyclerAcervo)
         carregarLivros()
+        carregarPesquisas()
         setupSpinner()
         setupNavBar()
 
@@ -119,6 +120,27 @@ class AcervoadmActivity : AppCompatActivity() {
                 }
 
                 setupLivros()
+            }
+    }
+
+    private fun carregarPesquisas() {
+        FirebaseFirestore.getInstance()
+            .collection("pesquisaCientifica")
+            .get()
+            .addOnSuccessListener { documentos ->
+                listaPesquisas.clear()
+                for (doc in documentos) {
+                    val pesquisa = PesquisaAdm(
+                        id = doc.id,
+                        nome = doc.getString("nome") ?: "",
+                        descricao = doc.getString("descricao") ?: "",
+                        disponibilidade = doc.getString("disponibilidade") ?: ""
+                    )
+                    listaPesquisas.add(pesquisa)
+                }
+                if (findViewById<Spinner>(R.id.spinnerFiltro).selectedItem.toString() == "Pesquisa Científica") {
+                    setupPesquisa()
+                }
             }
     }
 

@@ -50,21 +50,21 @@ class CadastroPesquisaActivity : AppCompatActivity() {
                 val dadosPesquisa = hashMapOf(
                     "nome" to prof,
                     "descricao" to desc,
-                    "informacoesAdicionais" to info
+                    "disponibilidade" to info
                 )
 
                 // Salva a pesquisa no banco de dados (Firestore)
                 db.collection("pesquisaCientifica")
                     .add(dadosPesquisa)
-                    .addOnSuccessListener {
-                        // Também adiciona na lista local para feedback imediato (opcional)
-                        AcervoadmActivity.listaPesquisas.add(0, PesquisaAdm(prof, desc, info))
+                    .addOnSuccessListener { docRef ->
+                        // Também adiciona na lista local para feedback imediato
+                        AcervoadmActivity.listaPesquisas.add(0, PesquisaAdm(docRef.id, prof, desc, info))
                         
-                        Toast.makeText(this, "Pesquisa cadastrada com sucesso!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Acervo Atualizado!", Toast.LENGTH_SHORT).show()
                         finish()
                     }
                     .addOnFailureListener { e ->
-                        Toast.makeText(this, "Erro ao salvar no banco: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Erro ao salvar: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
             }
         }

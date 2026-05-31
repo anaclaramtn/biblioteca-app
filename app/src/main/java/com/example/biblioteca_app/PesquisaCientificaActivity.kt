@@ -11,7 +11,12 @@ import com.example.biblioteca_app.adapters.GenericAdapter
 import com.example.biblioteca_app.models.PesquisaAdm
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
+import com.google.firebase.firestore.FirebaseFirestore
+
 class PesquisaCientificaActivity : AppCompatActivity() {
+
+    private lateinit var adapter: GenericAdapter<PesquisaAdm>
+    private val listaPesquisas = mutableListOf<PesquisaAdm>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,24 +35,10 @@ class PesquisaCientificaActivity : AppCompatActivity() {
             mostrarDialogOrdenacao()
         }
 
-        // 🔹 Lista de dados (substitui seus cards fixos)
-        val lista = listOf(
-            PesquisaAdm(
-                "Prof. Osvaldo",
-                "Dúvida em relação à norma ABNT",
-                "Seg, Qua, Sex\nSalas: D08, J10, M14\n13h - 17h"
-            ),
-            PesquisaAdm(
-                "Monitor Gabriel",
-                "Suporte relacionado à área de TCC",
-                "Seg, Qua, Sex\nSalas: D08, K10, J14\n13h - 17h"
-            )
-        )
-
         // 🔹 Adapter genérico
-        val adapter = GenericAdapter<PesquisaAdm>(
+        adapter = GenericAdapter<PesquisaAdm>(
             R.layout.item_pesquisa,
-            lista
+            listaPesquisas
         ) { view, item, _ ->
 
             val nome = view.findViewById<TextView>(R.id.txtNomePesquisa)
@@ -61,7 +52,31 @@ class PesquisaCientificaActivity : AppCompatActivity() {
 
         recycler.layoutManager = LinearLayoutManager(this)
         recycler.adapter = adapter
+        
+        carregarDadosBanco()
         setupNavBar()
+    }
+
+    private fun carregarDadosBanco() {
+        FirebaseFirestore.getInstance()
+            .collection("pesquisaCientifica")
+            .get()
+            .addOnSuccessListener { documentos ->
+                listaPesquisas.clear()
+                for (doc in documentos) {
+                    val pesquisa = PesquisaAdm(
+                        id = doc.id,
+                        nome = doc.getString("nome") ?: "",
+                        descricao = doc.getString("descricao") ?: "",
+                        disponibilidade = doc.getString("disponibilidade") ?: ""
+                    )
+                    listaPesquisas.add(pesquisa)
+                }
+                adapter.updateList(listaPesquisas)
+            }
+            .addOnFailureListener {
+                android.widget.Toast.makeText(this, "Erro ao carregar dados", android.widget.Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun mostrarDialogOrdenacao() {
