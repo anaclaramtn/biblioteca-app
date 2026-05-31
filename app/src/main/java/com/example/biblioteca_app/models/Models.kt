@@ -77,5 +77,5 @@ data class Avaliacao(
     val descricao: String = "",
     val nota: Float = 0f,
     val data: Timestamp? = null,
-    val curtidas: Int = 0
+    var curtidas: Int = 0
 )
