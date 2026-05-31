@@ -19,6 +19,7 @@ import com.example.biblioteca_app.models.PesquisaAdm
 class CadastroPesquisaActivity : AppCompatActivity() {
 
     private lateinit var db: FirebaseFirestore
+    private var pesquisaParaEditar: PesquisaAdm? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +28,15 @@ class CadastroPesquisaActivity : AppCompatActivity() {
 
         // Inicializa o Firestore
         db = FirebaseFirestore.getInstance()
-        
+
+        // Verifica se veio algo para editar
+        pesquisaParaEditar = intent.getSerializableExtra("PESQUISA") as? PesquisaAdm
+        pesquisaParaEditar?.let {
+            findViewById<EditText>(R.id.edtNomeProfessor).setText(it.nome)
+            findViewById<EditText>(R.id.edtDescricaoAtividade).setText(it.descricao)
+            findViewById<EditText>(R.id.edtInfoAdicionais).setText(it.disponibilidade)
+        }
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -53,19 +62,33 @@ class CadastroPesquisaActivity : AppCompatActivity() {
                     "disponibilidade" to info
                 )
 
-                // Salva a pesquisa no banco de dados (Firestore)
-                db.collection("pesquisaCientifica")
-                    .add(dadosPesquisa)
-                    .addOnSuccessListener { docRef ->
-                        // Também adiciona na lista local para feedback imediato
-                        AcervoadmActivity.listaPesquisas.add(0, PesquisaAdm(docRef.id, prof, desc, info))
-                        
-                        Toast.makeText(this, "Acervo Atualizado!", Toast.LENGTH_SHORT).show()
-                        finish()
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(this, "Erro ao salvar: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
+                if (pesquisaParaEditar == null) {
+                    // MODO CADASTRO
+                    db.collection("pesquisaCientifica")
+                        .add(dadosPesquisa)
+                        .addOnSuccessListener { docRef ->
+                            // Também adiciona na lista local para feedback imediato
+                            AcervoadmActivity.listaPesquisas.add(0, PesquisaAdm(docRef.id, prof, desc, info))
+
+                            Toast.makeText(this, "Acervo Atualizado!", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Erro ao salvar: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    // MODO EDIÇÃO
+                    db.collection("pesquisaCientifica")
+                        .document(pesquisaParaEditar!!.id)
+                        .set(dadosPesquisa)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Acervo Atualizado!", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Erro ao atualizar: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
             }
         }
 

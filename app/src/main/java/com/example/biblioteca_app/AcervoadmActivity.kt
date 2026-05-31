@@ -330,14 +330,22 @@ class AcervoadmActivity : AppCompatActivity() {
                 popup.setOnMenuItemClickListener { menuItem ->
                     when (menuItem.title) {
                         "Editar" -> {
-                            startActivity(Intent(this, CadastroPesquisaActivity::class.java))
+                            val intent = Intent(this, CadastroPesquisaActivity::class.java)
+                            intent.putExtra("PESQUISA", item)
+                            startActivity(intent)
                             true
                         }
                         "Deletar" -> {
-                            listaPesquisas.removeAt(position)
-                            recycler.adapter?.notifyItemRemoved(position)
-                            recycler.adapter?.notifyItemRangeChanged(position, listaPesquisas.size)
-                            Toast.makeText(this, "Pesquisa de '${item.nome}' deletada!", Toast.LENGTH_SHORT).show()
+                            FirebaseFirestore.getInstance().collection("pesquisaCientifica").document(item.id).delete()
+                                .addOnSuccessListener {
+                                    listaPesquisas.removeAt(position)
+                                    recycler.adapter?.notifyItemRemoved(position)
+                                    recycler.adapter?.notifyItemRangeChanged(position, listaPesquisas.size)
+                                    Toast.makeText(this, "Pesquisa de '${item.nome}' deletada!", Toast.LENGTH_SHORT).show()
+                                }
+                                .addOnFailureListener {
+                                    Toast.makeText(this, "Erro ao deletar!", Toast.LENGTH_SHORT).show()
+                                }
                             true
                         }
                         else -> false

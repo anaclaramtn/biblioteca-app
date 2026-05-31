@@ -60,7 +60,7 @@ data class PesquisaAdm(
     val nome: String = "",
     val descricao: String = "",
     val disponibilidade: String = ""
-)
+) : Serializable
 
 data class ChatMessage(
     val text: String,
