@@ -1,7 +1,10 @@
 package com.example.biblioteca_app
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Base64
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -131,6 +134,11 @@ class TelaHomeActivity : AppCompatActivity() {
         }
     }
 
+    fun base64ToBitmap(base64: String): Bitmap {
+        val decodedBytes = Base64.decode(base64, Base64.DEFAULT)
+        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+    }
+
     private fun setupNavBar() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
         bottomNav.selectedItemId = R.id.nav_home
@@ -198,7 +206,7 @@ class TelaHomeActivity : AppCompatActivity() {
                         titulo = documento.getString("titulo") ?: "",
                         autor = documento.getString("autor") ?: "",
                         descricao = documento.getString("sinopse") ?: "",
-                        imagemRes = R.drawable.capadomquixote,
+                        imagemBase64 = documento.getString("imagemBase64"),
                         disponivel = documento.getBoolean("disponivel") ?: true,
                         media = documento.getDouble("media")?.toFloat() ?: 0f,
                         totalAvaliacoes = documento.getLong("totalAvaliacoes")?.toInt() ?: 0
@@ -222,7 +230,7 @@ class TelaHomeActivity : AppCompatActivity() {
                         titulo = documento.getString("titulo") ?: "",
                         autor = documento.getString("autor") ?: "",
                         descricao = documento.getString("sinopse") ?: "",
-                        imagemRes = R.drawable.capadomquixote,
+                        imagemBase64 = documento.getString("imagemBase64"),
                         disponivel = documento.getBoolean("disponivel") ?: true,
                         media = documento.getDouble("media")?.toFloat() ?: 0f,
                         totalAvaliacoes = documento.getLong("totalAvaliacoes")?.toInt() ?: 0
@@ -246,7 +254,7 @@ class TelaHomeActivity : AppCompatActivity() {
                         titulo = documento.getString("titulo") ?: "",
                         autor = documento.getString("autor") ?: "",
                         descricao = documento.getString("sinopse") ?: "",
-                        imagemRes = R.drawable.capadomquixote,
+                        imagemBase64 = documento.getString("imagemBase64"),
                         disponivel = documento.getBoolean("disponivel") ?: true,
                         media = documento.getDouble("media")?.toFloat() ?: 0f,
                         totalAvaliacoes = documento.getLong("totalAvaliacoes")?.toInt() ?: 0
@@ -306,9 +314,30 @@ class TelaHomeActivity : AppCompatActivity() {
     }
 
     private fun setupItemLivro(view: View, livro: Livro) {
+
         view.findViewById<TextView>(R.id.txtTituloLivro).text = livro.titulo
         view.findViewById<TextView>(R.id.txtAutor).text = livro.autor
-        view.findViewById<ImageView>(R.id.imgCapa).setImageResource(R.drawable.capadomquixote)
+
+        val img = view.findViewById<ImageView>(R.id.imgCapa)
+
+        when {
+            !livro.imagemBase64.isNullOrEmpty() -> {
+                try {
+                    val bitmap = base64ToBitmap(livro.imagemBase64!!)
+                    img.setImageBitmap(bitmap)
+                } catch (e: Exception) {
+                    img.setImageResource(R.drawable.capadomquixote)
+                }
+            }
+
+            livro.imagemRes != null && livro.imagemRes != 0 -> {
+                img.setImageResource(livro.imagemRes!!)
+            }
+
+            else -> {
+                img.setImageResource(R.drawable.capadomquixote)
+            }
+        }
 
         view.setOnClickListener {
             val intent = Intent(this, LivroActivity::class.java)
