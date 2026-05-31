@@ -53,7 +53,7 @@ class TelaHomeActivity : AppCompatActivity() {
 
         // Garante que NÃO aparece botão de voltar
         btnBack.visibility = View.GONE
-        
+
         // Configuração das Notícias
         val rvNoticias = findViewById<RecyclerView>(R.id.rvNoticias)
         val layoutDots = findViewById<LinearLayout>(R.id.layoutDots)
@@ -118,7 +118,11 @@ class TelaHomeActivity : AppCompatActivity() {
         }
 
         carregarLivrosPopulares()
+        carregarLivrosMaisCurtidos()
         carregarLivrosBemAvaliados()
+
+        // Inicializa com dados exemplares (Mock) para garantir que os 6 apareçam sempre
+        setupLivrosExemplares()
 
         setupNavBar()
 
@@ -157,58 +161,38 @@ class TelaHomeActivity : AppCompatActivity() {
         }
     }
 
-//    private fun setupLivrosCarrossel() {
-//        // Populares
-//        setupItemLivro(findViewById(R.id.livroPop1), R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
-//        setupItemLivro(findViewById(R.id.livroPop2), R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
-//        setupItemLivro(findViewById(R.id.livroPop3), R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
-//
-//        // Mais Bem Avaliados
-//        setupItemLivro(findViewById(R.id.livroAval1), R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
-//        setupItemLivro(findViewById(R.id.livroAval2), R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
-//        setupItemLivro(findViewById(R.id.livroAval3), R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
-//    }
+    private fun setupLivrosExemplares() {
+        val livroExemplo = Livro(
+            titulo = "Dom Quixote",
+            autor = "Miguel de Cervantes",
+            descricao = "A história de um cavaleiro errante...",
+            imagemRes = R.drawable.capadomquixote,
+            disponivel = true,
+            media = 4.5f,
+            totalAvaliacoes = 50
+        )
 
-//    private fun carregarLivros() {
-//
-//        db.collection("livros")
-//            .get()
-//            .addOnSuccessListener { documentos ->
-//
-//                val livros = mutableListOf<Livro>()
-//
-//                for (documento in documentos) {
-//
-//                    val livro = Livro(
-//                        id = documento.id,
-//                        titulo = documento.getString("titulo") ?: "",
-//                        autor = documento.getString("autor") ?: "",
-//                        descricao = documento.getString("sinopse") ?: "",
-//                        disponivel = documento.getBoolean("disponivel") ?: true,
-//                        media = documento.getDouble("media")?.toFloat() ?: 0f,
-//                        totalAvaliacoes = documento.getLong("totalAvaliacoes")?.toInt() ?: 0,
-//
-//                        imagemRes = R.drawable.capadomquixote
-//                    )
-//
-//                    livros.add(livro)
-//                }
-//
-//                mostrarLivros(livros)
-//            }
-//    }
+        // Preenche Populares
+        val viewsPop = listOf(R.id.livroPop1, R.id.livroPop2, R.id.livroPop3, R.id.livroPop4, R.id.livroPop5, R.id.livroPop6)
+        viewsPop.forEach { id -> setupItemLivro(findViewById(id), livroExemplo) }
+
+        // Preenche Curtidos
+        val viewsCurt = listOf(R.id.livroCurt1, R.id.livroCurt2, R.id.livroCurt3, R.id.livroCurt4, R.id.livroCurt5, R.id.livroCurt6)
+        viewsCurt.forEach { id -> setupItemLivro(findViewById(id), livroExemplo) }
+
+        // Preenche Bem Avaliados
+        val viewsAval = listOf(R.id.livroAval1, R.id.livroAval2, R.id.livroAval3, R.id.livroAval4, R.id.livroAval5, R.id.livroAval6)
+        viewsAval.forEach { id -> setupItemLivro(findViewById(id), livroExemplo) }
+    }
+
     private fun carregarLivrosBemAvaliados() {
-
         db.collection("livros")
-            .orderBy("media", com.google.firebase.firestore.Query.Direction.DESCENDING)
-            .limit(3)
+            .orderBy("media", Query.Direction.DESCENDING)
+            .limit(6)
             .get()
             .addOnSuccessListener { documentos ->
-
                 val livros = mutableListOf<Livro>()
-
                 for (documento in documentos) {
-
                     val livro = Livro(
                         id = documento.id,
                         titulo = documento.getString("titulo") ?: "",
@@ -219,69 +203,20 @@ class TelaHomeActivity : AppCompatActivity() {
                         media = documento.getDouble("media")?.toFloat() ?: 0f,
                         totalAvaliacoes = documento.getLong("totalAvaliacoes")?.toInt() ?: 0
                     )
-
                     livros.add(livro)
                 }
-
                 mostrarLivrosBemAvaliados(livros)
             }
     }
 
-    private fun mostrarLivrosPopulares(
-        livros: List<Livro>
-    ) {
-
-        val views = listOf(
-            findViewById<View>(R.id.livroPop1),
-            findViewById<View>(R.id.livroPop2),
-            findViewById<View>(R.id.livroPop3)
-        )
-
-        livros.forEachIndexed { index, livro ->
-
-            if (index < views.size) {
-
-                setupItemLivro(
-                    views[index],
-                    livro
-                )
-            }
-        }
-    }
-    private fun mostrarLivrosBemAvaliados(
-        livros: List<Livro>
-    ) {
-
-        val views = listOf(
-            findViewById<View>(R.id.livroAval1),
-            findViewById<View>(R.id.livroAval2),
-            findViewById<View>(R.id.livroAval3)
-        )
-
-        livros.forEachIndexed { index, livro ->
-
-            if (index < views.size) {
-
-                setupItemLivro(
-                    views[index],
-                    livro
-                )
-            }
-        }
-    }
-
     private fun carregarLivrosPopulares() {
-
         db.collection("livros")
-            .orderBy("totalAvaliacoes", com.google.firebase.firestore.Query.Direction.DESCENDING)
-            .limit(3)
+            .orderBy("totalAvaliacoes", Query.Direction.DESCENDING)
+            .limit(6)
             .get()
             .addOnSuccessListener { documentos ->
-
                 val livros = mutableListOf<Livro>()
-
                 for (documento in documentos) {
-
                     val livro = Livro(
                         id = documento.id,
                         titulo = documento.getString("titulo") ?: "",
@@ -292,45 +227,92 @@ class TelaHomeActivity : AppCompatActivity() {
                         media = documento.getDouble("media")?.toFloat() ?: 0f,
                         totalAvaliacoes = documento.getLong("totalAvaliacoes")?.toInt() ?: 0
                     )
-
                     livros.add(livro)
                 }
-
                 mostrarLivrosPopulares(livros)
             }
     }
 
-    private fun setupItemLivro(
-        view: View,
-        livro: Livro
-    ) {
+    private fun carregarLivrosMaisCurtidos() {
+        db.collection("livros")
+            .orderBy("media", Query.Direction.DESCENDING) // Usando media como fallback ou se houver um campo "curtidas" futuramente
+            .limit(6)
+            .get()
+            .addOnSuccessListener { documentos ->
+                val livros = mutableListOf<Livro>()
+                for (documento in documentos) {
+                    val livro = Livro(
+                        id = documento.id,
+                        titulo = documento.getString("titulo") ?: "",
+                        autor = documento.getString("autor") ?: "",
+                        descricao = documento.getString("sinopse") ?: "",
+                        imagemRes = R.drawable.capadomquixote,
+                        disponivel = documento.getBoolean("disponivel") ?: true,
+                        media = documento.getDouble("media")?.toFloat() ?: 0f,
+                        totalAvaliacoes = documento.getLong("totalAvaliacoes")?.toInt() ?: 0
+                    )
+                    livros.add(livro)
+                }
+                mostrarLivrosMaisCurtidos(livros)
+            }
+    }
 
-        view.findViewById<TextView>(
-            R.id.txtTituloLivro
-        ).text = livro.titulo
-
-        view.findViewById<TextView>(
-            R.id.txtAutor
-        ).text = livro.autor
-
-        view.findViewById<ImageView>(
-            R.id.imgCapa
-        ).setImageResource(
-            R.drawable.capadomquixote
+    private fun mostrarLivrosPopulares(livros: List<Livro>) {
+        val views = listOf(
+            findViewById<View>(R.id.livroPop1),
+            findViewById<View>(R.id.livroPop2),
+            findViewById<View>(R.id.livroPop3),
+            findViewById<View>(R.id.livroPop4),
+            findViewById<View>(R.id.livroPop5),
+            findViewById<View>(R.id.livroPop6)
         )
+        livros.forEachIndexed { index, livro ->
+            if (index < views.size) {
+                setupItemLivro(views[index], livro)
+            }
+        }
+    }
+
+    private fun mostrarLivrosMaisCurtidos(livros: List<Livro>) {
+        val views = listOf(
+            findViewById<View>(R.id.livroCurt1),
+            findViewById<View>(R.id.livroCurt2),
+            findViewById<View>(R.id.livroCurt3),
+            findViewById<View>(R.id.livroCurt4),
+            findViewById<View>(R.id.livroCurt5),
+            findViewById<View>(R.id.livroCurt6)
+        )
+        livros.forEachIndexed { index, livro ->
+            if (index < views.size) {
+                setupItemLivro(views[index], livro)
+            }
+        }
+    }
+
+    private fun mostrarLivrosBemAvaliados(livros: List<Livro>) {
+        val views = listOf(
+            findViewById<View>(R.id.livroAval1),
+            findViewById<View>(R.id.livroAval2),
+            findViewById<View>(R.id.livroAval3),
+            findViewById<View>(R.id.livroAval4),
+            findViewById<View>(R.id.livroAval5),
+            findViewById<View>(R.id.livroAval6)
+        )
+        livros.forEachIndexed { index, livro ->
+            if (index < views.size) {
+                setupItemLivro(views[index], livro)
+            }
+        }
+    }
+
+    private fun setupItemLivro(view: View, livro: Livro) {
+        view.findViewById<TextView>(R.id.txtTituloLivro).text = livro.titulo
+        view.findViewById<TextView>(R.id.txtAutor).text = livro.autor
+        view.findViewById<ImageView>(R.id.imgCapa).setImageResource(R.drawable.capadomquixote)
 
         view.setOnClickListener {
-
-            val intent = Intent(
-                this,
-                LivroActivity::class.java
-            )
-
-            intent.putExtra(
-                "LIVRO",
-                livro
-            )
-
+            val intent = Intent(this, LivroActivity::class.java)
+            intent.putExtra("LIVRO", livro)
             startActivity(intent)
         }
     }

@@ -115,6 +115,9 @@
                         <include android:id="@+id/livroPop1" layout="@layout/item_livro" />
                         <include android:id="@+id/livroPop2" layout="@layout/item_livro" />
                         <include android:id="@+id/livroPop3" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroPop4" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroPop5" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroPop6" layout="@layout/item_livro" />
 
                     </LinearLayout>
                 </HorizontalScrollView>
@@ -129,14 +132,26 @@
                     android:textStyle="bold"
                     android:textSize="14sp" />
 
-                <TextView
+                <HorizontalScrollView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:text="Nenhum livro curtido por enquanto"
-                    android:textColor="#999999"
-                    android:fontFamily="cursive"
-                    android:textSize="14sp" />
+                    android:padding="8dp"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <include android:id="@+id/livroCurt1" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroCurt2" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroCurt3" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroCurt4" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroCurt5" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroCurt6" layout="@layout/item_livro" />
+
+                    </LinearLayout>
+                </HorizontalScrollView>
 
                 <!-- Livros Mais Bem Avaliados -->
                 <TextView
@@ -162,6 +177,9 @@
                         <include android:id="@+id/livroAval1" layout="@layout/item_livro" />
                         <include android:id="@+id/livroAval2" layout="@layout/item_livro" />
                         <include android:id="@+id/livroAval3" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroAval4" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroAval5" layout="@layout/item_livro" />
+                        <include android:id="@+id/livroAval6" layout="@layout/item_livro" />
 
                     </LinearLayout>
                 </HorizontalScrollView>
