@@ -28,6 +28,7 @@ class CadastroJogoActivity : AppCompatActivity() {
     // Guarda a URI da imagem selecionada
     private var imageUri: Uri? = null
     private lateinit var db: FirebaseFirestore
+    private var jogoParaEditar: Jogo? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +37,14 @@ class CadastroJogoActivity : AppCompatActivity() {
 
         // Inicializa o Firestore
         db = FirebaseFirestore.getInstance()
+
+        // Verifica se veio algo para editar
+        jogoParaEditar = intent.getSerializableExtra("JOGO") as? Jogo
+        jogoParaEditar?.let {
+            findViewById<EditText>(R.id.edtTituloJogo).setText(it.nome)
+            // Se for edição, a lógica de imagem precisaria carregar a URI salva, 
+            // mas como estamos usando imagemRes mockada por enquanto, vamos pular o carregamento visual da imagem.
+        }
 
         // Configura o seletor de galeria
         val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -78,30 +87,44 @@ class CadastroJogoActivity : AppCompatActivity() {
         findViewById<AppCompatButton>(R.id.btnEnviar).setOnClickListener {
             val titulo = findViewById<EditText>(R.id.edtTituloJogo).text.toString()
 
-            // Valida se o título e a imagem foram preenchidos
-            if (titulo.isBlank() || imageUri == null) {
+            // Valida se o título foi preenchido (imagem opcional se for edição e já existir)
+            if (titulo.isBlank() || (jogoParaEditar == null && imageUri == null)) {
                 exibirAviso()
             } else {
                 // Prepara os dados do jogo para o Firestore
-                val dadosJogo = hashMapOf(
+                val dadosJogo = mutableMapOf<String, Any>(
                     "nome" to titulo,
-                    "imagemCapa" to imageUri.toString(),
-                    "isDisponivel" to true
+                    "isDisponivel" to true,
+                    "imagemRes" to R.drawable.uno // Mock para simplicidade, ou use imageUri.toString()
                 )
+                
+                imageUri?.let { dadosJogo["imagemCapa"] = it.toString() }
 
-                // Salva o jogo no banco de dados (Firestore)
-                db.collection("jogos")
-                    .add(dadosJogo)
-                    .addOnSuccessListener {
-                        // Também adiciona na lista local para feedback imediato (opcional)
-                        AcervoadmActivity.listaJogos.add(0, Jogo(titulo, R.drawable.uno))
-                        
-                        Toast.makeText(this, "Jogo cadastrado com sucesso!", Toast.LENGTH_SHORT).show()
-                        finish()
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(this, "Erro ao salvar no banco: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
+                if (jogoParaEditar == null) {
+                    // MODO CADASTRO
+                    db.collection("jogos")
+                        .add(dadosJogo)
+                        .addOnSuccessListener { docRef ->
+                            AcervoadmActivity.listaJogos.add(0, Jogo(docRef.id, titulo, R.drawable.uno))
+                            Toast.makeText(this, "Acervo Atualizado!", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Erro ao salvar: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    // MODO EDIÇÃO
+                    db.collection("jogos")
+                        .document(jogoParaEditar!!.id)
+                        .update(dadosJogo)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Acervo Atualizado!", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Erro ao atualizar: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
             }
         }
 

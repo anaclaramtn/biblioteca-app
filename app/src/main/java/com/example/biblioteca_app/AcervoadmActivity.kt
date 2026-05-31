@@ -35,23 +35,9 @@ class AcervoadmActivity : AppCompatActivity() {
             Noticia("Evento na Biblioteca", "Nova ala de estudos aberta."),
             Noticia("Manutenção", "Sistema ficará offline no domingo.")
         )
-        val listaJogos = mutableListOf(
-            Jogo("UNO", R.drawable.uno),
-            Jogo("WAR", R.drawable.war),
-            Jogo("Catan", R.drawable.uno)
-        )
-        val listaSalas = mutableListOf(
-            Sala("SALA 01", 10),
-            Sala("SALA 02", 10),
-            Sala("AUDITÓRIO", 50),
-            Sala("SALA 03", 8),
-            Sala("SALA 04", 12),
-            Sala("SALA 05", 10)
-        )
-        val listaPesquisas = mutableListOf(
-            PesquisaAdm("Prof. Osvaldo", "Dúvida em relação à norma ABNT", "Dias disponíveis:\nSeg, Qua, Sex\nSalas Disponíveis:\nB01, B02, B05\nHorários:\n7h - 11h"),
-            PesquisaAdm("Monitor Gabriel", "Dúvidas relacionadas à ideias de TCC", "Dias disponíveis:\nSeg, Qua, Sex\nSalas Disponíveis:\nB01, B02, B05\nHorários:\n11h - 14h")
-        )
+        val listaJogos = mutableListOf<Jogo>()
+        val listaSalas = mutableListOf<Sala>()
+        val listaPesquisas = mutableListOf<PesquisaAdm>()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,6 +75,10 @@ class AcervoadmActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        carregarLivros()
+        carregarPesquisas()
+        carregarJogos()
+        carregarSalas()
         val spinner = findViewById<Spinner>(R.id.spinnerFiltro)
         atualizarConteudo(spinner.selectedItem.toString())
     }
@@ -140,6 +130,46 @@ class AcervoadmActivity : AppCompatActivity() {
                 }
                 if (findViewById<Spinner>(R.id.spinnerFiltro).selectedItem.toString() == "Pesquisa Científica") {
                     setupPesquisa()
+                }
+            }
+    }
+
+    private fun carregarJogos() {
+        FirebaseFirestore.getInstance()
+            .collection("jogos")
+            .get()
+            .addOnSuccessListener { documentos ->
+                listaJogos.clear()
+                for (doc in documentos) {
+                    val jogo = Jogo(
+                        id = doc.id,
+                        nome = doc.getString("nome") ?: "",
+                        imagemRes = (doc.getLong("imagemRes") ?: R.drawable.uno.toLong()).toInt()
+                    )
+                    listaJogos.add(jogo)
+                }
+                if (findViewById<Spinner>(R.id.spinnerFiltro).selectedItem.toString() == "Jogos") {
+                    setupJogos()
+                }
+            }
+    }
+
+    private fun carregarSalas() {
+        FirebaseFirestore.getInstance()
+            .collection("salas")
+            .get()
+            .addOnSuccessListener { documentos ->
+                listaSalas.clear()
+                for (doc in documentos) {
+                    val sala = Sala(
+                        id = doc.id,
+                        nome = doc.getString("nome") ?: "",
+                        capacidade = (doc.getLong("capacidade") ?: 0).toInt()
+                    )
+                    listaSalas.add(sala)
+                }
+                if (findViewById<Spinner>(R.id.spinnerFiltro).selectedItem.toString() == "Salas") {
+                    setupSalas()
                 }
             }
     }
@@ -265,14 +295,19 @@ class AcervoadmActivity : AppCompatActivity() {
                 popup.setOnMenuItemClickListener { menuItem ->
                     when (menuItem.title) {
                         "Editar" -> {
-                            startActivity(Intent(this, CadastroJogoActivity::class.java))
+                            val intent = Intent(this, CadastroJogoActivity::class.java)
+                            intent.putExtra("JOGO", item)
+                            startActivity(intent)
                             true
                         }
                         "Deletar" -> {
-                            listaJogos.removeAt(position)
-                            recycler.adapter?.notifyItemRemoved(position)
-                            recycler.adapter?.notifyItemRangeChanged(position, listaJogos.size)
-                            Toast.makeText(this, "Jogo '${item.nome}' deletado!", Toast.LENGTH_SHORT).show()
+                            FirebaseFirestore.getInstance().collection("jogos").document(item.id).delete()
+                                .addOnSuccessListener {
+                                    listaJogos.removeAt(position)
+                                    recycler.adapter?.notifyItemRemoved(position)
+                                    recycler.adapter?.notifyItemRangeChanged(position, listaJogos.size)
+                                    Toast.makeText(this, "Jogo '${item.nome}' deletado!", Toast.LENGTH_SHORT).show()
+                                }
                             true
                         }
                         else -> false
@@ -297,14 +332,19 @@ class AcervoadmActivity : AppCompatActivity() {
                 popup.setOnMenuItemClickListener { menuItem ->
                     when (menuItem.title) {
                         "Editar" -> {
-                            startActivity(Intent(this, CadastroSalaActivity::class.java))
+                            val intent = Intent(this, CadastroSalaActivity::class.java)
+                            intent.putExtra("SALA", item)
+                            startActivity(intent)
                             true
                         }
                         "Deletar" -> {
-                            listaSalas.removeAt(position)
-                            recycler.adapter?.notifyItemRemoved(position)
-                            recycler.adapter?.notifyItemRangeChanged(position, listaSalas.size)
-                            Toast.makeText(this, "Sala '${item.nome}' deletada!", Toast.LENGTH_SHORT).show()
+                            FirebaseFirestore.getInstance().collection("salas").document(item.id).delete()
+                                .addOnSuccessListener {
+                                    listaSalas.removeAt(position)
+                                    recycler.adapter?.notifyItemRemoved(position)
+                                    recycler.adapter?.notifyItemRangeChanged(position, listaSalas.size)
+                                    Toast.makeText(this, "Sala '${item.nome}' deletada!", Toast.LENGTH_SHORT).show()
+                                }
                             true
                         }
                         else -> false

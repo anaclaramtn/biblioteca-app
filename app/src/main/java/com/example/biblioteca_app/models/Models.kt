@@ -46,14 +46,16 @@ data class Emprestimo(
 )
 
 data class Jogo(
-    val nome: String,
-    val imagemRes: Int
-)
+    var id: String = "",
+    val nome: String = "",
+    val imagemRes: Int = 0
+) : Serializable
 
 data class Sala(
-    val nome: String,
-    val capacidade: Int
-)
+    var id: String = "",
+    val nome: String = "",
+    val capacidade: Int = 0
+) : Serializable
 
 data class PesquisaAdm(
     var id: String = "",

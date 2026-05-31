@@ -19,6 +19,7 @@ import com.example.biblioteca_app.models.Sala
 class CadastroSalaActivity : AppCompatActivity() {
 
     private lateinit var db: FirebaseFirestore
+    private var salaParaEditar: Sala? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +28,13 @@ class CadastroSalaActivity : AppCompatActivity() {
 
         // Inicializa o Firestore
         db = FirebaseFirestore.getInstance()
+
+        // Verifica se veio algo para editar
+        salaParaEditar = intent.getSerializableExtra("SALA") as? Sala
+        salaParaEditar?.let {
+            findViewById<EditText>(R.id.edtNomeSala).setText(it.nome)
+            findViewById<EditText>(R.id.edtCapacidadeSala).setText(it.capacidade.toString())
+        }
         
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -54,19 +62,31 @@ class CadastroSalaActivity : AppCompatActivity() {
                     "isDisponivel" to true
                 )
 
-                // Salva a sala no banco de dados (Firestore)
-                db.collection("salas")
-                    .add(dadosSala)
-                    .addOnSuccessListener {
-                        // Também adiciona na lista local para feedback imediato (opcional)
-                        AcervoadmActivity.listaSalas.add(0, Sala(nome, capacidadeInt))
-                        
-                        Toast.makeText(this, "Sala cadastrada com sucesso!", Toast.LENGTH_SHORT).show()
-                        finish()
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(this, "Erro ao salvar no banco: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
+                if (salaParaEditar == null) {
+                    // MODO CADASTRO
+                    db.collection("salas")
+                        .add(dadosSala)
+                        .addOnSuccessListener { docRef ->
+                            AcervoadmActivity.listaSalas.add(0, Sala(docRef.id, nome, capacidadeInt))
+                            Toast.makeText(this, "Acervo Atualizado!", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Erro ao salvar: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    // MODO EDIÇÃO
+                    db.collection("salas")
+                        .document(salaParaEditar!!.id)
+                        .set(dadosSala)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Acervo Atualizado!", Toast.LENGTH_SHORT).show()
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Erro ao atualizar: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
             }
         }
 
