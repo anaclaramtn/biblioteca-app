@@ -1,6 +1,7 @@
 package com.example.biblioteca_app
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -20,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.biblioteca_app.adapters.GenericAdapter
 import com.example.biblioteca_app.models.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.firestore.FirebaseFirestore
 
 class AcervoadmActivity : AppCompatActivity() {
 
@@ -27,14 +29,7 @@ class AcervoadmActivity : AppCompatActivity() {
     private val categorias = listOf("Livros", "Notícias", "Jogos", "Salas", "Pesquisa Científica")
 
     companion object {
-        val listaLivros = mutableListOf(
-            Livro(titulo = "As Duas Torres", autor = "J. R. R. Tolkien", descricao = "", imagemRes = R.drawable.hobbit, disponivel = true, media = 4.9f, totalAvaliacoes = 500),
-            Livro(titulo = "As Duas Torres", autor = "J. R. R. Tolkien", descricao = "", imagemRes = R.drawable.hobbit, disponivel = true, media = 4.9f, totalAvaliacoes = 500),
-            Livro(titulo = "As Duas Torres", autor = "J. R. R. Tolkien", descricao = "", imagemRes = R.drawable.hobbit, disponivel = true, media = 4.9f, totalAvaliacoes = 500),
-            Livro(titulo = "As Duas Torres", autor = "J. R. R. Tolkien", descricao = "", imagemRes = R.drawable.hobbit, disponivel = true, media = 4.9f, totalAvaliacoes = 500),
-            Livro(titulo = "As Duas Torres", autor = "J. R. R. Tolkien", descricao = "", imagemRes = R.drawable.hobbit, disponivel = true, media = 4.9f, totalAvaliacoes = 500),
-            Livro(titulo = "As Duas Torres", autor = "J. R. R. Tolkien", descricao = "", imagemRes = R.drawable.hobbit, disponivel = true, media = 4.9f, totalAvaliacoes = 500)
-        )
+        val listaLivros = mutableListOf<Livro>()
         val listaNoticias = mutableListOf(
             Noticia("Título da notícia", "Descrição breve da notícia para o admin."),
             Noticia("Evento na Biblioteca", "Nova ala de estudos aberta."),
@@ -70,6 +65,7 @@ class AcervoadmActivity : AppCompatActivity() {
         }
 
         recycler = findViewById(R.id.recyclerAcervo)
+        carregarLivros()
         setupSpinner()
         setupNavBar()
 
@@ -94,6 +90,35 @@ class AcervoadmActivity : AppCompatActivity() {
         super.onResume()
         val spinner = findViewById<Spinner>(R.id.spinnerFiltro)
         atualizarConteudo(spinner.selectedItem.toString())
+    }
+
+    private fun carregarLivros() {
+
+        FirebaseFirestore.getInstance()
+            .collection("livros")
+            .get()
+            .addOnSuccessListener { documentos ->
+
+                listaLivros.clear()
+
+                for (doc in documentos) {
+
+                    val livro = Livro(
+                        id = doc.id,
+                        titulo = doc.getString("titulo") ?: "",
+                        autor = doc.getString("autor") ?: "",
+                        descricao = doc.getString("sinopse") ?: "",
+                        imagemUri = doc.getString("imagemUri") ?: "",
+                        disponivel = doc.getBoolean("disponivel") ?: true,
+                        media = (doc.getDouble("media") ?: 0.0).toFloat(),
+                        totalAvaliacoes = (doc.getLong("totalAvaliacoes") ?: 0).toInt()
+                    )
+
+                    listaLivros.add(livro)
+                }
+
+                setupLivros()
+            }
     }
 
     private fun setupSpinner() {
@@ -122,13 +147,25 @@ class AcervoadmActivity : AppCompatActivity() {
 
     private fun setupLivros() {
         recycler.layoutManager = GridLayoutManager(this, 3)
-        recycler.adapter = GenericAdapter(R.layout.item_livro, listaLivros) { view, item, _ ->
-            view.findViewById<ImageView>(R.id.imgCapa).setImageResource(item.imagemRes)
+
+        recycler.adapter = GenericAdapter(
+            R.layout.item_livro,
+            listaLivros
+        ) { view, item, position ->
+
+            view.findViewById<ImageView>(R.id.imgCapa)
+                .setImageURI(Uri.parse(item.imagemUri))
+
             view.findViewById<TextView>(R.id.txtTituloLivro).text = item.titulo
             view.findViewById<TextView>(R.id.txtAutor).text = item.autor
 
             view.setOnClickListener {
-                startActivity(Intent(this, AdminLivroActivity::class.java))
+                val intent = Intent(this, AdminLivroActivity::class.java)
+
+                intent.putExtra("LIVRO", item)
+                intent.putExtra("LIVRO_POS", position)
+
+                startActivity(intent)
             }
         }
     }

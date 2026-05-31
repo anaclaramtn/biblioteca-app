@@ -90,8 +90,19 @@ class CadastroLivroActivity : AppCompatActivity() {
                     .add(dadosLivro)
                     .addOnSuccessListener {
                         // Também adiciona na lista local para feedback imediato (opcional)
-                        AcervoadmActivity.listaLivros.add(0, Livro(titulo = titulo, autor = autor, descricao = sinopse, imagemRes = R.drawable.hobbit, disponivel = true, media = 0.0f, totalAvaliacoes = 0))
-                        
+                        AcervoadmActivity.listaLivros.add(
+                            0,
+                            Livro(
+                                titulo = titulo,
+                                autor = autor,
+                                descricao = sinopse,
+                                imagemUri = imageUri.toString(),
+                                disponivel = true,
+                                media = 0.0f,
+                                totalAvaliacoes = 0
+                            )
+                        )
+
                         Toast.makeText(this, "Livro cadastrado com sucesso!", Toast.LENGTH_SHORT).show()
                         finish()
                     }

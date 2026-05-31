@@ -1,6 +1,7 @@
 package com.example.biblioteca_app
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
@@ -65,7 +66,7 @@ class AdminLivroActivity : AppCompatActivity() {
                 titulo = "Star Wars: A Vingança dos Sith",
                 autor = "George Lucas",
                 descricao = "Anakin Skywalker se torna Darth Vader...",
-                imagemRes = R.drawable.capa_star_wars,
+                imagemUri = "",
                 disponivel = true,
                 media = 4.9f,
                 totalAvaliacoes = 120
@@ -75,7 +76,11 @@ class AdminLivroActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.txtTitulo).text = livro.titulo
         findViewById<TextView>(R.id.txtAutor).text = livro.autor
         findViewById<TextView>(R.id.txtDescricao).text = livro.descricao
-        findViewById<android.widget.ImageView>(R.id.imgCapa).setImageResource(livro.imagemRes)
+        val img = findViewById<android.widget.ImageView>(R.id.imgCapa)
+
+        if (livro.imagemUri.isNotEmpty()) {
+            img.setImageURI(Uri.parse(livro.imagemUri))
+        }
         
         val layoutResumo = findViewById<View>(R.id.layoutResumo)
         layoutResumo.findViewById<TextView>(R.id.txtMedia).text = livro.media.toString()

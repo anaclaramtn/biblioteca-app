@@ -10,16 +10,15 @@ data class Noticia(
 )
 
 data class Livro(
-    val id: String = "",
-    val titulo: String,
-    val autor: String,
-    val descricao: String,
-    val imagemRes: Int,
-    val disponivel: Boolean,
-    val media: Float,
-    val totalAvaliacoes: Int
+    var id: String = "",
+    val titulo: String = "",
+    val autor: String = "",
+    val descricao: String = "",
+    val imagemUri: String = "",
+    val disponivel: Boolean = true,
+    val media: Float = 0f,
+    val totalAvaliacoes: Int = 0
 ) : Serializable
-
 data class Notificacao(
     val titulo: String,
     val mensagem: String,
