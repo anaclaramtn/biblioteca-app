@@ -6,8 +6,13 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class AdminMenuActivity : AppCompatActivity() {
+
+    private lateinit var txtNome: TextView
+    private lateinit var txtEmail: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -15,6 +20,9 @@ class AdminMenuActivity : AppCompatActivity() {
 
         val btnSair = findViewById<TextView>(R.id.btnSair)
         val btnConfiguracoes = findViewById<TextView>(R.id.btnConfiguracoes)
+
+        val txtNome = findViewById<TextView>(R.id.txtNome)
+        val txtEmail = findViewById<TextView>(R.id.txtEmail)
 
         btnConfiguracoes.setOnClickListener {
             startActivity(Intent(this, AdminConfiguracoesActivity::class.java))
@@ -24,7 +32,24 @@ class AdminMenuActivity : AppCompatActivity() {
             mostrarDialogoSaida()
         }
 
+        carregarDadosUsuario(txtNome, txtEmail)
+
         setupNavBar()
+    }
+
+    private fun carregarDadosUsuario(txtNome: TextView, txtEmail: TextView) {
+
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        FirebaseFirestore.getInstance()
+            .collection("usuarios")
+            .document(uid)
+            .get()
+            .addOnSuccessListener { doc ->
+
+                txtNome.text = doc.getString("nome") ?: "Sem nome"
+                txtEmail.text = doc.getString("email") ?: "Sem email"
+            }
     }
 
     private fun mostrarDialogoSaida() {
