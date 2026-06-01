@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Base64
 import android.view.View
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -31,6 +32,7 @@ class BuscaActivity : AppCompatActivity() {
 
         val rvLivros = findViewById<RecyclerView>(R.id.rvLivros)
         val etPesquisa = findViewById<EditText>(R.id.etPesquisa)
+        val btnLimparPesquisa = findViewById<ImageView>(R.id.btnLimparPesquisa) // Mapeado aqui
 
         val txtQtd = findViewById<TextView>(R.id.txtQtdLivros)
         val layoutSemResultados = findViewById<LinearLayout>(R.id.layoutSemResultados)
@@ -46,8 +48,23 @@ class BuscaActivity : AppCompatActivity() {
 
         carregarLivros(txtQtd, layoutSemResultados)
 
+        // Começa escondido porque o campo inicia vazio
+        btnLimparPesquisa.visibility = View.GONE
+
+        // Ação para limpar o texto ao clicar no "X"
+        btnLimparPesquisa.setOnClickListener {
+            etPesquisa.text.clear() // Isso dispara automaticamente o doAfterTextChanged abaixo
+        }
+
         etPesquisa.doAfterTextChanged { text ->
             val query = text.toString().trim()
+
+            // Controla a visibilidade do botão de limpar dinamicamente
+            if (query.isEmpty()) {
+                btnLimparPesquisa.visibility = View.GONE
+            } else {
+                btnLimparPesquisa.visibility = View.VISIBLE
+            }
 
             val filtrados = if (query.isEmpty()) {
                 livros

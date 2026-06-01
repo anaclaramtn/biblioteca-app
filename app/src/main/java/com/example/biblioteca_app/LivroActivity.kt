@@ -16,6 +16,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class LivroActivity : AppCompatActivity() {
 
@@ -44,7 +47,6 @@ class LivroActivity : AppCompatActivity() {
     // LIVRO
     // =========================
     private fun preencherTela(livro: Livro) {
-
         binding.txtTitulo.text = livro.titulo
         binding.txtAutor.text = livro.autor
         binding.txtDescricao.text = livro.descricao
@@ -62,11 +64,9 @@ class LivroActivity : AppCompatActivity() {
                 val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                 binding.imgCapa.setImageBitmap(bmp)
             }
-
             livro.imagemRes != null -> {
                 binding.imgCapa.setImageResource(livro.imagemRes!!)
             }
-
             else -> {
                 binding.imgCapa.setImageResource(R.drawable.capadomquixote)
             }
@@ -77,14 +77,11 @@ class LivroActivity : AppCompatActivity() {
     // RESUMO
     // =========================
     private fun carregarResumoAvaliacoes(idLivro: String) {
-
         db.collection("avaliacoes")
             .whereEqualTo("idLivro", idLivro)
             .get()
             .addOnSuccessListener { docs ->
-
                 val notas = docs.mapNotNull { it.getDouble("nota")?.toFloat() }
-
                 val total = notas.size
                 val media = if (total > 0) notas.average().toFloat() else 0f
 
@@ -109,19 +106,18 @@ class LivroActivity : AppCompatActivity() {
         }
     }
 
-
     // =========================
-    // TOP 3 AVALIAÇÕES
+    // TOP 3 AVALIAÇÕES (CORRIGIDO)
     // =========================
     private fun carregarAvaliacoes(idLivro: String) {
-
+        // Consultando e ordenando por Curtidas (Principal) e Data (Secundário)
         db.collection("avaliacoes")
             .whereEqualTo("idLivro", idLivro)
-            .orderBy("curtidas", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .orderBy("curtidas", Query.Direction.DESCENDING)
+            .orderBy("data", Query.Direction.DESCENDING)
             .limit(3)
             .get()
             .addOnSuccessListener { docs ->
-
                 val bindings = listOf(
                     binding.avaliacao1,
                     binding.avaliacao2,
@@ -131,35 +127,39 @@ class LivroActivity : AppCompatActivity() {
                 bindings.forEach { it.root.visibility = View.GONE }
 
                 docs.forEachIndexed { index, doc ->
-
                     if (index >= bindings.size) return@forEachIndexed
 
-                    var avaliacao = doc.toObject(Avaliacao::class.java)
+                    val avaliacao = doc.toObject(Avaliacao::class.java)
                     val avaliacaoId = doc.id
 
                     db.collection("usuarios")
                         .document(avaliacao.idUsuario)
                         .get()
                         .addOnSuccessListener { user ->
-
                             val nome = user.getString("nome") ?: "Usuário"
                             val item = bindings[index]
 
                             item.root.visibility = View.VISIBLE
-
                             item.txtNomeUsuario.text = nome
                             item.txtTituloAvaliacao.text = avaliacao.titulo
                             item.txtComentario.text = avaliacao.descricao
                             item.txtCurtidas.text = avaliacao.curtidas.toString()
-                            item.txtData.visibility = View.GONE
+
+                            // Tratamento e exibição da Data
+                            val timestamp = doc.getTimestamp("data")
+                            if (timestamp != null) {
+                                val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                                item.txtData.text = sdf.format(timestamp.toDate())
+                                item.txtData.visibility = View.VISIBLE
+                            } else {
+                                item.txtData.visibility = View.GONE
+                            }
 
                             // =========================
-                            // CURTIR (FUNCIONANDO)
+                            // CURTIR
                             // =========================
                             var localLike = false
-
                             item.btnCurtir.setOnClickListener {
-
                                 val ref = db.collection("avaliacoes").document(avaliacaoId)
 
                                 if (!localLike) {
@@ -173,12 +173,11 @@ class LivroActivity : AppCompatActivity() {
                                     item.btnCurtir.setImageResource(R.drawable.ic_heart)
                                     localLike = false
                                 }
-
                                 item.txtCurtidas.text = avaliacao.curtidas.toString()
                             }
 
                             // =========================
-                            // DENUNCIAR (FUNCIONANDO)
+                            // DENUNCIAR
                             // =========================
                             item.btnDenunciar.setOnClickListener {
                                 mostrarDialogDenuncia(avaliacaoId)
@@ -186,15 +185,16 @@ class LivroActivity : AppCompatActivity() {
                         }
                 }
             }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Erro ao carregar avaliações: ${e.message}", Toast.LENGTH_LONG).show()
+            }
     }
 
     // =========================
-    // ALUGAR (FUNCIONANDO)
+    // ALUGAR (CORRIGIDO)
     // =========================
     private fun setupAlugar(livro: Livro) {
-
         binding.btnAlugar.setOnClickListener {
-
             if (solicitacaoEnviada) return@setOnClickListener
 
             val data = hashMapOf(
@@ -203,10 +203,10 @@ class LivroActivity : AppCompatActivity() {
                 "data" to Timestamp.now()
             )
 
-            db.collection("??????")
+            // Substituído "??????" por uma coleção padrão "solicitacoes_aluguel"
+            db.collection("solicitacoes_aluguel")
                 .add(data)
                 .addOnSuccessListener {
-
                     solicitacaoEnviada = true
                     binding.btnAlugar.text = "Solicitação enviada"
                     binding.btnAlugar.isEnabled = false
@@ -223,15 +223,12 @@ class LivroActivity : AppCompatActivity() {
     // DENÚNCIA
     // =========================
     private fun mostrarDialogDenuncia(idAvaliacao: String) {
-
         val dialogBinding = DialogDenunciaBinding.inflate(layoutInflater)
-
         val dialog = AlertDialog.Builder(this)
             .setView(dialogBinding.root)
             .create()
 
         dialogBinding.btnEnviar.setOnClickListener {
-
             val motivo = dialogBinding.edtOutro.text.toString()
 
             val denuncia = hashMapOf(
@@ -259,7 +256,6 @@ class LivroActivity : AppCompatActivity() {
     // BOTÕES
     // =========================
     private fun configurarBotoes(livro: Livro) {
-
         binding.btnVoltar.setOnClickListener { finish() }
 
         binding.btnVerMais.setOnClickListener {
@@ -285,9 +281,7 @@ class LivroActivity : AppCompatActivity() {
     // NAVBAR
     // =========================
     private fun setupNavBar() {
-
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
-
         bottomNav.selectedItemId = R.id.nav_busca
 
         bottomNav.setOnItemSelectedListener { item ->

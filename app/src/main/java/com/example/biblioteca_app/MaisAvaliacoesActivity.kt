@@ -9,9 +9,13 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.biblioteca_app.databinding.*
 import com.example.biblioteca_app.models.Avaliacao
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class MaisAvaliacoesActivity : AppCompatActivity() {
 
@@ -34,25 +38,28 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         }
 
         configurarBotoes()
-        carregarAvaliacoesPorCurtidas()
+
+        // Carregamento inicial padrão: Mais curtidas primeiro
+        carregarAvaliacoes("curtidas", Query.Direction.DESCENDING)
+
         setupNavBar()
     }
 
-    // =========================
-    // CARREGAMENTO PRINCIPAL
-    // =========================
-    private fun carregarAvaliacoesPorCurtidas() {
-
+    // ==========================================
+    // CARREGAMENTO DINÂMICO (CURTIDAS E DATA)
+    // ==========================================
+    private fun carregarAvaliacoes(campoOrdenacao: String, direcao: Query.Direction) {
         db.collection("avaliacoes")
             .whereEqualTo("idLivro", idLivro)
-            .orderBy("curtidas", Query.Direction.DESCENDING)
+            .orderBy(campoOrdenacao, direcao)
             .get()
             .addOnSuccessListener { docs ->
-
                 binding.containerAvaliacoes.removeAllViews()
 
-                val avaliacoes = docs.mapNotNull {
-                    it.toObject(Avaliacao::class.java).copy(id = it.id)
+                val avaliacoes = docs.mapNotNull { doc ->
+                    val av = doc.toObject(Avaliacao::class.java)
+                    // Garantimos que pegamos o ID do documento e a data do timestamp do Firestore
+                    av.copy(id = doc.id)
                 }
 
                 atualizarResumo(avaliacoes)
@@ -64,12 +71,16 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
 
                 binding.txtSemAvaliacoes.visibility = View.GONE
 
-                avaliacoes.forEach {
-                    adicionarItemAvaliacao(it)
+                // Passamos o documento original também para extrair o Timestamp com segurança externa
+                docs.forEachIndexed { index, doc ->
+                    if (index < avaliacoes.size) {
+                        val timestamp = doc.getTimestamp("data")
+                        adicionarItemAvaliacao(avaliacoes[index], timestamp)
+                    }
                 }
             }
-            .addOnFailureListener {
-                Toast.makeText(this, "Erro ao carregar avaliações", Toast.LENGTH_SHORT).show()
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Erro ao carregar avaliações: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -77,7 +88,6 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
     // RESUMO (MÉDIA + TOTAL)
     // =========================
     private fun atualizarResumo(avaliacoes: List<Avaliacao>) {
-
         val total = avaliacoes.size
         val media = if (total == 0) 0.0 else avaliacoes.map { it.nota }.average()
 
@@ -94,14 +104,11 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
     // ESTRELAS
     // =========================
     private fun converterEstrelas(media: Double): String {
-
         val estrelas = media.toInt()
         val resto = media - estrelas
 
         val builder = StringBuilder()
-
         repeat(estrelas) { builder.append("⭐") }
-
         if (resto >= 0.5) builder.append("☆")
 
         return builder.toString().padEnd(5, '☆')
@@ -110,8 +117,7 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
     // =========================
     // ITEM DA LISTA
     // =========================
-    private fun adicionarItemAvaliacao(avaliacao: Avaliacao) {
-
+    private fun adicionarItemAvaliacao(avaliacao: Avaliacao, timestamp: Timestamp?) {
         val item = ItemAvaliacaoBinding.inflate(
             layoutInflater,
             binding.containerAvaliacoes,
@@ -124,7 +130,6 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
             .document(avaliacao.idUsuario)
             .get()
             .addOnSuccessListener { user ->
-
                 val nome = user.getString("nome") ?: "Usuário"
 
                 item.txtNomeUsuario.text = nome
@@ -132,16 +137,23 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
                 item.txtComentario.text = avaliacao.descricao
                 item.txtCurtidas.text = avaliacao.curtidas.toString()
 
-                item.txtData.visibility = View.GONE
+                // Exibição e formatação de data corrigida
+                if (timestamp != null) {
+                    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                    item.txtData.text = sdf.format(timestamp.toDate())
+                    item.txtData.visibility = View.VISIBLE
+                } else {
+                    item.txtData.visibility = View.GONE
+                }
 
-                configurarLikeLocal(item, avaliacao)
+                configurarLikeEModais(item, avaliacao)
             }
     }
 
-    // =========================
-    // LIKE (LOCAL + FIRESTORE OPCIONAL)
-    // =========================
-    private fun configurarLikeLocal(
+    // ==========================================
+    // LIKE (ATÔMICO) + ACIONAMENTO DE DENÚNCIA
+    // ==========================================
+    private fun configurarLikeEModais(
         item: ItemAvaliacaoBinding,
         avaliacao: Avaliacao
     ) {
@@ -149,35 +161,32 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         var count = avaliacao.curtidas
 
         item.btnCurtir.setOnClickListener {
-
             curtido = !curtido
+            val ref = db.collection("avaliacoes").document(avaliacao.id)
 
             if (curtido) {
                 count++
                 item.btnCurtir.setImageResource(R.drawable.ic_heart_filled)
+                ref.update("curtidas", FieldValue.increment(1))
             } else {
                 count--
                 item.btnCurtir.setImageResource(R.drawable.ic_heart)
+                ref.update("curtidas", FieldValue.increment(-1))
             }
 
             item.txtCurtidas.text = count.toString()
-
-            // opcional (persistir no banco)
-            db.collection("avaliacoes")
-                .document(avaliacao.id)
-                .update("curtidas", count)
+            avaliacao.curtidas = count
         }
 
         item.btnDenunciar.setOnClickListener {
-            mostrarDialogDenuncia()
+            mostrarDialogDenuncia(avaliacao.id)
         }
     }
 
     // =========================
-    // BOTÕES
+    // BOTÕES E ALERT DIALOG
     // =========================
     private fun configurarBotoes() {
-
         binding.btnVoltar.setOnClickListener { finish() }
 
         binding.btnAvaliar.setOnClickListener {
@@ -187,54 +196,20 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         }
 
         binding.btnOrdenar.setOnClickListener {
-
-            val opcoes = arrayOf("Mais curtidas", "Menor curtidas")
+            // As 4 opções solicitadas para o menu de ordenação
+            val opcoes = arrayOf("Mais curtidas", "Menos curtidas", "Mais recentes", "Menos recentes")
 
             AlertDialog.Builder(this)
                 .setTitle("Ordenar por")
                 .setItems(opcoes) { _, which ->
-
                     when (which) {
-                        0 -> carregarAvaliacoesPorCurtidasDesc()
-                        1 -> carregarAvaliacoesPorCurtidasAsc()
+                        0 -> carregarAvaliacoes("curtidas", Query.Direction.DESCENDING)
+                        1 -> carregarAvaliacoes("curtidas", Query.Direction.ASCENDING)
+                        2 -> carregarAvaliacoes("data", Query.Direction.DESCENDING)
+                        3 -> carregarAvaliacoes("data", Query.Direction.ASCENDING)
                     }
                 }
                 .show()
-        }
-    }
-
-    private fun carregarAvaliacoesPorCurtidasDesc() {
-        db.collection("avaliacoes")
-            .whereEqualTo("idLivro", idLivro)
-            .orderBy("curtidas", Query.Direction.DESCENDING)
-            .get()
-            .addOnSuccessListener { docs ->
-                renderLista(docs)
-            }
-    }
-
-    private fun carregarAvaliacoesPorCurtidasAsc() {
-        db.collection("avaliacoes")
-            .whereEqualTo("idLivro", idLivro)
-            .orderBy("curtidas", Query.Direction.ASCENDING)
-            .get()
-            .addOnSuccessListener { docs ->
-                renderLista(docs)
-            }
-    }
-
-    private fun renderLista(docs: com.google.firebase.firestore.QuerySnapshot) {
-
-        binding.containerAvaliacoes.removeAllViews()
-
-        val avaliacoes = docs.map {
-            it.toObject(Avaliacao::class.java).copy(id = it.id)
-        }
-
-        atualizarResumo(avaliacoes)
-
-        avaliacoes.forEach {
-            adicionarItemAvaliacao(it)
         }
     }
 
@@ -242,9 +217,7 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
     // NAVBAR
     // =========================
     private fun setupNavBar() {
-
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
-
         bottomNav.selectedItemId = R.id.nav_busca
 
         bottomNav.setOnItemSelectedListener { item ->
@@ -263,10 +236,8 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
     // =========================
     // DENÚNCIA
     // =========================
-    private fun mostrarDialogDenuncia() {
-
+    private fun mostrarDialogDenuncia(idAvaliacao: String) {
         val dialogBinding = DialogDenunciaBinding.inflate(layoutInflater)
-
         val dialog = AlertDialog.Builder(this)
             .setView(dialogBinding.root)
             .create()
@@ -276,17 +247,30 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         dialogBinding.btnCancelar.setOnClickListener { dialog.dismiss() }
 
         dialogBinding.btnEnviar.setOnClickListener {
-
             val selected = dialogBinding.radioGroup.checkedRadioButtonId
 
             if (selected == -1) {
                 Toast.makeText(this, "Selecione um motivo", Toast.LENGTH_SHORT).show()
             } else {
-                dialog.dismiss()
-                Toast.makeText(this, "Denúncia enviada", Toast.LENGTH_SHORT).show()
+                // Aqui você pode recuperar qual RadioButton foi selecionado se necessário, ex:
+                // val motivo = findViewById<RadioButton>(selected).text.toString()
+
+                val denuncia = hashMapOf(
+                    "idAvaliacao" to idAvaliacao,
+                    "data" to Timestamp.now()
+                )
+
+                db.collection("denuncias")
+                    .add(denuncia)
+                    .addOnSuccessListener {
+                        dialog.dismiss()
+                        Toast.makeText(this, "Denúncia enviada com sucesso", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(this, "Erro ao enviar denúncia", Toast.LENGTH_SHORT).show()
+                    }
             }
         }
-
         dialog.show()
     }
 }
