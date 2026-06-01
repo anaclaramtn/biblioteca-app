@@ -94,7 +94,11 @@
             android:layout_centerVertical="true"
             android:text="Denunciar"
             android:textColor="@color/padrao_app"
-            android:textSize="12sp"/>
+            android:textSize="12sp"
+            android:padding="12dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"/>
     </RelativeLayout>
 
 </LinearLayout>

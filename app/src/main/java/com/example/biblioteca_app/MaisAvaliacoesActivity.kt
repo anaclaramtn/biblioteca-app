@@ -126,6 +126,9 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
 
         binding.containerAvaliacoes.addView(item.root)
 
+        // ✅ Configura os cliques IMEDIATAMENTE após inflar o layout
+        configurarLikeEModais(item, avaliacao)
+
         db.collection("usuarios")
             .document(avaliacao.idUsuario)
             .get()
@@ -137,7 +140,6 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
                 item.txtComentario.text = avaliacao.descricao
                 item.txtCurtidas.text = avaliacao.curtidas.toString()
 
-                // Exibição e formatação de data corrigida
                 if (timestamp != null) {
                     val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                     item.txtData.text = sdf.format(timestamp.toDate())
@@ -145,8 +147,6 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
                 } else {
                     item.txtData.visibility = View.GONE
                 }
-
-                configurarLikeEModais(item, avaliacao)
             }
     }
 
@@ -244,7 +244,9 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
 
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        dialogBinding.btnCancelar.setOnClickListener { dialog.dismiss() }
+        dialogBinding.btnCancelar.setOnClickListener {
+            mostrarDialogConfirmacaoCancelar(dialog)
+        }
 
         dialogBinding.btnEnviar.setOnClickListener {
             val selected = dialogBinding.radioGroup.checkedRadioButtonId
@@ -252,9 +254,6 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
             if (selected == -1) {
                 Toast.makeText(this, "Selecione um motivo", Toast.LENGTH_SHORT).show()
             } else {
-                // Aqui você pode recuperar qual RadioButton foi selecionado se necessário, ex:
-                // val motivo = findViewById<RadioButton>(selected).text.toString()
-
                 val denuncia = hashMapOf(
                     "idAvaliacao" to idAvaliacao,
                     "data" to Timestamp.now()
@@ -264,7 +263,7 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
                     .add(denuncia)
                     .addOnSuccessListener {
                         dialog.dismiss()
-                        Toast.makeText(this, "Denúncia enviada com sucesso", Toast.LENGTH_SHORT).show()
+                        mostrarDialogSucesso()
                     }
                     .addOnFailureListener {
                         Toast.makeText(this, "Erro ao enviar denúncia", Toast.LENGTH_SHORT).show()
@@ -272,5 +271,41 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
             }
         }
         dialog.show()
+    }
+
+    private fun mostrarDialogSucesso() {
+        val sucessoBinding = DialogSucessoDenunciaBinding.inflate(layoutInflater)
+        val sucessoDialog = AlertDialog.Builder(this)
+            .setView(sucessoBinding.root)
+            .create()
+
+        sucessoDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        sucessoBinding.btnOk.setOnClickListener {
+            sucessoDialog.dismiss()
+        }
+
+        sucessoDialog.show()
+    }
+
+    private fun mostrarDialogConfirmacaoCancelar(dialogDenuncia: AlertDialog) {
+        val confirmBinding = DialogConfirmacaoCancelarBinding.inflate(layoutInflater)
+        val confirmDialog = AlertDialog.Builder(this)
+            .setView(confirmBinding.root)
+            .create()
+
+        confirmDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        confirmBinding.btnNao.setOnClickListener {
+            confirmDialog.dismiss()
+        }
+
+        confirmBinding.btnSim.setOnClickListener {
+            confirmDialog.dismiss()
+            dialogDenuncia.dismiss()
+            mostrarDialogSucesso()
+        }
+
+        confirmDialog.show()
     }
 }
