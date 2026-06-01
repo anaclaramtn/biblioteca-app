@@ -151,32 +151,68 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
     }
 
     // ==========================================
-    // LIKE (ATÔMICO) + ACIONAMENTO DE DENÚNCIA
+    // LIKE (PERSISTENTE) + ACIONAMENTO DE DENÚNCIA
     // ==========================================
     private fun configurarLikeEModais(
         item: ItemAvaliacaoBinding,
         avaliacao: Avaliacao
     ) {
-        var curtido = false
-        var count = avaliacao.curtidas
-
-        item.btnCurtir.setOnClickListener {
-            curtido = !curtido
-            val ref = db.collection("avaliacoes").document(avaliacao.id)
-
-            if (curtido) {
-                count++
-                item.btnCurtir.setImageResource(R.drawable.ic_heart_filled)
-                ref.update("curtidas", FieldValue.increment(1))
-            } else {
-                count--
-                item.btnCurtir.setImageResource(R.drawable.ic_heart)
-                ref.update("curtidas", FieldValue.increment(-1))
+        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+        if (uid == null) {
+            item.btnCurtir.setOnClickListener {
+                Toast.makeText(this, "Faça login para curtir", Toast.LENGTH_SHORT).show()
             }
-
-            item.txtCurtidas.text = count.toString()
-            avaliacao.curtidas = count
+            item.btnDenunciar.setOnClickListener { mostrarDialogDenuncia(avaliacao.id) }
+            return
         }
+
+        // Verificar estado inicial
+        db.collection("avaliacoesCurtidas")
+            .whereEqualTo("idUsuario", uid)
+            .whereEqualTo("idAvaliacao", avaliacao.id)
+            .get()
+            .addOnSuccessListener { docs ->
+                var jaCurtido = !docs.isEmpty
+                item.btnCurtir.setImageResource(
+                    if (jaCurtido) R.drawable.ic_heart_filled else R.drawable.ic_heart
+                )
+
+                item.btnCurtir.setOnClickListener {
+                    item.btnCurtir.isEnabled = false
+                    val refAvaliacao = db.collection("avaliacoes").document(avaliacao.id)
+
+                    if (jaCurtido) {
+                        // Remover curtida
+                        db.collection("avaliacoesCurtidas")
+                            .whereEqualTo("idUsuario", uid)
+                            .whereEqualTo("idAvaliacao", avaliacao.id)
+                            .get()
+                            .addOnSuccessListener { querySnapshot ->
+                                val batch = db.batch()
+                                for (doc in querySnapshot) batch.delete(doc.reference)
+                                batch.commit().addOnSuccessListener {
+                                    jaCurtido = false
+                                    refAvaliacao.update("curtidas", FieldValue.increment(-1))
+                                    item.btnCurtir.setImageResource(R.drawable.ic_heart)
+                                    avaliacao.curtidas--
+                                    item.txtCurtidas.text = avaliacao.curtidas.toString()
+                                    item.btnCurtir.isEnabled = true
+                                }
+                            }
+                    } else {
+                        // Adicionar curtida
+                        val data = hashMapOf("idUsuario" to uid, "idAvaliacao" to avaliacao.id)
+                        db.collection("avaliacoesCurtidas").add(data).addOnSuccessListener {
+                            jaCurtido = true
+                            refAvaliacao.update("curtidas", FieldValue.increment(1))
+                            item.btnCurtir.setImageResource(R.drawable.ic_heart_filled)
+                            avaliacao.curtidas++
+                            item.txtCurtidas.text = avaliacao.curtidas.toString()
+                            item.btnCurtir.isEnabled = true
+                        }
+                    }
+                }
+            }
 
         item.btnDenunciar.setOnClickListener {
             mostrarDialogDenuncia(avaliacao.id)

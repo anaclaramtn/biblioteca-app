@@ -11,6 +11,8 @@ import com.example.biblioteca_app.models.Avaliacao
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
@@ -76,29 +78,33 @@ class AdminMaisAvaliacoesActivity : AppCompatActivity() {
         db.collection("usuarios").document(avaliacao.idUsuario).get()
             .addOnSuccessListener { userDoc ->
                 val nome = userDoc.getString("nome") ?: "Usuário"
-                configurarItem(itemView, nome, avaliacao.titulo, avaliacao.descricao, avaliacao.data, avaliacao.nota)
+                configurarItem(itemView, nome, avaliacao)
             }
     }
 
-    private fun configurarItem(view: View, nome: String, titulo: String, comentario: String, data: Timestamp?, nota: Float) {
+    private fun configurarItem(view: View, nome: String, avaliacao: Avaliacao) {
         val txtNome = view.findViewById<TextView>(R.id.txtNomeUsuario)
         val txtTitulo = view.findViewById<TextView>(R.id.txtTituloAvaliacao)
         val txtComentario = view.findViewById<TextView>(R.id.txtComentario)
         val txtData = view.findViewById<TextView>(R.id.txtData)
         val txtEstrelas = view.findViewById<TextView>(R.id.txtEstrelas)
+        val txtCurtidas = view.findViewById<TextView>(R.id.txtCurtidas)
 
         val btnMenu = view.findViewById<ImageButton>(R.id.btnMenu)
 
         txtNome.text = nome
-        txtTitulo.text = titulo
-        txtComentario.text = comentario
-        txtEstrelas.text = converterMediaParaEstrelas(nota)
+        txtTitulo.text = avaliacao.titulo
+        txtComentario.text = avaliacao.descricao
+        txtEstrelas.text = converterMediaParaEstrelas(avaliacao.nota)
+        txtCurtidas.text = avaliacao.curtidas.toString()
         
         val sdf = SimpleDateFormat("MMM dd, yyyy 'at' h:mm:ss a", Locale.ENGLISH)
-        val dataFormatada = data?.toDate()?.let { sdf.format(it) } ?: "Data desconhecida"
+        val dataFormatada = avaliacao.data?.toDate()?.let { sdf.format(it) } ?: "Data desconhecida"
         txtData.text = dataFormatada
 
         txtComentario.visibility = View.VISIBLE
+
+        verificarCurtidaAvaliacao(avaliacao.id, view)
 
         btnMenu.setOnClickListener { v ->
             val popup = PopupMenu(this, v)
@@ -133,6 +139,60 @@ class AdminMaisAvaliacoesActivity : AppCompatActivity() {
             media >= 0.5 -> "⭐☆☆☆☆"
             else -> "☆☆☆☆☆"
         }
+    }
+
+    private fun verificarCurtidaAvaliacao(idAvaliacao: String, itemView: View) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val btnCurtir = itemView.findViewById<ImageButton>(R.id.btnCurtir)
+        val txtCurtidas = itemView.findViewById<TextView>(R.id.txtCurtidas)
+
+        db.collection("avaliacoesCurtidas")
+            .whereEqualTo("idUsuario", uid)
+            .whereEqualTo("idAvaliacao", idAvaliacao)
+            .get()
+            .addOnSuccessListener { documents ->
+                var jaCurtido = !documents.isEmpty
+
+                btnCurtir.setImageResource(
+                    if (jaCurtido) R.drawable.ic_heart_filled else R.drawable.ic_heart
+                )
+
+                btnCurtir.setOnClickListener {
+                    btnCurtir.isEnabled = false
+                    val refAvaliacao = db.collection("avaliacoes").document(idAvaliacao)
+
+                    if (jaCurtido) {
+                        // Remover curtida
+                        db.collection("avaliacoesCurtidas")
+                            .whereEqualTo("idUsuario", uid)
+                            .whereEqualTo("idAvaliacao", idAvaliacao)
+                            .get()
+                            .addOnSuccessListener { querySnapshot ->
+                                val batch = db.batch()
+                                for (doc in querySnapshot) batch.delete(doc.reference)
+                                batch.commit().addOnSuccessListener {
+                                    jaCurtido = false
+                                    refAvaliacao.update("curtidas", FieldValue.increment(-1))
+                                    btnCurtir.setImageResource(R.drawable.ic_heart)
+                                    val novoTotal = (txtCurtidas.text.toString().toIntOrNull() ?: 1) - 1
+                                    txtCurtidas.text = novoTotal.toString()
+                                    btnCurtir.isEnabled = true
+                                }
+                            }
+                    } else {
+                        // Adicionar curtida
+                        val data = hashMapOf("idUsuario" to uid, "idAvaliacao" to idAvaliacao)
+                        db.collection("avaliacoesCurtidas").add(data).addOnSuccessListener {
+                            jaCurtido = true
+                            refAvaliacao.update("curtidas", FieldValue.increment(1))
+                            btnCurtir.setImageResource(R.drawable.ic_heart_filled)
+                            val novoTotal = (txtCurtidas.text.toString().toIntOrNull() ?: 0) + 1
+                            txtCurtidas.text = novoTotal.toString()
+                            btnCurtir.isEnabled = true
+                        }
+                    }
+                }
+            }
     }
 
     private fun mostrarDialogOrdenacao() {

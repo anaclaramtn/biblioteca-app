@@ -20,6 +20,8 @@ import android.widget.Button
 import android.widget.TextView
 
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
@@ -164,9 +166,7 @@ class AdminLivroActivity : AppCompatActivity() {
                             configurarItemAvaliacaoAdmin(
                                 itemView,
                                 nome,
-                                avaliacao.titulo,
-                                avaliacao.descricao,
-                                avaliacao.data,
+                                avaliacao,
                                 converterMediaParaEstrelas(avaliacao.nota)
                             )
                         }
@@ -218,21 +218,25 @@ class AdminLivroActivity : AppCompatActivity() {
     private fun configurarItemAvaliacaoAdmin(
         view: View,
         nome: String,
-        titulo: String,
-        comentario: String,
-        data: Timestamp?,
+        avaliacao: Avaliacao,
         estrelas: String
     ) {
         val txtComentario = view.findViewById<TextView>(R.id.txtComentario)
 
         view.findViewById<TextView>(R.id.txtNomeUsuario).text = nome
-        view.findViewById<TextView>(R.id.txtTituloAvaliacao).text = titulo
-        txtComentario.text = comentario
+        view.findViewById<TextView>(R.id.txtTituloAvaliacao).text = avaliacao.titulo
+        txtComentario.text = avaliacao.descricao
 
         val sdf = SimpleDateFormat("MMM dd, yyyy 'at' h:mm:ss a", Locale.ENGLISH)
-        val dataFormatada = data?.toDate()?.let { sdf.format(it) } ?: "Data desconhecida"
+        val dataFormatada = avaliacao.data?.toDate()?.let { sdf.format(it) } ?: "Data desconhecida"
         view.findViewById<TextView>(R.id.txtData).text = dataFormatada
         view.findViewById<TextView>(R.id.txtEstrelas).text = estrelas
+
+        val txtCurtidas = view.findViewById<TextView>(R.id.txtCurtidas)
+        txtCurtidas.text = avaliacao.curtidas.toString()
+
+        // Lógica de Curtida
+        verificarCurtidaAvaliacao(avaliacao.id, view)
 
         // Garantir que o comentário esteja sempre visível
         txtComentario.visibility = View.VISIBLE
@@ -261,6 +265,60 @@ class AdminLivroActivity : AppCompatActivity() {
             }
             popup.show()
         }
+    }
+
+    private fun verificarCurtidaAvaliacao(idAvaliacao: String, itemView: View) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val btnCurtir = itemView.findViewById<ImageButton>(R.id.btnCurtir)
+        val txtCurtidas = itemView.findViewById<TextView>(R.id.txtCurtidas)
+
+        db.collection("avaliacoesCurtidas")
+            .whereEqualTo("idUsuario", uid)
+            .whereEqualTo("idAvaliacao", idAvaliacao)
+            .get()
+            .addOnSuccessListener { documents ->
+                var jaCurtido = !documents.isEmpty
+
+                btnCurtir.setImageResource(
+                    if (jaCurtido) R.drawable.ic_heart_filled else R.drawable.ic_heart
+                )
+
+                btnCurtir.setOnClickListener {
+                    btnCurtir.isEnabled = false
+                    val refAvaliacao = db.collection("avaliacoes").document(idAvaliacao)
+
+                    if (jaCurtido) {
+                        // Remover curtida
+                        db.collection("avaliacoesCurtidas")
+                            .whereEqualTo("idUsuario", uid)
+                            .whereEqualTo("idAvaliacao", idAvaliacao)
+                            .get()
+                            .addOnSuccessListener { querySnapshot ->
+                                val batch = db.batch()
+                                for (doc in querySnapshot) batch.delete(doc.reference)
+                                batch.commit().addOnSuccessListener {
+                                    jaCurtido = false
+                                    refAvaliacao.update("curtidas", FieldValue.increment(-1))
+                                    btnCurtir.setImageResource(R.drawable.ic_heart)
+                                    val novoTotal = (txtCurtidas.text.toString().toIntOrNull() ?: 1) - 1
+                                    txtCurtidas.text = novoTotal.toString()
+                                    btnCurtir.isEnabled = true
+                                }
+                            }
+                    } else {
+                        // Adicionar curtida
+                        val data = hashMapOf("idUsuario" to uid, "idAvaliacao" to idAvaliacao)
+                        db.collection("avaliacoesCurtidas").add(data).addOnSuccessListener {
+                            jaCurtido = true
+                            refAvaliacao.update("curtidas", FieldValue.increment(1))
+                            btnCurtir.setImageResource(R.drawable.ic_heart_filled)
+                            val novoTotal = (txtCurtidas.text.toString().toIntOrNull() ?: 0) + 1
+                            txtCurtidas.text = novoTotal.toString()
+                            btnCurtir.isEnabled = true
+                        }
+                    }
+                }
+            }
     }
 
     private fun mostrarPopupMenu(view: View) {

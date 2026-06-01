@@ -159,29 +159,10 @@ class LivroActivity : AppCompatActivity() {
                             }
 
                             // =========================
-                            // CURTIR
+                            // CURTIR E DENUNCIAR
                             // =========================
-                            var localLike = false
-                            item.btnCurtir.setOnClickListener {
-                                val ref = db.collection("avaliacoes").document(avaliacaoId)
+                            verificarCurtidaAvaliacao(avaliacaoId, item)
 
-                                if (!localLike) {
-                                    ref.update("curtidas", FieldValue.increment(1))
-                                    avaliacao.curtidas++
-                                    item.btnCurtir.setImageResource(R.drawable.ic_heart_filled)
-                                    localLike = true
-                                } else {
-                                    ref.update("curtidas", FieldValue.increment(-1))
-                                    avaliacao.curtidas--
-                                    item.btnCurtir.setImageResource(R.drawable.ic_heart)
-                                    localLike = false
-                                }
-                                item.txtCurtidas.text = avaliacao.curtidas.toString()
-                            }
-
-                            // =========================
-                            // DENUNCIAR
-                            // =========================
                             item.btnDenunciar.setOnClickListener {
                                 mostrarDialogDenuncia(avaliacaoId)
                             }
@@ -190,6 +171,62 @@ class LivroActivity : AppCompatActivity() {
             }
             .addOnFailureListener { e ->
                 Toast.makeText(this, "Erro ao carregar avaliações: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+    }
+
+    private fun verificarCurtidaAvaliacao(idAvaliacao: String, item: ItemAvaliacaoBinding) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        db.collection("avaliacoesCurtidas")
+            .whereEqualTo("idUsuario", uid)
+            .whereEqualTo("idAvaliacao", idAvaliacao)
+            .get()
+            .addOnSuccessListener { documents ->
+                var curtidaDocId: String? = if (!documents.isEmpty) documents.documents[0].id else null
+                var jaCurtido = curtidaDocId != null
+
+                item.btnCurtir.setImageResource(
+                    if (jaCurtido) R.drawable.ic_heart_filled else R.drawable.ic_heart
+                )
+
+                item.btnCurtir.setOnClickListener {
+                    item.btnCurtir.isEnabled = false
+                    val refAvaliacao = db.collection("avaliacoes").document(idAvaliacao)
+
+                    if (jaCurtido) {
+                        // Remover curtida
+                        db.collection("avaliacoesCurtidas").document(curtidaDocId!!)
+                            .delete()
+                            .addOnSuccessListener {
+                                jaCurtido = false
+                                curtidaDocId = null
+                                refAvaliacao.update("curtidas", FieldValue.increment(-1))
+                                item.btnCurtir.setImageResource(R.drawable.ic_heart)
+                                val novoTotal = (item.txtCurtidas.text.toString().toIntOrNull() ?: 1) - 1
+                                item.txtCurtidas.text = novoTotal.toString()
+                                item.btnCurtir.isEnabled = true
+                            }
+                            .addOnFailureListener {
+                                item.btnCurtir.isEnabled = true
+                            }
+                    } else {
+                        // Adicionar curtida
+                        val data = hashMapOf("idUsuario" to uid, "idAvaliacao" to idAvaliacao)
+                        db.collection("avaliacoesCurtidas").add(data)
+                            .addOnSuccessListener { docRef ->
+                                jaCurtido = true
+                                curtidaDocId = docRef.id
+                                refAvaliacao.update("curtidas", FieldValue.increment(1))
+                                item.btnCurtir.setImageResource(R.drawable.ic_heart_filled)
+                                val novoTotal = (item.txtCurtidas.text.toString().toIntOrNull() ?: 0) + 1
+                                item.txtCurtidas.text = novoTotal.toString()
+                                item.btnCurtir.isEnabled = true
+                            }
+                            .addOnFailureListener {
+                                item.btnCurtir.isEnabled = true
+                            }
+                    }
+                }
             }
     }
 
