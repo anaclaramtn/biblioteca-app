@@ -7,6 +7,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
@@ -27,7 +28,7 @@ class AdminAlteracaoSenhaActivity : AppCompatActivity() {
 
         btnBack.visibility = View.VISIBLE
         btnBack.setOnClickListener {
-            finish() // 🔥 padrão correto (não recria tela anterior)
+            confirmarSaida()
         }
 
         // 🔹 CAMPOS
@@ -38,7 +39,7 @@ class AdminAlteracaoSenhaActivity : AppCompatActivity() {
         val btnCancelar = findViewById<MaterialButton>(R.id.ButtonCancelar)
         val btnConcluir = findViewById<MaterialButton>(R.id.ButtonConcluir)
 
-        btnCancelar.setOnClickListener { finish() }
+        btnCancelar.setOnClickListener { confirmarSaida() }
 
         btnConcluir.setOnClickListener {
             val atual = editSenhaAtual.text.toString()
@@ -73,6 +74,15 @@ class AdminAlteracaoSenhaActivity : AppCompatActivity() {
         val temMaiuscula = senha.any { it.isUpperCase() }
 
         return temNumero && temMinuscula && temMaiuscula
+    }
+
+    private fun confirmarSaida() {
+        AlertDialog.Builder(this)
+            .setTitle("Certeza que deseja cancelar?")
+            .setMessage("Suas alterações não serão salvas.")
+            .setPositiveButton("Sim") { _, _ -> finish() }
+            .setNegativeButton("Não", null)
+            .show()
     }
 
     // 🔥 PADRÃO IGUAL ÀS OUTRAS TELAS ADMIN
