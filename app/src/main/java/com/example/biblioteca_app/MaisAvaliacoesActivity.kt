@@ -23,6 +23,7 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
     private val db = FirebaseFirestore.getInstance()
 
     private var idLivro: String = ""
+    private var tituloLivro: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +31,7 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         idLivro = intent.getStringExtra("ID_LIVRO") ?: ""
+        tituloLivro = intent.getStringExtra("TITULO_LIVRO") ?: ""
 
         if (idLivro.isEmpty()) {
             Toast.makeText(this, "Livro inválido", Toast.LENGTH_SHORT).show()
@@ -162,7 +164,7 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
             item.btnCurtir.setOnClickListener {
                 Toast.makeText(this, "Faça login para curtir", Toast.LENGTH_SHORT).show()
             }
-            item.btnDenunciar.setOnClickListener { mostrarDialogDenuncia(avaliacao.id) }
+            item.btnDenunciar.setOnClickListener { mostrarDialogDenuncia(avaliacao) }
             return
         }
 
@@ -215,7 +217,7 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
             }
 
         item.btnDenunciar.setOnClickListener {
-            mostrarDialogDenuncia(avaliacao.id)
+            mostrarDialogDenuncia(avaliacao)
         }
     }
 
@@ -272,7 +274,7 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
     // =========================
     // DENÚNCIA
     // =========================
-    private fun mostrarDialogDenuncia(idAvaliacao: String) {
+    private fun mostrarDialogDenuncia(avaliacao: Avaliacao) {
         val dialogBinding = DialogDenunciaBinding.inflate(layoutInflater)
         val dialog = AlertDialog.Builder(this)
             .setView(dialogBinding.root)
@@ -290,8 +292,25 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
             if (selected == -1) {
                 Toast.makeText(this, "Selecione um motivo", Toast.LENGTH_SHORT).show()
             } else {
+                val motivo = when (selected) {
+                    R.id.rbInadequado -> getString(R.string.motivo_inadequado)
+                    R.id.rbIncorreto -> getString(R.string.motivo_incorreto)
+                    R.id.rbSpam -> getString(R.string.motivo_spam)
+                    R.id.rbOutro -> {
+                        val textoOutro = dialogBinding.edtOutro.text.toString().trim()
+                        if (textoOutro.isNotEmpty()) textoOutro else getString(R.string.motivo_outro)
+                    }
+                    else -> ""
+                }
+
                 val denuncia = hashMapOf(
-                    "idAvaliacao" to idAvaliacao,
+                    "idAvaliacao" to avaliacao.id,
+                    "idLivro" to avaliacao.idLivro,
+                    "tituloLivro" to tituloLivro,
+                    "idAutorComentario" to avaliacao.idUsuario,
+                    "comentario" to avaliacao.descricao,
+                    "motivo" to motivo,
+                    "status" to "pendente",
                     "data" to Timestamp.now()
                 )
 
@@ -339,7 +358,6 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         confirmBinding.btnSim.setOnClickListener {
             confirmDialog.dismiss()
             dialogDenuncia.dismiss()
-            mostrarDialogSucesso()
         }
 
         confirmDialog.show()

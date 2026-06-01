@@ -132,7 +132,7 @@ class LivroActivity : AppCompatActivity() {
                 docs.forEachIndexed { index, doc ->
                     if (index >= bindings.size) return@forEachIndexed
 
-                    val avaliacao = doc.toObject(Avaliacao::class.java)
+                    val avaliacao = doc.toObject(Avaliacao::class.java).copy(id = doc.id)
                     val avaliacaoId = doc.id
 
                     db.collection("usuarios")
@@ -164,7 +164,7 @@ class LivroActivity : AppCompatActivity() {
                             verificarCurtidaAvaliacao(avaliacaoId, item)
 
                             item.btnDenunciar.setOnClickListener {
-                                mostrarDialogDenuncia(avaliacaoId)
+                                mostrarDialogDenuncia(avaliacao, binding.txtTitulo.text.toString())
                             }
                         }
                 }
@@ -262,34 +262,97 @@ class LivroActivity : AppCompatActivity() {
     // =========================
     // DENÚNCIA
     // =========================
-    private fun mostrarDialogDenuncia(idAvaliacao: String) {
+    private fun mostrarDialogDenuncia(avaliacao: Avaliacao, tituloLivro: String) {
         val dialogBinding = DialogDenunciaBinding.inflate(layoutInflater)
         val dialog = AlertDialog.Builder(this)
             .setView(dialogBinding.root)
             .create()
 
-        dialogBinding.btnEnviar.setOnClickListener {
-            val motivo = dialogBinding.edtOutro.text.toString()
-
-            val denuncia = hashMapOf(
-                "idAvaliacao" to idAvaliacao,
-                "motivo" to motivo,
-                "data" to Timestamp.now()
-            )
-
-            db.collection("denuncias")
-                .add(denuncia)
-                .addOnSuccessListener {
-                    Toast.makeText(this, "Denúncia enviada", Toast.LENGTH_SHORT).show()
-                    dialog.dismiss()
-                }
-        }
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         dialogBinding.btnCancelar.setOnClickListener {
-            dialog.dismiss()
+            mostrarDialogConfirmacaoCancelar(dialog)
         }
 
+        dialogBinding.btnEnviar.setOnClickListener {
+            val selected = dialogBinding.radioGroup.checkedRadioButtonId
+
+            if (selected == -1) {
+                Toast.makeText(this, "Selecione um motivo", Toast.LENGTH_SHORT).show()
+            } else {
+                val motivo = when (selected) {
+                    R.id.rbInadequado -> getString(R.string.motivo_inadequado)
+                    R.id.rbIncorreto -> getString(R.string.motivo_incorreto)
+                    R.id.rbSpam -> getString(R.string.motivo_spam)
+                    R.id.rbOutro -> {
+                        val textoOutro = dialogBinding.edtOutro.text.toString().trim()
+                        if (textoOutro.isNotEmpty()) textoOutro else getString(R.string.motivo_outro)
+                    }
+                    else -> ""
+                }
+
+                val denuncia = hashMapOf(
+                    "idAvaliacao" to avaliacao.id,
+                    "idLivro" to avaliacao.idLivro,
+                    "tituloLivro" to tituloLivro,
+                    "idAutorComentario" to avaliacao.idUsuario,
+                    "comentario" to avaliacao.descricao,
+                    "motivo" to motivo,
+                    "status" to "pendente",
+                    "data" to Timestamp.now()
+                )
+
+                db.collection("denuncias")
+                    .add(denuncia)
+                    .addOnSuccessListener {
+                        dialog.dismiss()
+                        mostrarDialogSucesso()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(
+                            this,
+                            "Erro: ${e.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+            }
+        }
         dialog.show()
+    }
+
+    private fun mostrarDialogSucesso() {
+        val sucessoBinding = DialogSucessoDenunciaBinding.inflate(layoutInflater)
+        val sucessoDialog = AlertDialog.Builder(this)
+            .setView(sucessoBinding.root)
+            .create()
+
+        sucessoDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        sucessoBinding.btnOk.setOnClickListener {
+            sucessoDialog.dismiss()
+        }
+
+        sucessoDialog.show()
+    }
+
+    private fun mostrarDialogConfirmacaoCancelar(dialogDenuncia: AlertDialog) {
+        val confirmBinding = DialogConfirmacaoCancelarBinding.inflate(layoutInflater)
+        val confirmDialog = AlertDialog.Builder(this)
+            .setView(confirmBinding.root)
+            .create()
+
+        confirmDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        confirmBinding.btnNao.setOnClickListener {
+            confirmDialog.dismiss()
+        }
+
+        confirmBinding.btnSim.setOnClickListener {
+            confirmDialog.dismiss()
+            dialogDenuncia.dismiss()
+        }
+
+        confirmDialog.show()
     }
 
     private fun verificarCurtida(idLivro: String) {
@@ -333,6 +396,7 @@ class LivroActivity : AppCompatActivity() {
         binding.btnVerAvaliacoes.setOnClickListener {
             val intent = Intent(this, MaisAvaliacoesActivity::class.java)
             intent.putExtra("ID_LIVRO", livro.id)
+            intent.putExtra("TITULO_LIVRO", livro.titulo)
             startActivity(intent)
         }
 
