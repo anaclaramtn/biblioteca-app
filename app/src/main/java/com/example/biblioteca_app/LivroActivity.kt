@@ -14,6 +14,7 @@ import com.example.biblioteca_app.models.Avaliacao
 import com.example.biblioteca_app.models.Livro
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -27,6 +28,7 @@ class LivroActivity : AppCompatActivity() {
 
     private var expandido = false
     private var solicitacaoEnviada = false
+    private var livroJaCurtido = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +40,7 @@ class LivroActivity : AppCompatActivity() {
         preencherTela(livro)
         carregarResumoAvaliacoes(livro.id)
         carregarAvaliacoes(livro.id)
+        verificarCurtida(livro.id)
         configurarBotoes(livro)
         setupNavBar()
         setupAlugar(livro)
@@ -252,6 +255,32 @@ class LivroActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    private fun verificarCurtida(idLivro: String) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        binding.btnCurtir.isEnabled = false
+        db.collection("livrosCurtidos")
+            .whereEqualTo("idUsuario", uid)
+            .whereEqualTo("idLivro", idLivro)
+            .get()
+            .addOnSuccessListener { documents ->
+                livroJaCurtido = !documents.isEmpty
+                atualizarIconeCurtir()
+                binding.btnCurtir.isEnabled = true
+            }
+            .addOnFailureListener {
+                binding.btnCurtir.isEnabled = true
+            }
+    }
+
+    private fun atualizarIconeCurtir() {
+        if (livroJaCurtido) {
+            binding.btnCurtir.setImageResource(R.drawable.ic_heart_filled)
+        } else {
+            binding.btnCurtir.setImageResource(R.drawable.ic_heart)
+        }
+    }
+
     // =========================
     // BOTÕES
     // =========================
@@ -274,6 +303,64 @@ class LivroActivity : AppCompatActivity() {
             val intent = Intent(this, AvaliarActivity::class.java)
             intent.putExtra("ID_LIVRO", livro.id)
             startActivity(intent)
+        }
+
+        binding.btnCurtir.setOnClickListener {
+            toggleCurtir(livro.id)
+        }
+    }
+
+    private fun toggleCurtir(idLivro: String) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid == null) {
+            Toast.makeText(this, "Você precisa estar logado para curtir", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        binding.btnCurtir.isEnabled = false
+        if (livroJaCurtido) {
+            // Remover curtida
+            db.collection("livrosCurtidos")
+                .whereEqualTo("idUsuario", uid)
+                .whereEqualTo("idLivro", idLivro)
+                .get()
+                .addOnSuccessListener { documents ->
+                    val batch = db.batch()
+                    for (doc in documents) {
+                        batch.delete(doc.reference)
+                    }
+                    batch.commit().addOnSuccessListener {
+                        livroJaCurtido = false
+                        atualizarIconeCurtir()
+                        binding.btnCurtir.isEnabled = true
+                        Toast.makeText(this, "Removido dos curtidos", Toast.LENGTH_SHORT).show()
+                    }.addOnFailureListener {
+                        binding.btnCurtir.isEnabled = true
+                        Toast.makeText(this, "Erro ao remover curtida", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .addOnFailureListener {
+                    binding.btnCurtir.isEnabled = true
+                }
+        } else {
+            // Adicionar curtida
+            val curtida = hashMapOf(
+                "idUsuario" to uid,
+                "idLivro" to idLivro
+            )
+
+            db.collection("livrosCurtidos")
+                .add(curtida)
+                .addOnSuccessListener {
+                    livroJaCurtido = true
+                    atualizarIconeCurtir()
+                    binding.btnCurtir.isEnabled = true
+                    Toast.makeText(this, "Livro curtido!", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener {
+                    binding.btnCurtir.isEnabled = true
+                    Toast.makeText(this, "Erro ao curtir livro", Toast.LENGTH_SHORT).show()
+                }
         }
     }
 
