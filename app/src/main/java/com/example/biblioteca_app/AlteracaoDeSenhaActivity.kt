@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
@@ -32,8 +33,8 @@ class AlteracaoDeSenhaActivity : AppCompatActivity() {
         val editConfirmarSenha = findViewById<EditText>(R.id.EditTextConfirmarNovaSenha)
 
         // Botão Voltar e Cancelar (fecham a tela)
-        btnVoltar.setOnClickListener { finish() }
-        btnCancelar.setOnClickListener { finish() }
+        btnVoltar.setOnClickListener { confirmarSaida() }
+        btnCancelar.setOnClickListener { confirmarSaida() }
 
         // 2. Lógica do botão Concluir
         btnConcluir.setOnClickListener {
@@ -92,6 +93,15 @@ class AlteracaoDeSenhaActivity : AppCompatActivity() {
         val temMaiuscula = senha.any { it.isUpperCase() }
 
         return temNumero && temMinuscula && temMaiuscula
+    }
+
+    private fun confirmarSaida() {
+        AlertDialog.Builder(this)
+            .setTitle("Certeza que deseja cancelar?")
+            .setMessage("Suas alterações não serão salvas.")
+            .setPositiveButton("Sim") { _, _ -> finish() }
+            .setNegativeButton("Não", null)
+            .show()
     }
 
     private fun setupNavBar() {
