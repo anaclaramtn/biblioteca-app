@@ -10,6 +10,7 @@ import com.example.biblioteca_app.databinding.*
 import com.example.biblioteca_app.models.Avaliacao
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -159,7 +160,7 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
         item: ItemAvaliacaoBinding,
         avaliacao: Avaliacao
     ) {
-        val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
         if (uid == null) {
             item.btnCurtir.setOnClickListener {
                 Toast.makeText(this, "Faça login para curtir", Toast.LENGTH_SHORT).show()
@@ -303,11 +304,13 @@ class MaisAvaliacoesActivity : AppCompatActivity() {
                     else -> ""
                 }
 
+                val uidDenunciante = FirebaseAuth.getInstance().currentUser?.uid
                 val denuncia = hashMapOf(
                     "idAvaliacao" to avaliacao.id,
                     "idLivro" to avaliacao.idLivro,
                     "tituloLivro" to tituloLivro,
                     "idAutorComentario" to avaliacao.idUsuario,
+                    "idUsuarioDenunciante" to uidDenunciante,
                     "comentario" to avaliacao.descricao,
                     "motivo" to motivo,
                     "status" to "pendente",

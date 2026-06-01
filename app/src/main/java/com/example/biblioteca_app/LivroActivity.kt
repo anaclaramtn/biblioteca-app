@@ -237,13 +237,14 @@ class LivroActivity : AppCompatActivity() {
         binding.btnAlugar.setOnClickListener {
             if (solicitacaoEnviada) return@setOnClickListener
 
+            val uid = FirebaseAuth.getInstance().currentUser?.uid
             val data = hashMapOf(
+                "idUsuario" to uid,
                 "idLivro" to livro.id,
                 "status" to "pendente",
                 "data" to Timestamp.now()
             )
 
-            // Substituído "??????" por uma coleção padrão "solicitacoes_aluguel"
             db.collection("solicitacoes_aluguel")
                 .add(data)
                 .addOnSuccessListener {
@@ -291,11 +292,13 @@ class LivroActivity : AppCompatActivity() {
                     else -> ""
                 }
 
+                val uidDenunciante = FirebaseAuth.getInstance().currentUser?.uid
                 val denuncia = hashMapOf(
                     "idAvaliacao" to avaliacao.id,
                     "idLivro" to avaliacao.idLivro,
                     "tituloLivro" to tituloLivro,
                     "idAutorComentario" to avaliacao.idUsuario,
+                    "idUsuarioDenunciante" to uidDenunciante,
                     "comentario" to avaliacao.descricao,
                     "motivo" to motivo,
                     "status" to "pendente",

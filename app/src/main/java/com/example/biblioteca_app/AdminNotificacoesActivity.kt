@@ -15,12 +15,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.firestore.FirebaseFirestore
 
 class AdminNotificacoesActivity : AppCompatActivity() {
 
     private lateinit var container: LinearLayout
     private val itensNotificacao = mutableListOf<Pair<View, TipoNotificacao>>()
     private lateinit var botoesFiltro: List<Button>
+    private val db = FirebaseFirestore.getInstance()
 
     // Enum para definir qual molde usar e para filtragem
     enum class TipoNotificacao {
@@ -41,8 +43,79 @@ class AdminNotificacoesActivity : AppCompatActivity() {
         container = findViewById(R.id.containerSolicitacoes)
 
         setupFiltros()
-        carregarExemplos()
+        carregarNotificacoes()
         setupNavBar()
+    }
+
+    private fun carregarNotificacoes() {
+        carregarDenuncias()
+        carregarSolicitacoesAluguel()
+        // Você pode adicionar outras cargas aqui (Salas, Jogos, etc)
+    }
+
+    private fun carregarDenuncias() {
+        db.collection("denuncias")
+            .whereEqualTo("status", "pendente")
+            .get()
+            .addOnSuccessListener { documents ->
+                for (doc in documents) {
+                    val uidDenunciante = doc.getString("idUsuarioDenunciante")
+                    val tituloLivro = doc.getString("tituloLivro") ?: ""
+                    val motivo = doc.getString("motivo") ?: ""
+                    val idLivro = doc.getString("idLivro") ?: ""
+
+                    if (uidDenunciante != null) {
+                        db.collection("usuarios").document(uidDenunciante).get()
+                            .addOnSuccessListener { userDoc ->
+                                val nome = userDoc.getString("nome") ?: "Usuário"
+                                val email = userDoc.getString("email") ?: ""
+                                val descricao = "Denúncia de comentário no livro\n'$tituloLivro'\n- $motivo"
+
+                                adicionarItemNotificacao(
+                                    TipoNotificacao.DENUNCIAS,
+                                    nome,
+                                    email,
+                                    descricao,
+                                    idRelacionado = idLivro
+                                )
+                            }
+                    }
+                }
+            }
+    }
+
+    private fun carregarSolicitacoesAluguel() {
+        db.collection("solicitacoes_aluguel")
+            .whereEqualTo("status", "pendente")
+            .get()
+            .addOnSuccessListener { documents ->
+                for (doc in documents) {
+                    val uid = doc.getString("idUsuario")
+                    val idLivro = doc.getString("idLivro")
+                    val idDoc = doc.id
+
+                    if (uid != null && idLivro != null) {
+                        db.collection("livros").document(idLivro).get().addOnSuccessListener { livroDoc ->
+                            val tituloLivro = livroDoc.getString("titulo") ?: "Livro"
+
+                            db.collection("usuarios").document(uid).get().addOnSuccessListener { userDoc ->
+                                val nome = userDoc.getString("nome") ?: "Usuário"
+                                val email = userDoc.getString("email") ?: ""
+                                val descricao = "Requerimento de aluguel do Livro\n'$tituloLivro'"
+
+                                adicionarItemNotificacao(
+                                    TipoNotificacao.LIVROS,
+                                    nome,
+                                    email,
+                                    descricao,
+                                    idDocumento = idDoc,
+                                    colecao = "solicitacoes_aluguel"
+                                )
+                            }
+                        }
+                    }
+                }
+            }
     }
 
 
@@ -84,49 +157,6 @@ class AdminNotificacoesActivity : AppCompatActivity() {
         }
     }
 
-    private fun carregarExemplos() {
-        // Exemplo: Livro
-        adicionarItemNotificacao(
-            TipoNotificacao.LIVROS,
-            "João Victor",
-            "jotave@gmail.com",
-            "Requerimento de aluguel do Livro\n'O Hobbit'"
-        )
-
-        // Exemplo: Sala
-        adicionarItemNotificacao(
-            TipoNotificacao.SALAS,
-            "Fernanda Souza",
-            "nanda@gmail.com",
-            "Reserva da Sala de Estudos 02\nHorário: 14:00 - 16:00"
-        )
-
-        // Exemplo: Devolução
-        adicionarItemNotificacao(
-            TipoNotificacao.DEVOLUCOES,
-            "Ygor Costa",
-            "ygor@gmail.com",
-            "Devolução do livro 'Corra'\nMulta: R$ 6,00",
-            "Data Empréstimo: 27/03/2026\nPrazo de Entrega: 10/04/2026"
-        )
-
-        // Exemplo: Jogo
-        adicionarItemNotificacao(
-            TipoNotificacao.JOGOS,
-            "Lucas Lima",
-            "lucas@gmail.com",
-            "Requerimento de aluguel do Jogo\n'Catan'"
-        )
-
-        // Exemplo: Denúncia
-        adicionarItemNotificacao(
-            TipoNotificacao.DENUNCIAS,
-            "Thiago Narak",
-            "narak@unifor.com",
-            "Denúncia de comentário no livro\n'Harry Potter'\n- Conteúdo Inadequado"
-        )
-    }
-
     /**
      * Função Mestre: Adiciona qualquer tipo de notificação ao container
      */
@@ -135,7 +165,10 @@ class AdminNotificacoesActivity : AppCompatActivity() {
         nome: String,
         email: String,
         descricao: String,
-        extraInfo: String? = null // Usado para datas na devolução
+        extraInfo: String? = null,
+        idRelacionado: String? = null,
+        idDocumento: String? = null,
+        colecao: String? = null
     ) {
         val layoutRes = when (tipo) {
             TipoNotificacao.LIVROS, TipoNotificacao.JOGOS, TipoNotificacao.SALAS -> R.layout.item_solicitacao_aluguel
@@ -160,14 +193,28 @@ class AdminNotificacoesActivity : AppCompatActivity() {
             TipoNotificacao.LIVROS, TipoNotificacao.JOGOS, TipoNotificacao.SALAS -> {
                 itemView.findViewById<Button>(R.id.btnAprovar).setOnClickListener {
                     confirmarAcao("Aprovar solicitação de $nome?") {
-                        Toast.makeText(this, "Aprovado!", Toast.LENGTH_SHORT).show()
-                        removerItem(itemView)
+                        if (idDocumento != null && colecao != null) {
+                            db.collection(colecao).document(idDocumento).update("status", "aprovado")
+                                .addOnSuccessListener {
+                                    Toast.makeText(this, "Aprovado!", Toast.LENGTH_SHORT).show()
+                                    removerItem(itemView)
+                                }
+                        } else {
+                            removerItem(itemView)
+                        }
                     }
                 }
                 itemView.findViewById<Button>(R.id.btnRecusar).setOnClickListener {
                     confirmarAcao("Recusar solicitação de $nome?") {
-                        Toast.makeText(this, "Recusado!", Toast.LENGTH_SHORT).show()
-                        removerItem(itemView)
+                        if (idDocumento != null && colecao != null) {
+                            db.collection(colecao).document(idDocumento).update("status", "recusado")
+                                .addOnSuccessListener {
+                                    Toast.makeText(this, "Recusado!", Toast.LENGTH_SHORT).show()
+                                    removerItem(itemView)
+                                }
+                        } else {
+                            removerItem(itemView)
+                        }
                     }
                 }
             }
@@ -182,7 +229,9 @@ class AdminNotificacoesActivity : AppCompatActivity() {
             }
             TipoNotificacao.DENUNCIAS -> {
                 itemView.findViewById<Button>(R.id.btnVerificar).setOnClickListener {
-                    startActivity(Intent(this, AdminMaisAvaliacoesActivity::class.java))
+                    val intent = Intent(this, AdminMaisAvaliacoesActivity::class.java)
+                    intent.putExtra("ID_LIVRO", idRelacionado)
+                    startActivity(intent)
                 }
             }
         }

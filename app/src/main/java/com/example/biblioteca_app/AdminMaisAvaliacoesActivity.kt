@@ -116,8 +116,26 @@ class AdminMaisAvaliacoesActivity : AppCompatActivity() {
                             .setTitle("Confirmação")
                             .setMessage("Tem certeza que deseja excluir o comentário?")
                             .setPositiveButton("Sim") { _, _ ->
-                                (view.parent as? ViewGroup)?.removeView(view)
-                                Toast.makeText(this, "Comentário deletado", Toast.LENGTH_SHORT).show()
+                                db.collection("avaliacoes").document(avaliacao.id).delete()
+                                    .addOnSuccessListener {
+                                        (view.parent as? ViewGroup)?.removeView(view)
+                                        Toast.makeText(this, "Comentário deletado do banco", Toast.LENGTH_SHORT).show()
+                                        
+                                        // Opcional: Marcar a denúncia como resolvida se existir
+                                        db.collection("denuncias")
+                                            .whereEqualTo("idAvaliacao", avaliacao.id)
+                                            .get()
+                                            .addOnSuccessListener { docs ->
+                                                val batch = db.batch()
+                                                for (doc in docs) {
+                                                    batch.update(doc.reference, "status", "resolvida")
+                                                }
+                                                batch.commit()
+                                            }
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Toast.makeText(this, "Erro ao deletar: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    }
                             }
                             .setNegativeButton("Não", null)
                             .show()
