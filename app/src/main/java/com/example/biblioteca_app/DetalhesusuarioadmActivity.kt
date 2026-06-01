@@ -55,13 +55,13 @@ class DetalhesusuarioadmActivity : AppCompatActivity() {
     private fun setupRecyclerViews() {
         // Dados de exemplo (Molde)
         val listaAtivos = listOf(
-            Emprestimo("WAR", "28/03/2026", null, 0.0, R.drawable.war, true),
-            Emprestimo("O Hobbit", "28/03/2026", null, 0.0, R.drawable.hobbit, true)
+            Emprestimo("WAR", "28/03/2026", null, 0.0, R.drawable.war, isAtivo = true),
+            Emprestimo("O Hobbit", "28/03/2026", null, 0.0, R.drawable.hobbit, isAtivo = true)
         )
 
         val listaHistorico = listOf(
-            Emprestimo("SALA 01", "25/03/2026", "25/03/2026", 0.0, null, false),
-            Emprestimo("Dom Quixote", "27/03/2026", "10/04/2026", 0.0, R.drawable.capadomquixote, false)
+            Emprestimo("SALA 01", "25/03/2026", "25/03/2026", 0.0, null, isAtivo = false),
+            Emprestimo("Dom Quixote", "27/03/2026", "10/04/2026", 0.0, R.drawable.capadomquixote, isAtivo = false)
         )
 
         // Configuração Recycler Ativos

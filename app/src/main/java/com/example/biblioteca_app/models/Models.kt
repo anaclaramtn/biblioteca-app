@@ -4,17 +4,19 @@ import com.google.firebase.Timestamp
 import java.io.Serializable
 
 data class Noticia(
-    val titulo: String,
-    val descricao: String,
-    val imagemRes: Int? = null
-)
+    var id: String = "",
+    val titulo: String = "",
+    val descricao: String = "",
+    val descricaoLonga: String = "",
+    val imagemRes: Int? = null,
+    val imagemBase64: String? = null
+) : Serializable
 
 data class Livro(
     var id: String = "",
     val titulo: String = "",
     val autor: String = "",
     val descricao: String = "",
-    val imagemUri: String = "",
     val imagemRes: Int? = null,
     val imagemBase64: String? = null,
     val disponivel: Boolean = true,
@@ -42,13 +44,16 @@ data class Emprestimo(
     val dataDevolucao: String? = null,
     val valorMulta: Double,
     val imagemRes: Int? = null,
+    val imagemBase64: String? = null,
     val isAtivo: Boolean
 )
 
 data class Jogo(
     var id: String = "",
     val nome: String = "",
-    val imagemRes: Int = 0
+    val imagemRes: Int = 0,
+    val imagemBase64: String? = null,
+    val isDisponivel: Boolean = true
 ) : Serializable
 
 data class Sala(

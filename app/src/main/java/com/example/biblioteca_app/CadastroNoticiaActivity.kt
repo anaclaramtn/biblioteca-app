@@ -20,6 +20,10 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.firestore.FirebaseFirestore
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import java.io.ByteArrayOutputStream
 
 import com.example.biblioteca_app.models.Noticia
 
@@ -84,12 +88,23 @@ class CadastroNoticiaActivity : AppCompatActivity() {
             if (titulo.isBlank() || desc.isBlank() || corpo.isBlank() || imageUri == null) {
                 exibirAviso()
             } else {
+                // Converte a imagem para Base64
+                val base64Image = try {
+                    val inputStream = contentResolver.openInputStream(imageUri!!)
+                    val bitmap = BitmapFactory.decodeStream(inputStream)
+                    inputStream?.close()
+                    bitmap?.let { bitmapToBase64(it) }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    null
+                }
+
                 // Prepara os dados da notícia para o Firestore
                 val dadosNoticia = hashMapOf(
                     "nome" to titulo,
                     "descricaoCurta" to desc,
                     "descricaoLonga" to corpo,
-                    "imagemCapa" to imageUri.toString()
+                    "imagemBase64" to base64Image
                 )
 
                 // Salva a notícia no banco de dados (Firestore)
@@ -169,5 +184,13 @@ class CadastroNoticiaActivity : AppCompatActivity() {
                 else -> false
             }
         }
+    }
+
+    private fun bitmapToBase64(bitmap: Bitmap): String {
+        val outputStream = ByteArrayOutputStream()
+        // Compressão para reduzir o tamanho
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
+        val byteArray = outputStream.toByteArray()
+        return Base64.encodeToString(byteArray, Base64.DEFAULT)
     }
 }

@@ -99,7 +99,6 @@ class AcervoadmActivity : AppCompatActivity() {
                         titulo = doc.getString("titulo") ?: "",
                         autor = doc.getString("autor") ?: "",
                         descricao = doc.getString("sinopse") ?: "",
-                        imagemUri = doc.getString("imagemUri") ?: "",
                         imagemBase64 = doc.getString("imagemBase64"),
                         disponivel = doc.getBoolean("disponivel") ?: true,
                         media = (doc.getDouble("media") ?: 0.0).toFloat(),
@@ -134,6 +133,28 @@ class AcervoadmActivity : AppCompatActivity() {
             }
     }
 
+    private fun carregarNoticias() {
+        FirebaseFirestore.getInstance()
+            .collection("noticias")
+            .get()
+            .addOnSuccessListener { documentos ->
+                listaNoticias.clear()
+                for (doc in documentos) {
+                    val noticia = Noticia(
+                        id = doc.id,
+                        titulo = doc.getString("nome") ?: "",
+                        descricao = doc.getString("descricaoCurta") ?: "",
+                        descricaoLonga = doc.getString("descricaoLonga") ?: "",
+                        imagemBase64 = doc.getString("imagemBase64")
+                    )
+                    listaNoticias.add(noticia)
+                }
+                if (findViewById<Spinner>(R.id.spinnerFiltro).selectedItem.toString() == "Notícias") {
+                    setupNoticias()
+                }
+            }
+    }
+
     private fun carregarJogos() {
         FirebaseFirestore.getInstance()
             .collection("jogos")
@@ -144,7 +165,8 @@ class AcervoadmActivity : AppCompatActivity() {
                     val jogo = Jogo(
                         id = doc.id,
                         nome = doc.getString("nome") ?: "",
-                        imagemRes = (doc.getLong("imagemRes") ?: R.drawable.uno.toLong()).toInt()
+                        imagemRes = (doc.getLong("imagemRes") ?: R.drawable.uno.toLong()).toInt(),
+                        imagemBase64 = doc.getString("imagemBase64")
                     )
                     listaJogos.add(jogo)
                 }
@@ -217,15 +239,6 @@ class AcervoadmActivity : AppCompatActivity() {
                         imgCapa.setImageResource(R.drawable.capadomquixote)
                     }
                 }
-                item.imagemUri.isNotEmpty() -> {
-                    try {
-                        imgCapa.setImageURI(Uri.parse(item.imagemUri))
-                    } catch (e: SecurityException) {
-                        imgCapa.setImageResource(R.drawable.capadomquixote)
-                    } catch (e: Exception) {
-                        imgCapa.setImageResource(R.drawable.capadomquixote)
-                    }
-                }
                 item.imagemRes != null && item.imagemRes != 0 -> {
                     imgCapa.setImageResource(item.imagemRes!!)
                 }
@@ -251,6 +264,26 @@ class AcervoadmActivity : AppCompatActivity() {
     private fun setupNoticias() {
         recycler.layoutManager = LinearLayoutManager(this)
         recycler.adapter = GenericAdapter(R.layout.item_noticia, listaNoticias) { view, item, position ->
+            val imgNoticia = view.findViewById<ImageView>(R.id.imgNoticia)
+            
+            when {
+                !item.imagemBase64.isNullOrEmpty() -> {
+                    try {
+                        val decodedBytes = android.util.Base64.decode(item.imagemBase64, android.util.Base64.DEFAULT)
+                        val bitmap = android.graphics.BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                        imgNoticia.setImageBitmap(bitmap)
+                    } catch (e: Exception) {
+                        imgNoticia.setImageResource(R.drawable.logo)
+                    }
+                }
+                item.imagemRes != null && item.imagemRes != 0 -> {
+                    imgNoticia.setImageResource(item.imagemRes!!)
+                }
+                else -> {
+                    imgNoticia.setImageResource(R.drawable.logo)
+                }
+            }
+
             view.findViewById<TextView>(R.id.txtTituloNoticia).text = item.titulo
             view.findViewById<TextView>(R.id.txtDescricaoNoticia).text = item.descricao
 
@@ -284,7 +317,26 @@ class AcervoadmActivity : AppCompatActivity() {
     private fun setupJogos() {
         recycler.layoutManager = GridLayoutManager(this, 3)
         recycler.adapter = GenericAdapter(R.layout.item_jogo, listaJogos) { view, item, position ->
-            view.findViewById<ImageView>(R.id.imgJogo).setImageResource(item.imagemRes)
+            val imgJogo = view.findViewById<ImageView>(R.id.imgJogo)
+            
+            when {
+                !item.imagemBase64.isNullOrEmpty() -> {
+                    try {
+                        val decodedBytes = android.util.Base64.decode(item.imagemBase64, android.util.Base64.DEFAULT)
+                        val bitmap = android.graphics.BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                        imgJogo.setImageBitmap(bitmap)
+                    } catch (e: Exception) {
+                        imgJogo.setImageResource(R.drawable.uno)
+                    }
+                }
+                item.imagemRes != null && item.imagemRes != 0 -> {
+                    imgJogo.setImageResource(item.imagemRes)
+                }
+                else -> {
+                    imgJogo.setImageResource(R.drawable.uno)
+                }
+            }
+
             view.findViewById<TextView>(R.id.txtNomeJogo).text = item.nome
 
             view.setOnClickListener { v ->

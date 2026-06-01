@@ -20,6 +20,10 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.firestore.FirebaseFirestore
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+import java.io.ByteArrayOutputStream
 
 import com.example.biblioteca_app.models.Jogo
 
@@ -91,14 +95,27 @@ class CadastroJogoActivity : AppCompatActivity() {
             if (titulo.isBlank() || (jogoParaEditar == null && imageUri == null)) {
                 exibirAviso()
             } else {
+                // Converte a imagem para Base64 se houver uma nova imagem selecionada
+                val base64Image = imageUri?.let { uri ->
+                    try {
+                        val inputStream = contentResolver.openInputStream(uri)
+                        val bitmap = BitmapFactory.decodeStream(inputStream)
+                        inputStream?.close()
+                        bitmap?.let { bitmapToBase64(it) }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        null
+                    }
+                }
+
                 // Prepara os dados do jogo para o Firestore
                 val dadosJogo = mutableMapOf<String, Any>(
                     "nome" to titulo,
                     "isDisponivel" to true,
-                    "imagemRes" to R.drawable.uno // Mock para simplicidade, ou use imageUri.toString()
+                    "imagemRes" to R.drawable.uno // Mock para simplicidade
                 )
                 
-                imageUri?.let { dadosJogo["imagemCapa"] = it.toString() }
+                base64Image?.let { dadosJogo["imagemBase64"] = it }
 
                 if (jogoParaEditar == null) {
                     // MODO CADASTRO
@@ -182,5 +199,13 @@ class CadastroJogoActivity : AppCompatActivity() {
                 else -> false
             }
         }
+    }
+
+    private fun bitmapToBase64(bitmap: Bitmap): String {
+        val outputStream = ByteArrayOutputStream()
+        // Compressão para reduzir o tamanho
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
+        val byteArray = outputStream.toByteArray()
+        return Base64.encodeToString(byteArray, Base64.DEFAULT)
     }
 }

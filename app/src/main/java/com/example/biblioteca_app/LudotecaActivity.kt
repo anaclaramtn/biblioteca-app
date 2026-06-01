@@ -20,6 +20,7 @@ import com.example.biblioteca_app.models.Jogo
 import com.example.biblioteca_app.models.Sala
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.firestore.FirebaseFirestore
+import android.net.Uri
 
 class LudotecaActivity : AppCompatActivity() {
 
@@ -78,7 +79,26 @@ class LudotecaActivity : AppCompatActivity() {
     private fun setupRecyclerViews() {
         adapterJogos = GenericAdapter(R.layout.item_jogo_ludoteca, listaJogos) { view, item, _ ->
             view.findViewById<TextView>(R.id.txtNomeJogo).text = item.nome
-            view.findViewById<ImageView>(R.id.imgJogo).setImageResource(item.imagemRes)
+            val imgJogo = view.findViewById<ImageView>(R.id.imgJogo)
+            
+            when {
+                !item.imagemBase64.isNullOrEmpty() -> {
+                    try {
+                        val decodedBytes = android.util.Base64.decode(item.imagemBase64, android.util.Base64.DEFAULT)
+                        val bitmap = android.graphics.BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                        imgJogo.setImageBitmap(bitmap)
+                    } catch (e: Exception) {
+                        imgJogo.setImageResource(R.drawable.uno)
+                    }
+                }
+                item.imagemRes != 0 -> {
+                    imgJogo.setImageResource(item.imagemRes)
+                }
+                else -> {
+                    imgJogo.setImageResource(R.drawable.uno)
+                }
+            }
+
             val btnAlugar = view.findViewById<Button>(R.id.btnAlugar)
             btnAlugar.setOnClickListener {
                 atualizarBotaoSolicitacao(btnAlugar, "Aluguel solicitado!")
@@ -109,7 +129,8 @@ class LudotecaActivity : AppCompatActivity() {
                 val jogo = Jogo(
                     id = doc.id,
                     nome = doc.getString("nome") ?: "",
-                    imagemRes = (doc.getLong("imagemRes") ?: R.drawable.uno.toLong()).toInt()
+                    imagemRes = (doc.getLong("imagemRes") ?: R.drawable.uno.toLong()).toInt(),
+                    imagemBase64 = doc.getString("imagemBase64")
                 )
                 listaJogos.add(jogo)
             }

@@ -17,6 +17,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class PerfilActivity : AppCompatActivity() {
 
+    private val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+    private val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -25,6 +28,15 @@ class PerfilActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        val user = auth.currentUser
+        if (user != null) {
+            db.collection("usuarios").document(user.uid).get()
+                .addOnSuccessListener { doc ->
+                    findViewById<TextView>(R.id.tvNomeUsuario).text = doc.getString("nome") ?: "Usuário"
+                    findViewById<TextView>(R.id.tvEmailUsuario).text = doc.getString("email") ?: user.email
+                }
         }
 
         // Configurar botão voltar
@@ -49,14 +61,65 @@ class PerfilActivity : AppCompatActivity() {
     }
 
     private fun setupLivrosCurtidos() {
-        // Livro 1
-        configurarItemLivro(R.id.livro1, R.drawable.capa_star_wars, "Star Wars", "George Lucas")
-        // Livro 2
-        configurarItemLivro(R.id.livro2, R.drawable.frankstein, "Frankstein", "Mary Shelley")
-        // Livro 3
-        configurarItemLivro(R.id.livro3, R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
-        // Livro 4
-        configurarItemLivro(R.id.livro4, R.drawable.logo, "Biblioteca", "Unifor")
+        val user = auth.currentUser ?: return
+        val container = findViewById<android.widget.LinearLayout>(R.id.containerCurtidos)
+
+        db.collection("usuarios")
+            .document(user.uid)
+            .collection("curtidos")
+            .get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
+                    // Fallback para itens estáticos se não houver curtidas no firestore
+                    configurarItemLivro(R.id.livro1, R.drawable.capa_star_wars, "Star Wars", "George Lucas")
+                    configurarItemLivro(R.id.livro2, R.drawable.frankstein, "Frankstein", "Mary Shelley")
+                    configurarItemLivro(R.id.livro3, R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
+                    configurarItemLivro(R.id.livro4, R.drawable.logo, "Biblioteca", "Unifor")
+                } else {
+                    container.removeAllViews()
+                    for (doc in documents) {
+                        val livroId = doc.id
+                        db.collection("livros").document(livroId).get()
+                            .addOnSuccessListener { livroDoc ->
+                                if (livroDoc.exists()) {
+                                    val livro = com.example.biblioteca_app.models.Livro(
+                                        id = livroDoc.id,
+                                        titulo = livroDoc.getString("titulo") ?: "",
+                                        autor = livroDoc.getString("autor") ?: "",
+                                        imagemBase64 = livroDoc.getString("imagemBase64")
+                                    )
+                                    adicionarLivroAoCarrossel(container, livro)
+                                }
+                            }
+                    }
+                }
+            }
+    }
+
+    private fun adicionarLivroAoCarrossel(container: android.widget.LinearLayout, livro: com.example.biblioteca_app.models.Livro) {
+        val view = layoutInflater.inflate(R.layout.item_livro, container, false)
+        view.findViewById<TextView>(R.id.txtTituloLivro).text = livro.titulo
+        view.findViewById<TextView>(R.id.txtAutor).text = livro.autor
+        val img = view.findViewById<ImageView>(R.id.imgCapa)
+
+        if (!livro.imagemBase64.isNullOrEmpty()) {
+            try {
+                val bytes = android.util.Base64.decode(livro.imagemBase64, android.util.Base64.DEFAULT)
+                val bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                img.setImageBitmap(bitmap)
+            } catch (e: Exception) {
+                img.setImageResource(R.drawable.capadomquixote)
+            }
+        } else {
+            img.setImageResource(R.drawable.capadomquixote)
+        }
+
+        view.setOnClickListener {
+            val intent = Intent(this, LivroActivity::class.java)
+            intent.putExtra("LIVRO", livro)
+            startActivity(intent)
+        }
+        container.addView(view)
     }
 
     private fun configurarItemLivro(id: Int, imagem: Int, titulo: String, autor: String) {

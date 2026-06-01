@@ -63,38 +63,87 @@ class TelaHomeActivity : AppCompatActivity() {
         val btnPrev = findViewById<ImageButton>(R.id.btnPrevNoticia)
         val btnNext = findViewById<ImageButton>(R.id.btnNextNoticia)
 
-        val listaNoticias = listOf(
-            Noticia("Novo jogo chega à biblioteca!", "Venha conferir o mais novo jogo de tabuleiro que chegou na ludoteca da biblioteca.", R.drawable.war),
-            Noticia("Professor Boba Fett", "Inacreditável! Um professor de Computação deu aula totalmente fantasiado de Boba Fett de Star Wars hoje.", R.drawable.logo)
-        )
-
-        rvNoticias.adapter = GenericAdapter(
+        val adapterNoticias = GenericAdapter(
             R.layout.item_noticia,
-            listaNoticias
+            emptyList<Noticia>()
         ) { view, noticia, position ->
 
             view.findViewById<TextView>(R.id.txtTituloNoticia).text = noticia.titulo
             view.findViewById<TextView>(R.id.txtDescricaoNoticia).text = noticia.descricao
 
-            noticia.imagemRes?.let {
-                view.findViewById<ImageView>(R.id.imgNoticia).setImageResource(it)
+            val img = view.findViewById<ImageView>(R.id.imgNoticia)
+            when {
+                !noticia.imagemBase64.isNullOrEmpty() -> {
+                    try {
+                        img.setImageBitmap(base64ToBitmap(noticia.imagemBase64))
+                    } catch (e: Exception) {
+                        img.setImageResource(R.drawable.logo)
+                    }
+                }
+                noticia.imagemRes != null && noticia.imagemRes != 0 -> {
+                    img.setImageResource(noticia.imagemRes)
+                }
+                else -> {
+                    img.setImageResource(R.drawable.logo)
+                }
             }
 
             view.findViewById<View>(R.id.btnSaibaMais).setOnClickListener {
                 val intent = Intent(this, NoticiaCompletaActivity::class.java)
                 intent.putExtra("TITULO", noticia.titulo)
-                intent.putExtra("IMAGEM", noticia.imagemRes ?: R.drawable.logo)
+                if (noticia.imagemBase64 != null) {
+                    intent.putExtra("IMAGEM_BASE64", noticia.imagemBase64)
+                } else {
+                    intent.putExtra("IMAGEM_RES", noticia.imagemRes ?: R.drawable.logo)
+                }
                 startActivity(intent)
             }
         }
+        rvNoticias.adapter = adapterNoticias
+
+        db.collection("noticias")
+            .orderBy("titulo")
+            .get()
+            .addOnSuccessListener { documents ->
+                val noticias = documents.map { doc ->
+                    Noticia(
+                        id = doc.id,
+                        titulo = doc.getString("titulo") ?: "",
+                        descricao = doc.getString("descricao") ?: "",
+                        imagemBase64 = doc.getString("imagemBase64")
+                    )
+                }
+                if (noticias.isNotEmpty()) {
+                    adapterNoticias.updateList(noticias)
+                    setupDots(layoutDots, noticias.size)
+                    updateDots(layoutDots, 0)
+                } else {
+                    // Fallback para mock se o firestore estiver vazio
+                    val mockNoticias = listOf(
+                        Noticia("Novo jogo chega à biblioteca!", "Venha conferir o mais novo jogo de tabuleiro que chegou na ludoteca da biblioteca.", imagemRes = R.drawable.war),
+                        Noticia("Professor Boba Fett", "Inacreditável! Um professor de Computação deu aula totalmente fantasiado de Boba Fett de Star Wars hoje.", imagemRes = R.drawable.logo)
+                    )
+                    adapterNoticias.updateList(mockNoticias)
+                    setupDots(layoutDots, mockNoticias.size)
+                    updateDots(layoutDots, 0)
+                }
+            }
+            .addOnFailureListener {
+                val mockNoticias = listOf(
+                    Noticia("Novo jogo chega à biblioteca!", "Venha conferir o mais novo jogo de tabuleiro que chegou na ludoteca da biblioteca.", imagemRes = R.drawable.war),
+                    Noticia("Professor Boba Fett", "Inacreditável! Um professor de Computação deu aula totalmente fantasiado de Boba Fett de Star Wars hoje.", imagemRes = R.drawable.logo)
+                )
+                adapterNoticias.updateList(mockNoticias)
+                setupDots(layoutDots, mockNoticias.size)
+                updateDots(layoutDots, 0)
+            }
 
         // SnapHelper para comportamento de carrossel (para parar na notícia centralizada)
         val snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(rvNoticias)
 
         // Configuração das Bolinhas (Indicadores)
-        setupDots(layoutDots, listaNoticias.size)
-        updateDots(layoutDots, 0)
+        // Removido setupDots inicial pois agora é feito no callback do Firestore
 
         rvNoticias.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -117,7 +166,7 @@ class TelaHomeActivity : AppCompatActivity() {
 
         btnNext.setOnClickListener {
             val currentPos = (rvNoticias.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-            if (currentPos < listaNoticias.size - 1) rvNoticias.smoothScrollToPosition(currentPos + 1)
+            if (currentPos < adapterNoticias.itemCount - 1) rvNoticias.smoothScrollToPosition(currentPos + 1)
         }
 
         carregarLivrosPopulares()

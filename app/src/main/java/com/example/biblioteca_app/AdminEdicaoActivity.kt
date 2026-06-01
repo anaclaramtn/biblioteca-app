@@ -1,6 +1,9 @@
 package com.example.biblioteca_app
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -9,23 +12,57 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.biblioteca_app.models.Livro
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.firestore.FirebaseFirestore
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 
 class AdminEdicaoActivity : AppCompatActivity() {
 
-    private var livroPos: Int = -1
+    private var livroAtual: Livro? = null
+    private var imageUri: Uri? = null
+    private var imagemBase64: String? = null
+    private val db = FirebaseFirestore.getInstance()
+
+    private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
+            imageUri = uri
+            try {
+                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                contentResolver.takePersistableUriPermission(uri, takeFlags)
+            } catch (e: Exception) { e.printStackTrace() }
+
+            val imgCapa = findViewById<ImageView>(R.id.imgCapa)
+            imgCapa.setImageURI(uri)
+            
+            // Converter para Base64
+            try {
+                val inputStream = contentResolver.openInputStream(uri)
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+                inputStream?.close()
+                bitmap?.let { btmp: Bitmap ->
+                    val outputStream = ByteArrayOutputStream()
+                    btmp.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
+                    val byteArray = outputStream.toByteArray()
+                    imagemBase64 = android.util.Base64.encodeToString(byteArray, android.util.Base64.DEFAULT)
+                }
+            } catch (e: Exception) { e.printStackTrace() }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.tela_admin_edicao)
 
-        livroPos = intent.getIntExtra("LIVRO_POS", -1)
+        livroAtual = intent.getSerializableExtra("LIVRO") as? Livro
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -39,27 +76,20 @@ class AdminEdicaoActivity : AppCompatActivity() {
     }
 
     private fun preencherDados() {
-        if (livroPos != -1 && livroPos < AcervoadmActivity.listaLivros.size) {
-            val livro = AcervoadmActivity.listaLivros[livroPos]
+        livroAtual?.let { livro ->
             findViewById<EditText>(R.id.edtTitulo).setText(livro.titulo)
             findViewById<EditText>(R.id.edtAutor).setText(livro.autor)
             findViewById<EditText>(R.id.edtDescricao).setText(livro.descricao)
+            
+            imagemBase64 = livro.imagemBase64
+            
             val imgCapa = findViewById<ImageView>(R.id.imgCapa)
             when {
                 !livro.imagemBase64.isNullOrEmpty() -> {
                     try {
                         val decodedBytes = android.util.Base64.decode(livro.imagemBase64, android.util.Base64.DEFAULT)
-                        val bitmap = android.graphics.BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                        val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                         imgCapa.setImageBitmap(bitmap)
-                    } catch (e: Exception) {
-                        imgCapa.setImageResource(R.drawable.capadomquixote)
-                    }
-                }
-                livro.imagemUri.isNotEmpty() -> {
-                    try {
-                        imgCapa.setImageURI(android.net.Uri.parse(livro.imagemUri))
-                    } catch (e: SecurityException) {
-                        imgCapa.setImageResource(R.drawable.capadomquixote)
                     } catch (e: Exception) {
                         imgCapa.setImageResource(R.drawable.capadomquixote)
                     }
@@ -82,6 +112,10 @@ class AdminEdicaoActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnEnviar).setOnClickListener {
             salvarAlteracoes()
         }
+        
+        findViewById<ImageView>(R.id.imgCapa).setOnClickListener {
+            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        }
     }
 
     private fun salvarAlteracoes() {
@@ -94,16 +128,23 @@ class AdminEdicaoActivity : AppCompatActivity() {
             return
         }
 
-        if (livroPos != -1 && livroPos < AcervoadmActivity.listaLivros.size) {
-            val livroOriginal = AcervoadmActivity.listaLivros[livroPos]
-            val livroEditado = livroOriginal.copy(
-                titulo = novoTitulo,
-                autor = novoAutor,
-                descricao = novaDesc
+        livroAtual?.let { livro: Livro ->
+            val updates = hashMapOf<String, Any?>(
+                "titulo" to novoTitulo,
+                "autor" to novoAutor,
+                "sinopse" to novaDesc,
+                "imagemBase64" to imagemBase64
             )
-            AcervoadmActivity.listaLivros[livroPos] = livroEditado
-            Toast.makeText(this, "Acervo Atualizado!", Toast.LENGTH_SHORT).show()
-            finish()
+            
+            db.collection("livros").document(livro.id)
+                .update(updates)
+                .addOnSuccessListener {
+                    Toast.makeText(this, "Livro atualizado com sucesso!", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "Erro ao atualizar!", Toast.LENGTH_SHORT).show()
+                }
         }
     }
 

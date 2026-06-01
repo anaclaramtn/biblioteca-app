@@ -29,10 +29,24 @@ class NoticiaCompletaActivity : AppCompatActivity() {
 
         // Receber dados da Intent
         val titulo = intent.getStringExtra("TITULO") ?: "Título da Notícia"
-        val imagemRes = intent.getIntExtra("IMAGEM", R.drawable.war)
+        val imagemRes = intent.getIntExtra("IMAGEM_RES", R.drawable.war)
+        val imagemBase64 = intent.getStringExtra("IMAGEM_BASE64")
         
         txtTitulo.text = titulo
-        imgNoticia.setImageResource(imagemRes)
+        
+        if (!imagemBase64.isNullOrEmpty()) {
+            try {
+                val bytes = android.util.Base64.decode(imagemBase64, android.util.Base64.DEFAULT)
+                val bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                imgNoticia.setImageBitmap(bitmap)
+            } catch (e: Exception) {
+                imgNoticia.setImageResource(R.drawable.logo)
+            }
+        } else if (imagemRes != 0) {
+            imgNoticia.setImageResource(imagemRes)
+        } else {
+            imgNoticia.setImageResource(R.drawable.logo)
+        }
 
         txtConteudo.text = """
             Esse evento da biblioteca da Unifor é um evento bem interessante e muito legal. Vale a pena ir pra ele e ele vai ser massa. Recomendo que todos vão pra ver o que vai ter lá.

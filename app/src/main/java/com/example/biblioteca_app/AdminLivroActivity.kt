@@ -68,7 +68,6 @@ class AdminLivroActivity : AppCompatActivity() {
                 titulo = "Star Wars: A Vingança dos Sith",
                 autor = "George Lucas",
                 descricao = "Anakin Skywalker se torna Darth Vader...",
-                imagemUri = "",
                 disponivel = true,
                 media = 4.9f,
                 totalAvaliacoes = 120
@@ -85,15 +84,6 @@ class AdminLivroActivity : AppCompatActivity() {
                     val decodedBytes = android.util.Base64.decode(livro.imagemBase64, android.util.Base64.DEFAULT)
                     val bitmap = android.graphics.BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                     img.setImageBitmap(bitmap)
-                } catch (e: Exception) {
-                    img.setImageResource(R.drawable.capadomquixote)
-                }
-            }
-            livro.imagemUri.isNotEmpty() -> {
-                try {
-                    img.setImageURI(Uri.parse(livro.imagemUri))
-                } catch (e: SecurityException) {
-                    img.setImageResource(R.drawable.capadomquixote)
                 } catch (e: Exception) {
                     img.setImageResource(R.drawable.capadomquixote)
                 }
