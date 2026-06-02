@@ -55,31 +55,34 @@ class AdminNotificacoesActivity : AppCompatActivity() {
 
     private fun carregarDenuncias() {
         db.collection("denuncias")
-            .whereEqualTo("status", "pendente")
+            .whereIn("status", listOf("pendente", "visto"))
             .get()
             .addOnSuccessListener { documents ->
                 for (doc in documents) {
-                    val uidDenunciante = doc.getString("idUsuarioDenunciante")
+                    val idDoc = doc.id
+                    val status = doc.getString("status") ?: "pendente"
                     val tituloLivro = doc.getString("tituloLivro") ?: ""
                     val motivo = doc.getString("motivo") ?: ""
+                    val comentario = doc.getString("comentario") ?: ""
                     val idLivro = doc.getString("idLivro") ?: ""
+                    val idAvaliacao = doc.getString("idAvaliacao") ?: ""
 
-                    if (uidDenunciante != null) {
-                        db.collection("usuarios").document(uidDenunciante).get()
-                            .addOnSuccessListener { userDoc ->
-                                val nome = userDoc.getString("nome") ?: "Usuário"
-                                val email = userDoc.getString("email") ?: ""
-                                val descricao = "Denúncia de comentário no livro\n'$tituloLivro'\n- $motivo"
+                    // Informações formatadas para o admin
+                    val nome = "Denúncia"
+                    val email = "Motivo: $motivo"
+                    val descricao = "Livro: $tituloLivro\n\"$comentario\""
 
-                                adicionarItemNotificacao(
-                                    TipoNotificacao.DENUNCIAS,
-                                    nome,
-                                    email,
-                                    descricao,
-                                    idRelacionado = idLivro
-                                )
-                            }
-                    }
+                    adicionarItemNotificacao(
+                        TipoNotificacao.DENUNCIAS,
+                        nome,
+                        email,
+                        descricao,
+                        extraInfo = idAvaliacao,
+                        idDocumento = idDoc,
+                        idRelacionado = idLivro,
+                        colecao = "denuncias",
+                        status = status
+                    )
                 }
             }
     }
@@ -168,7 +171,8 @@ class AdminNotificacoesActivity : AppCompatActivity() {
         extraInfo: String? = null,
         idRelacionado: String? = null,
         idDocumento: String? = null,
-        colecao: String? = null
+        colecao: String? = null,
+        status: String = "pendente"
     ) {
         val layoutRes = when (tipo) {
             TipoNotificacao.LIVROS, TipoNotificacao.JOGOS, TipoNotificacao.SALAS -> R.layout.item_solicitacao_aluguel
@@ -183,14 +187,14 @@ class AdminNotificacoesActivity : AppCompatActivity() {
         itemView.findViewById<TextView>(R.id.tvEmailUsuario).text = email
         itemView.findViewById<TextView>(R.id.tvDescricao).text = descricao
 
-        // ✅ Ao clicar na notificação, a bolinha azul desaparece
-        itemView.setOnClickListener {
-            itemView.findViewById<View>(R.id.indicadorStatus)?.visibility = View.GONE
-        }
-
         // Configurar ações específicas
         when (tipo) {
             TipoNotificacao.LIVROS, TipoNotificacao.JOGOS, TipoNotificacao.SALAS -> {
+                // ✅ Ao clicar na solicitação, a bolinha azul desaparece localmente
+                itemView.setOnClickListener {
+                    itemView.findViewById<View>(R.id.indicadorStatus)?.visibility = View.GONE
+                }
+
                 itemView.findViewById<Button>(R.id.btnAprovar).setOnClickListener {
                     confirmarAcao("Aprovar solicitação de $nome?") {
                         if (idDocumento != null && colecao != null) {
@@ -219,6 +223,11 @@ class AdminNotificacoesActivity : AppCompatActivity() {
                 }
             }
             TipoNotificacao.DEVOLUCOES -> {
+                // ✅ Ao clicar na notificação, a bolinha azul desaparece localmente
+                itemView.setOnClickListener {
+                    itemView.findViewById<View>(R.id.indicadorStatus)?.visibility = View.GONE
+                }
+
                 itemView.findViewById<TextView>(R.id.tvDatas).text = extraInfo
                 itemView.findViewById<Button>(R.id.btnConfirmarDevolucao).setOnClickListener {
                     confirmarAcao("Confirmar devolução de $nome?") {
@@ -228,10 +237,45 @@ class AdminNotificacoesActivity : AppCompatActivity() {
                 }
             }
             TipoNotificacao.DENUNCIAS -> {
+                val indicador = itemView.findViewById<View>(R.id.indicadorStatus)
+                var currentStatus = status
+
+                // Se já foi visto, esconde a bolinha azul permanentemente
+                if (currentStatus == "visto") {
+                    indicador?.visibility = View.GONE
+                }
+
+                // Ao clicar na notificação (item inteiro), o status fica 'visto' e a bolinha some
+                itemView.setOnClickListener {
+                    if (idDocumento != null && currentStatus == "pendente") {
+                        db.collection("denuncias").document(idDocumento)
+                            .update("status", "visto")
+                            .addOnSuccessListener {
+                                indicador?.visibility = View.GONE
+                                currentStatus = "visto"
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(this, "Erro ao atualizar status", Toast.LENGTH_SHORT).show()
+                            }
+                    }
+                }
+
                 itemView.findViewById<Button>(R.id.btnVerificar).setOnClickListener {
-                    val intent = Intent(this, AdminMaisAvaliacoesActivity::class.java)
-                    intent.putExtra("ID_LIVRO", idRelacionado)
-                    startActivity(intent)
+                    if (idDocumento != null) {
+                        // Ao clicar em verificar, o status já passa a ser 'resolvido'
+                        db.collection("denuncias").document(idDocumento)
+                            .update("status", "resolvido")
+                            .addOnSuccessListener {
+                                val intent = Intent(this, AdminMaisAvaliacoesActivity::class.java)
+                                intent.putExtra("ID_LIVRO", idRelacionado)
+                                intent.putExtra("ID_AVALIACAO_DENUNCIADA", extraInfo)
+                                startActivity(intent)
+                                removerItem(itemView)
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(this, "Erro ao resolver denúncia", Toast.LENGTH_SHORT).show()
+                            }
+                    }
                 }
             }
         }

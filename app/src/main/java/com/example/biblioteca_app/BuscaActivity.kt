@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
@@ -37,6 +38,7 @@ class BuscaActivity : AppCompatActivity() {
 
         val txtQtd = findViewById<TextView>(R.id.txtQtdLivros)
         val layoutSemResultados = findViewById<LinearLayout>(R.id.layoutSemResultados)
+        val btnOrdenar = findViewById<LinearLayout>(R.id.btnOrdenar)
 
         adapter = LivroAdapter(emptyList()) { livro ->
             val intent = Intent(this, LivroActivity::class.java)
@@ -57,26 +59,17 @@ class BuscaActivity : AppCompatActivity() {
             etPesquisa.text.clear() // Isso dispara automaticamente o doAfterTextChanged abaixo
         }
 
+        btnOrdenar.setOnClickListener {
+            mostrarMenuOrdenacao(it, etPesquisa, txtQtd, layoutSemResultados)
+        }
+
         etPesquisa.doAfterTextChanged { text ->
             val query = text.toString().trim()
 
             // Controla a visibilidade do botão de limpar dinamicamente
-            if (query.isEmpty()) {
-                btnLimparPesquisa.visibility = View.GONE
-            } else {
-                btnLimparPesquisa.visibility = View.VISIBLE
-            }
+            btnLimparPesquisa.visibility = if (query.isEmpty()) View.GONE else View.VISIBLE
 
-            val filtrados = if (query.isEmpty()) {
-                livros
-            } else {
-                livros.filter {
-                    it.titulo.contains(query, true) ||
-                            it.autor.contains(query, true)
-                }
-            }
-
-            atualizarLista(filtrados, txtQtd, layoutSemResultados)
+            filtrarEAtualizar(etPesquisa, txtQtd, layoutSemResultados)
         }
 
         setupNavBar()
@@ -160,5 +153,49 @@ class BuscaActivity : AppCompatActivity() {
     fun base64ToBitmap(base64: String): Bitmap {
         val decodedBytes = Base64.decode(base64, Base64.DEFAULT)
         return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+    }
+
+    private fun filtrarEAtualizar(
+        etPesquisa: EditText,
+        txtQtd: TextView,
+        layoutSemResultados: LinearLayout
+    ) {
+        val query = etPesquisa.text.toString().trim()
+
+        val filtrados = if (query.isEmpty()) {
+            livros
+        } else {
+            livros.filter {
+                it.titulo.contains(query, true) ||
+                        it.autor.contains(query, true)
+            }
+        }
+
+        atualizarLista(filtrados, txtQtd, layoutSemResultados)
+    }
+
+    private fun mostrarMenuOrdenacao(
+        view: View,
+        etPesquisa: EditText,
+        txtQtd: TextView,
+        layoutSemResultados: LinearLayout
+    ) {
+        val popup = PopupMenu(this, view)
+        popup.menu.add("A - Z por título do Livro")
+        popup.menu.add("Z - A por título do Livro")
+        popup.menu.add("A - Z por título do Autor")
+        popup.menu.add("Z - A por título do Autor")
+
+        popup.setOnMenuItemClickListener { item ->
+            when (item.title) {
+                "A - Z por título do Livro" -> livros.sortBy { it.titulo }
+                "Z - A por título do Livro" -> livros.sortByDescending { it.titulo }
+                "A - Z por título do Autor" -> livros.sortBy { it.autor }
+                "Z - A por título do Autor" -> livros.sortByDescending { it.autor }
+            }
+            filtrarEAtualizar(etPesquisa, txtQtd, layoutSemResultados)
+            true
+        }
+        popup.show()
     }
 }
