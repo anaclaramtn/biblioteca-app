@@ -27,8 +27,8 @@ class LivroActivity : AppCompatActivity() {
     private val db = FirebaseFirestore.getInstance()
 
     private var expandido = false
-    private var solicitacaoEnviada = false
     private var livroJaCurtido = false
+    private var idHistoricoAtual: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +44,7 @@ class LivroActivity : AppCompatActivity() {
         configurarBotoes(livro)
         setupNavBar()
         setupAlugar(livro)
+        verificarStatusLivro(livro.id)
     }
 
     // =========================
@@ -53,9 +54,6 @@ class LivroActivity : AppCompatActivity() {
         binding.txtTitulo.text = livro.titulo
         binding.txtAutor.text = livro.autor
         binding.txtDescricao.text = livro.descricao
-
-        binding.txtStatus.text =
-            if (livro.disponivel) "Disponível" else "Indisponível"
 
         binding.layoutResumo.txtMedia.text = "0.0"
         binding.layoutResumo.txtTotalAvaliacoes.text = "(0 avaliações)"
@@ -231,33 +229,136 @@ class LivroActivity : AppCompatActivity() {
     }
 
     // =========================
-    // ALUGAR (CORRIGIDO)
+    // ALUGAR E DEVOLVER
     // =========================
+    private fun verificarStatusLivro(idLivro: String) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        db.collection("historico")
+            .whereEqualTo("idObjeto", idLivro)
+            .whereEqualTo("tipoObjeto", "livro")
+            .whereEqualTo("dataSaida", null)
+            .get()
+            .addOnSuccessListener { snapshots ->
+                val alugadoPorAlguem = !snapshots.isEmpty
+                val meuAluguel = snapshots.documents.find { it.getString("idUsuario") == uid }
+
+                if (alugadoPorAlguem) {
+                    binding.txtStatus.text = "Indisponível"
+                    if (meuAluguel != null) {
+                        idHistoricoAtual = meuAluguel.id
+                        binding.btnAlugar.text = "Devolver"
+                        binding.btnAlugar.isEnabled = true
+                        binding.btnAlugar.alpha = 1.0f
+                    } else {
+                        idHistoricoAtual = null
+                        binding.btnAlugar.text = "Indisponível"
+                        binding.btnAlugar.isEnabled = false
+                        binding.btnAlugar.alpha = 0.5f
+                    }
+                } else {
+                    binding.txtStatus.text = "Disponível"
+                    idHistoricoAtual = null
+
+                    db.collection("solicitacoes")
+                        .whereEqualTo("idUsuario", uid)
+                        .whereEqualTo("idObjeto", idLivro)
+                        .whereEqualTo("status", "pendente")
+                        .get()
+                        .addOnSuccessListener { pendSnap ->
+                            if (!pendSnap.isEmpty) {
+                                binding.btnAlugar.text = "Solicitação enviada"
+                                binding.btnAlugar.isEnabled = false
+                                binding.btnAlugar.alpha = 0.5f
+                            } else {
+                                binding.btnAlugar.text = "Alugar"
+                                binding.btnAlugar.isEnabled = true
+                                binding.btnAlugar.alpha = 1.0f
+                            }
+                        }
+                }
+            }
+    }
+
     private fun setupAlugar(livro: Livro) {
         binding.btnAlugar.setOnClickListener {
-            if (solicitacaoEnviada) return@setOnClickListener
-
-            val uid = FirebaseAuth.getInstance().currentUser?.uid
-            val data = hashMapOf(
-                "idUsuario" to uid,
-                "idLivro" to livro.id,
-                "status" to "pendente",
-                "data" to Timestamp.now()
-            )
-
-            db.collection("solicitacoes_aluguel")
-                .add(data)
-                .addOnSuccessListener {
-                    solicitacaoEnviada = true
-                    binding.btnAlugar.text = "Solicitação enviada"
-                    binding.btnAlugar.isEnabled = false
-
-                    Toast.makeText(this, "Solicitação enviada", Toast.LENGTH_SHORT).show()
-                }
-                .addOnFailureListener {
-                    Toast.makeText(this, "Erro ao solicitar aluguel", Toast.LENGTH_SHORT).show()
-                }
+            val texto = binding.btnAlugar.text.toString()
+            if (texto == "Alugar") {
+                realizarAluguel(livro)
+            } else if (texto == "Devolver") {
+                idHistoricoAtual?.let { realizarDevolucao(livro.id, it) }
+            }
         }
+    }
+
+    private fun realizarAluguel(livro: Livro) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        // Verificar se o usuário já possui QUALQUER aluguel ativo (Livro, Sala ou Jogo)
+        db.collection("historico")
+            .whereEqualTo("idUsuario", uid)
+            .whereEqualTo("isDevolvido", false)
+            .get()
+            .addOnSuccessListener { snapshots ->
+                val ocupado = snapshots.documents.any { hDoc ->
+                    if (hDoc.getString("tipoObjeto") == "livro") {
+                        true // Livro não devolvido
+                    } else {
+                        // Sala ou Jogo ainda no prazo de 2h
+                        val dataSaida = hDoc.getTimestamp("dataSaida")
+                        dataSaida != null && dataSaida.toDate().after(java.util.Date())
+                    }
+                }
+
+                if (ocupado) {
+                    Toast.makeText(this, "Você já possui um aluguel ativo e não pode solicitar outro!", Toast.LENGTH_LONG).show()
+                } else {
+                    val solicitacao = hashMapOf(
+                        "idUsuario" to uid,
+                        "idObjeto" to livro.id,
+                        "tipoObjeto" to "livro",
+                        "status" to "pendente",
+                        "dataSolicitacao" to Timestamp.now(),
+                        "isDevolucao" to false,
+                        "dataResposta" to null
+                    )
+
+                    db.collection("solicitacoes").add(solicitacao)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Solicitação enviada", Toast.LENGTH_SHORT).show()
+                            verificarStatusLivro(livro.id)
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(this, "Erro ao solicitar aluguel", Toast.LENGTH_SHORT).show()
+                        }
+                }
+            }
+    }
+
+    private fun realizarDevolucao(idLivro: String, historicoId: String) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val agora = Timestamp.now()
+
+        // Atualizar histórico com dataSaida (obs: "data que o usuário solicita a devolução")
+        db.collection("historico").document(historicoId)
+            .update("dataSaida", agora)
+            .addOnSuccessListener {
+                val solicitacao = hashMapOf(
+                    "idUsuario" to uid,
+                    "idObjeto" to idLivro,
+                    "tipoObjeto" to "livro",
+                    "status" to "pendente",
+                    "dataSolicitacao" to agora,
+                    "isDevolucao" to true,
+                    "dataResposta" to null
+                )
+
+                db.collection("solicitacoes").add(solicitacao)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Solicitação de devolução enviada!", Toast.LENGTH_SHORT).show()
+                        verificarStatusLivro(idLivro)
+                    }
+            }
     }
 
     // =========================

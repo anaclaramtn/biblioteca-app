@@ -90,7 +90,7 @@ class AdminNotificacoesActivity : AppCompatActivity() {
 
     private fun carregarSolicitacoes() {
         db.collection("solicitacoes")
-            .whereEqualTo("status", "pendente")
+            .whereIn("status", listOf("pendente", "visto"))
             .get()
             .addOnSuccessListener { documents ->
                 for (doc in documents) {
@@ -98,6 +98,7 @@ class AdminNotificacoesActivity : AppCompatActivity() {
                     val idObjeto = doc.getString("idObjeto")
                     val tipoObjeto = doc.getString("tipoObjeto")
                     val idDoc = doc.id
+                    val status = doc.getString("status") ?: "pendente"
                     val isDevolucao = doc.getBoolean("isDevolucao") ?: false
 
                     if (uid != null && idObjeto != null && tipoObjeto != null) {
@@ -117,34 +118,85 @@ class AdminNotificacoesActivity : AppCompatActivity() {
                                     val nomeObjeto = if (tipoObjeto == "livro") objDoc.getString("titulo") else objDoc.getString("nome")
                                     val nomeFinal = nomeObjeto ?: "Item"
 
-                                    val descricao = if (isDevolucao) {
-                                        "Requerimento de devolução de ${tipoObjeto.replaceFirstChar { it.uppercase() }}\n'$nomeFinal'"
+                                    if (isDevolucao) {
+                                        // Devolução: Pegar dados do histórico
+                                        db.collection("historico")
+                                            .whereEqualTo("idUsuario", uid)
+                                            .whereEqualTo("idObjeto", idObjeto)
+                                            .whereEqualTo("isDevolvido", false)
+                                            .get()
+                                            .addOnSuccessListener { histSnap ->
+                                                if (!histSnap.isEmpty) {
+                                                    val hDoc = histSnap.documents[0]
+                                                    val dataEntrada = hDoc.getTimestamp("dataEntrada")
+                                                    val dataPrazo = hDoc.getTimestamp("dataPrazo")
+                                                    
+                                                    val sdf = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+                                                    val txtEntrada = dataEntrada?.let { sdf.format(it.toDate()) } ?: "--/--/----"
+                                                    val txtPrazo = dataPrazo?.let { sdf.format(it.toDate()) } ?: "--/--/----"
+
+                                                    var multaStr = "R$ 0,00"
+                                                    if (dataPrazo != null && tipoObjeto == "livro") {
+                                                        val agora = Timestamp.now().toDate().time
+                                                        val prazo = dataPrazo.toDate().time
+                                                        if (agora > prazo) {
+                                                            val diff = agora - prazo
+                                                            val dias = (diff / (1000 * 60 * 60 * 24)).toInt()
+                                                            multaStr = String.format(java.util.Locale.forLanguageTag("pt-BR"), "R$ %.2f", dias * 0.50)
+                                                        }
+                                                    }
+
+                                                    val descTipo = when(tipoObjeto) {
+                                                        "livro" -> "livro"
+                                                        "jogo" -> "jogo"
+                                                        "sala" -> "sala"
+                                                        else -> tipoObjeto
+                                                    }
+                                                    val descricao = "Devolução do $descTipo \"$nomeFinal\"\nMulta: $multaStr"
+                                                    val extraInfo = "Data Empréstimo: $txtEntrada\nPrazo de Entrega: $txtPrazo"
+
+                                                    adicionarItemNotificacao(
+                                                        TipoNotificacao.DEVOLUCOES,
+                                                        nome,
+                                                        email,
+                                                        descricao,
+                                                        extraInfo = extraInfo,
+                                                        idDocumento = idDoc,
+                                                        colecao = "solicitacoes",
+                                                        idRelacionado = idObjeto,
+                                                        idUsuario = uid,
+                                                        tipoObjeto = tipoObjeto,
+                                                        status = status
+                                                    )
+                                                }
+                                            }
                                     } else {
-                                        when (tipoObjeto) {
+                                        // Aluguel
+                                        val descricao = when (tipoObjeto) {
                                             "sala" -> "Requerimento de Sala: $nomeFinal"
-                                            "jogo" -> "Requerimento de aluguel de Jogo\n\"$nomeFinal\""
-                                            else -> "Requerimento de aluguel de Livro\n'$nomeFinal'"
+                                            "jogo" -> "Requerimento de aluguel do Jogo\n\"$nomeFinal\""
+                                            else -> "Requerimento de aluguel do Livro\n\"$nomeFinal\""
                                         }
-                                    }
 
-                                    val tipoNotif = when (tipoObjeto) {
-                                        "livro" -> TipoNotificacao.LIVROS
-                                        "jogo" -> TipoNotificacao.JOGOS
-                                        "sala" -> TipoNotificacao.SALAS
-                                        else -> TipoNotificacao.LIVROS
-                                    }
+                                        val tipoNotif = when (tipoObjeto) {
+                                            "jogo" -> TipoNotificacao.JOGOS
+                                            "sala" -> TipoNotificacao.SALAS
+                                            else -> TipoNotificacao.LIVROS
+                                        }
 
-                                    adicionarItemNotificacao(
-                                        tipoNotif,
-                                        nome,
-                                        email,
-                                        descricao,
-                                        idDocumento = idDoc,
-                                        colecao = "solicitacoes",
-                                        idRelacionado = idObjeto,
-                                        idUsuario = uid,
-                                        tipoObjeto = tipoObjeto
-                                    )
+                                        adicionarItemNotificacao(
+                                            tipoNotif,
+                                            nome,
+                                            email,
+                                            descricao,
+                                            idDocumento = idDoc,
+                                            colecao = "solicitacoes",
+                                            idRelacionado = idObjeto,
+                                            idUsuario = uid,
+                                            tipoObjeto = tipoObjeto,
+                                            status = status
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -152,41 +204,6 @@ class AdminNotificacoesActivity : AppCompatActivity() {
                 }
             }
     }
-
-    private fun carregarSolicitacoesAluguel() {
-        db.collection("solicitacoes_aluguel")
-            .whereEqualTo("status", "pendente")
-            .get()
-            .addOnSuccessListener { documents ->
-                for (doc in documents) {
-                    val uid = doc.getString("idUsuario")
-                    val idLivro = doc.get("idLivro")?.toString()
-                    val idDoc = doc.id
-
-                    if (uid != null && idLivro != null) {
-                        db.collection("livros").document(idLivro).get().addOnSuccessListener { livroDoc ->
-                            val tituloLivro = livroDoc.getString("titulo") ?: "Livro"
-
-                            db.collection("usuarios").document(uid).get().addOnSuccessListener { userDoc ->
-                                val nome = userDoc.getString("nome") ?: "Usuário"
-                                val email = userDoc.getString("email") ?: ""
-                                val descricao = "Requerimento de aluguel do Livro\n'$tituloLivro'"
-
-                                adicionarItemNotificacao(
-                                    TipoNotificacao.LIVROS,
-                                    nome,
-                                    email,
-                                    descricao,
-                                    idDocumento = idDoc,
-                                    colecao = "solicitacoes_aluguel"
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-    }
-
 
     private fun setupFiltros() {
         val btnTodas = findViewById<Button>(R.id.btnFiltroTodas)
@@ -249,6 +266,8 @@ class AdminNotificacoesActivity : AppCompatActivity() {
         }
 
         val itemView = LayoutInflater.from(this).inflate(layoutRes, container, false)
+        val indicador = itemView.findViewById<View>(R.id.indicadorStatus)
+        if (status == "visto") indicador?.visibility = View.GONE
 
         // Preencher campos comuns
         itemView.findViewById<TextView>(R.id.tvNomeUsuario).text = nome
@@ -258,53 +277,111 @@ class AdminNotificacoesActivity : AppCompatActivity() {
         // Configurar ações específicas
         when (tipo) {
             TipoNotificacao.LIVROS, TipoNotificacao.JOGOS, TipoNotificacao.SALAS -> {
-                // ✅ Ao clicar na solicitação, a bolinha azul desaparece localmente
                 itemView.setOnClickListener {
-                    itemView.findViewById<View>(R.id.indicadorStatus)?.visibility = View.GONE
+                    if (idDocumento != null && colecao != null && status == "pendente") {
+                        db.collection(colecao).document(idDocumento).update("status", "visto")
+                        indicador?.visibility = View.GONE
+                    }
                 }
 
                 itemView.findViewById<Button>(R.id.btnAprovar).setOnClickListener {
-                    confirmarAcao("Aprovar solicitação de $nome?") {
-                        if (idDocumento != null && colecao != null) {
-                            val dataResposta = Timestamp.now()
-                            db.collection(colecao).document(idDocumento).update(
-                                "status", "aceito",
-                                "dataResposta", dataResposta
-                            ).addOnSuccessListener {
-                                if (colecao == "solicitacoes" && idUsuario != null && tipoObjeto != null) {
-                                    val calendar = Calendar.getInstance()
-                                    calendar.time = dataResposta.toDate()
+                    if (idUsuario == null) return@setOnClickListener
 
-                                    if (tipoObjeto == "sala" || tipoObjeto == "jogo") {
-                                        calendar.add(Calendar.HOUR, 2)
-                                    } else if (tipoObjeto == "livro") {
-                                        calendar.add(Calendar.DAY_OF_YEAR, 30)
+                    confirmarAcao("Aprovar solicitação de $nome?") {
+                        // 1. VERIFICAR SE O USUÁRIO JÁ TEM ALGO ALUGADO (Limite de 1 item por user)
+                        db.collection("historico")
+                            .whereEqualTo("idUsuario", idUsuario)
+                            .whereEqualTo("isDevolvido", false)
+                            .get()
+                            .addOnSuccessListener { userSnapshots ->
+                                val userOcupado = userSnapshots.documents.any { hDoc ->
+                                    if (hDoc.getString("tipoObjeto") == "livro") {
+                                        true
+                                    } else {
+                                        val dataSaida = hDoc.getTimestamp("dataSaida")
+                                        dataSaida != null && dataSaida.toDate().after(java.util.Date())
+                                    }
+                                }
+
+                                if (userOcupado) {
+                                    Toast.makeText(this, "O usuário já possui um aluguel ativo!", Toast.LENGTH_LONG).show()
+                                    if (idDocumento != null && colecao != null && status == "pendente") {
+                                        db.collection(colecao).document(idDocumento).update("status", "visto")
+                                        indicador?.visibility = View.GONE
+                                    }
+                                    return@addOnSuccessListener
+                                }
+
+                                // 2. VERIFICAR SE O OBJETO JÁ ESTÁ OCUPADO (Disponibilidade do item)
+                                val query = db.collection("historico")
+                                    .whereEqualTo("idObjeto", idRelacionado)
+                                    .whereEqualTo("isDevolvido", false)
+
+                                query.get().addOnSuccessListener { snapshots ->
+                                    val ocupado = snapshots.documents.any { hDoc ->
+                                        if (tipoObjeto == "livro") {
+                                            true // isDevolvido false já indica ocupado
+                                        } else {
+                                            // Sala/Jogo: ocupado se agora < dataSaida
+                                            val dataSaida = hDoc.getTimestamp("dataSaida")
+                                            dataSaida != null && dataSaida.toDate().after(java.util.Date())
+                                        }
                                     }
 
-                                    val dataPrazo = Timestamp(calendar.time)
-                                    val dataSaida = if (tipoObjeto == "sala" || tipoObjeto == "jogo") dataPrazo else null
+                                    if (ocupado) {
+                                        val msg = when(tipoObjeto) {
+                                            "sala" -> "A sala não pode ser aprovada no momento pois já está alugada para outra pessoa"
+                                            "jogo" -> "O jogo não pode ser aprovado no momento pois já está alugado para outra pessoa"
+                                            else -> "O livro não pode ser aprovado no momento pois já está alugado para outra pessoa"
+                                        }
+                                        Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+                                        // Marcar como visto para sumir a bolinha azul conforme pedido
+                                        if (idDocumento != null && colecao != null && status == "pendente") {
+                                            db.collection(colecao).document(idDocumento).update("status", "visto")
+                                            indicador?.visibility = View.GONE
+                                        }
+                                    } else {
+                                        // APROVAR
+                                        if (idDocumento != null && colecao != null) {
+                                            val dataResposta = Timestamp.now()
+                                            db.collection(colecao).document(idDocumento).update(
+                                                "status", "aceito",
+                                                "dataResposta", dataResposta
+                                            ).addOnSuccessListener {
+                                                if (idUsuario != null && tipoObjeto != null) {
+                                                    val calendar = Calendar.getInstance()
+                                                    calendar.time = dataResposta.toDate()
 
-                                    val historico = hashMapOf(
-                                        "dataEntrada" to dataResposta,
-                                        "dataPrazo" to dataPrazo,
-                                        "dataSaida" to dataSaida,
-                                        "idObjeto" to idRelacionado,
-                                        "idUsuario" to idUsuario,
-                                        "isDevolvido" to false,
-                                        "status" to "pendente",
-                                        "tipoObjeto" to tipoObjeto
-                                    )
+                                                    if (tipoObjeto == "sala" || tipoObjeto == "jogo") {
+                                                        calendar.add(Calendar.HOUR, 2)
+                                                    } else if (tipoObjeto == "livro") {
+                                                        calendar.add(Calendar.DAY_OF_YEAR, 30)
+                                                    }
 
-                                    db.collection("historico").add(historico)
+                                                    val dataPrazo = Timestamp(calendar.time)
+                                                    val dataSaida = if (tipoObjeto == "sala" || tipoObjeto == "jogo") dataPrazo else null
+
+                                                    val historico = hashMapOf(
+                                                        "dataEntrada" to dataResposta,
+                                                        "dataPrazo" to dataPrazo,
+                                                        "dataSaida" to dataSaida,
+                                                        "idObjeto" to idRelacionado,
+                                                        "idUsuario" to idUsuario,
+                                                        "isDevolvido" to false,
+                                                        "status" to "pendente",
+                                                        "tipoObjeto" to tipoObjeto
+                                                    )
+                                                    db.collection("historico").add(historico)
+                                                }
+                                                Toast.makeText(this, "Aprovado!", Toast.LENGTH_SHORT).show()
+                                                removerItem(itemView)
+                                            }.addOnFailureListener {
+                                                Toast.makeText(this, "Erro ao atualizar solicitação", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    }
                                 }
-                                Toast.makeText(this, "Aprovado!", Toast.LENGTH_SHORT).show()
-                                removerItem(itemView)
-                            }.addOnFailureListener {
-                                Toast.makeText(this, "Erro ao atualizar solicitação", Toast.LENGTH_SHORT).show()
                             }
-                        } else {
-                            removerItem(itemView)
-                        }
                     }
                 }
                 itemView.findViewById<Button>(R.id.btnRecusar).setOnClickListener {
@@ -327,16 +404,38 @@ class AdminNotificacoesActivity : AppCompatActivity() {
                 }
             }
             TipoNotificacao.DEVOLUCOES -> {
-                // ✅ Ao clicar na notificação, a bolinha azul desaparece localmente
+                itemView.findViewById<TextView>(R.id.tvDatas).text = extraInfo
                 itemView.setOnClickListener {
-                    itemView.findViewById<View>(R.id.indicadorStatus)?.visibility = View.GONE
+                    if (idDocumento != null && colecao != null && status == "pendente") {
+                        db.collection(colecao).document(idDocumento).update("status", "visto")
+                        indicador?.visibility = View.GONE
+                    }
                 }
 
-                itemView.findViewById<TextView>(R.id.tvDatas).text = extraInfo
                 itemView.findViewById<Button>(R.id.btnConfirmarDevolucao).setOnClickListener {
                     confirmarAcao("Confirmar devolução de $nome?") {
-                        Toast.makeText(this, "Devolução confirmada!", Toast.LENGTH_SHORT).show()
-                        removerItem(itemView)
+                        if (idDocumento != null && colecao != null) {
+                            db.collection(colecao).document(idDocumento).update(
+                                "status", "aceito",
+                                "dataResposta", Timestamp.now()
+                            ).addOnSuccessListener {
+                                db.collection("historico")
+                                    .whereEqualTo("idUsuario", idUsuario)
+                                    .whereEqualTo("idObjeto", idRelacionado)
+                                    .whereEqualTo("isDevolvido", false)
+                                    .get()
+                                    .addOnSuccessListener { histSnap ->
+                                        for (hDoc in histSnap) {
+                                            hDoc.reference.update(
+                                                "isDevolvido", true,
+                                                "status", "resolvido"
+                                            )
+                                        }
+                                        Toast.makeText(this, "Devolução confirmada!", Toast.LENGTH_SHORT).show()
+                                        removerItem(itemView)
+                                    }
+                            }
+                        }
                     }
                 }
             }

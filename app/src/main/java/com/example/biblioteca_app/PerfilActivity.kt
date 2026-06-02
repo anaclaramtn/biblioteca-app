@@ -19,6 +19,8 @@ class PerfilActivity : AppCompatActivity() {
 
     private val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
     private val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
+    private var idHistoricoAtual: String? = null
+    private var idLivroAtual: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,12 +54,101 @@ class PerfilActivity : AppCompatActivity() {
 
         // Configurar clique no livro alugado (Título e Capa)
         val cliqueLivroAlugado = View.OnClickListener {
-            abrirLivro()
+            idLivroAtual?.let { id ->
+                db.collection("livros").document(id).get().addOnSuccessListener { doc ->
+                    val livro = doc.toObject(com.example.biblioteca_app.models.Livro::class.java)?.copy(id = doc.id)
+                    if (livro != null) {
+                        val intent = Intent(this, LivroActivity::class.java)
+                        intent.putExtra("LIVRO", livro)
+                        startActivity(intent)
+                    }
+                }
+            }
         }
         findViewById<TextView>(R.id.tvTituloLivro).setOnClickListener(cliqueLivroAlugado)
         findViewById<ImageView>(R.id.ivCapaLivro).setOnClickListener(cliqueLivroAlugado)
 
         setupNavBar()
+        carregarLivroAlugado()
+    }
+
+    private fun carregarLivroAlugado() {
+        val uid = auth.currentUser?.uid ?: return
+        val cardAluguel = findViewById<androidx.cardview.widget.CardView>(R.id.cvAlugado) ?: return
+
+        db.collection("historico")
+            .whereEqualTo("idUsuario", uid)
+            .whereEqualTo("tipoObjeto", "livro")
+            .whereEqualTo("dataSaida", null)
+            .get()
+            .addOnSuccessListener { snapshots ->
+                if (snapshots.isEmpty) {
+                    cardAluguel.visibility = View.GONE
+                } else {
+                    cardAluguel.visibility = View.VISIBLE
+                    val doc = snapshots.documents[0]
+                    idHistoricoAtual = doc.id
+                    val idLivro = doc.getString("idObjeto") ?: ""
+                    idLivroAtual = idLivro
+                    val dataPrazo = doc.getTimestamp("dataPrazo")
+
+                    // Calcular Multa
+                    if (dataPrazo != null) {
+                        val sdf = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+                        findViewById<TextView>(R.id.tvDevolucaoLivro).text = "Prazo : ${sdf.format(dataPrazo.toDate())}"
+
+                        val agora = com.google.firebase.Timestamp.now().toDate().time
+                        val prazo = dataPrazo.toDate().time
+                        if (agora > prazo) {
+                            val diff = agora - prazo
+                            val diasAtraso = (diff / (1000 * 60 * 60 * 24)).toInt()
+                            val multa = diasAtraso * 0.50
+                            findViewById<TextView>(R.id.tvMulta).text = String.format("Valor da multa: R$ %.2f", multa)
+                            findViewById<TextView>(R.id.tvMulta).setTextColor(Color.RED)
+                        } else {
+                            findViewById<TextView>(R.id.tvMulta).text = "Valor da multa: R$ 0,00"
+                            findViewById<TextView>(R.id.tvMulta).setTextColor(Color.BLACK)
+                        }
+                    }
+
+                    // Carregar detalhes do livro
+                    db.collection("livros").document(idLivro).get()
+                        .addOnSuccessListener { livroDoc ->
+                            findViewById<TextView>(R.id.tvTituloLivro).text = livroDoc.getString("titulo") ?: "Livro"
+                            val imgBase64 = livroDoc.getString("imagemBase64")
+                            val ivCapa = findViewById<ImageView>(R.id.ivCapaLivro)
+                            if (!imgBase64.isNullOrEmpty()) {
+                                val bytes = android.util.Base64.decode(imgBase64, android.util.Base64.DEFAULT)
+                                val bmp = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                                ivCapa.setImageBitmap(bmp)
+                            } else {
+                                ivCapa.setImageResource(R.drawable.capadomquixote)
+                            }
+                        }
+
+                    // Verificar se já existe solicitação de devolução pendente
+                    db.collection("solicitacoes")
+                        .whereEqualTo("idUsuario", uid)
+                        .whereEqualTo("idObjeto", idLivro)
+                        .whereEqualTo("status", "pendente")
+                        .whereEqualTo("isDevolucao", true)
+                        .get()
+                        .addOnSuccessListener { solDocs ->
+                            val btn = findViewById<Button>(R.id.btnDevolver)
+                            if (!solDocs.isEmpty) {
+                                btn.text = "Solicitação Enviada"
+                                btn.isEnabled = false
+                                btn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#9E9E9E"))
+                                btn.setTextColor(Color.WHITE)
+                            } else {
+                                btn.text = "DEVOLVER"
+                                btn.isEnabled = true
+                                btn.backgroundTintList = ColorStateList.valueOf(Color.WHITE)
+                                btn.setTextColor(Color.BLACK)
+                            }
+                        }
+                }
+            }
     }
 
     private fun setupLivrosCurtidos() {
@@ -136,18 +227,32 @@ class PerfilActivity : AppCompatActivity() {
     }
 
     fun onDevolverClick(view: View) {
-        val botao = view as Button
-        botao.text = "Solicitação Enviada"
-        botao.isEnabled = false
-        // Estilo acinzentado conforme LudotecaActivity
-        botao.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#9E9E9E"))
-        botao.setTextColor(Color.WHITE)
-        
-        if (botao is com.google.android.material.button.MaterialButton) {
-            botao.strokeWidth = 0
-        }
+        val uid = auth.currentUser?.uid ?: return
+        val histId = idHistoricoAtual ?: return
+        val livroId = idLivroAtual ?: return
+        val agora = com.google.firebase.Timestamp.now()
 
-        Toast.makeText(this, "solicitacao enviada", Toast.LENGTH_SHORT).show()
+        // 1. Atualizar histórico com dataSaida (solicitação de devolução)
+        db.collection("historico").document(histId)
+            .update("dataSaida", agora)
+            .addOnSuccessListener {
+                // 2. Criar solicitação de devolução
+                val solicitacao = hashMapOf(
+                    "idUsuario" to uid,
+                    "idObjeto" to livroId,
+                    "tipoObjeto" to "livro",
+                    "status" to "pendente",
+                    "dataSolicitacao" to agora,
+                    "isDevolucao" to true,
+                    "dataResposta" to null
+                )
+
+                db.collection("solicitacoes").add(solicitacao)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Solicitação de devolução enviada!", Toast.LENGTH_SHORT).show()
+                        carregarLivroAlugado()
+                    }
+            }
     }
 
     private fun setupNavBar() {
