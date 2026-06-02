@@ -2,12 +2,14 @@ package com.example.biblioteca_app
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.biblioteca_app.models.Noticia
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class NoticiaCompletaActivity : AppCompatActivity() {
@@ -22,42 +24,47 @@ class NoticiaCompletaActivity : AppCompatActivity() {
             insets
         }
 
-        val btnVoltar = findViewById<ImageView>(R.id.btnVoltarNoticia)
+        setupHeader()
+
         val imgNoticia = findViewById<ImageView>(R.id.imgNoticiaCompleta)
         val txtTitulo = findViewById<TextView>(R.id.txtTituloNoticiaCompleta)
         val txtConteudo = findViewById<TextView>(R.id.txtConteudoNoticia)
 
-        // Receber dados da Intent
-        val titulo = intent.getStringExtra("TITULO") ?: "Título da Notícia"
-        val imagemRes = intent.getIntExtra("IMAGEM_RES", R.drawable.war)
-        val imagemBase64 = intent.getStringExtra("IMAGEM_BASE64")
-        
-        txtTitulo.text = titulo
-        
-        if (!imagemBase64.isNullOrEmpty()) {
-            try {
-                val bytes = android.util.Base64.decode(imagemBase64, android.util.Base64.DEFAULT)
-                val bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                imgNoticia.setImageBitmap(bitmap)
-            } catch (e: Exception) {
+        // Receber objeto Noticia da Intent
+        val noticia = intent.getSerializableExtra("NOTICIA") as? Noticia
+
+        noticia?.let {
+            txtTitulo.text = it.titulo
+            txtConteudo.text = it.descricaoLonga
+
+            if (!it.imagemBase64.isNullOrEmpty()) {
+                try {
+                    val bytes = android.util.Base64.decode(it.imagemBase64, android.util.Base64.DEFAULT)
+                    val bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    imgNoticia.setImageBitmap(bitmap)
+                } catch (e: Exception) {
+                    imgNoticia.setImageResource(R.drawable.logo)
+                }
+            } else if (it.imagemRes != null && it.imagemRes != 0) {
+                imgNoticia.setImageResource(it.imagemRes)
+            } else {
                 imgNoticia.setImageResource(R.drawable.logo)
             }
-        } else if (imagemRes != 0) {
-            imgNoticia.setImageResource(imagemRes)
-        } else {
-            imgNoticia.setImageResource(R.drawable.logo)
         }
 
-        txtConteudo.text = """
-            Esse evento da biblioteca da Unifor é um evento bem interessante e muito legal. Vale a pena ir pra ele e ele vai ser massa. Recomendo que todos vão pra ver o que vai ter lá.
-            
-            Ademais, esse evento vai conter livros. Até por estarmos falando de uma biblioteca. Diga-se de passagem que os livros valem a pena de serem adequadamente lidos. Esse evento vai ter um sorteio de um livro muito massa e autografado pelo renomado autor Ygor Costa. Recomendo bastante!
-        """.trimIndent()
+        setupNavBar()
+    }
 
-        btnVoltar.setOnClickListener {
+    private fun setupHeader() {
+        val header = findViewById<View>(R.id.header)
+        val btnBack = header.findViewById<ImageView>(R.id.btnBack)
+        val txtTituloHeader = header.findViewById<TextView>(R.id.txtTitulo)
+
+        txtTituloHeader.text = "Notícia"
+        btnBack.visibility = View.VISIBLE
+        btnBack.setOnClickListener {
             finish()
         }
-        setupNavBar()
     }
     private fun setupNavBar() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)

@@ -90,26 +90,21 @@ class TelaHomeActivity : AppCompatActivity() {
 
             view.findViewById<View>(R.id.btnSaibaMais).setOnClickListener {
                 val intent = Intent(this, NoticiaCompletaActivity::class.java)
-                intent.putExtra("TITULO", noticia.titulo)
-                if (noticia.imagemBase64 != null) {
-                    intent.putExtra("IMAGEM_BASE64", noticia.imagemBase64)
-                } else {
-                    intent.putExtra("IMAGEM_RES", noticia.imagemRes ?: R.drawable.logo)
-                }
+                intent.putExtra("NOTICIA", noticia)
                 startActivity(intent)
             }
         }
         rvNoticias.adapter = adapterNoticias
 
         db.collection("noticias")
-            .orderBy("titulo")
             .get()
             .addOnSuccessListener { documents ->
                 val noticias = documents.map { doc ->
                     Noticia(
                         id = doc.id,
-                        titulo = doc.getString("titulo") ?: "",
-                        descricao = doc.getString("descricao") ?: "",
+                        titulo = doc.getString("nome") ?: "",
+                        descricao = doc.getString("descricaoCurta") ?: "",
+                        descricaoLonga = doc.getString("descricaoLonga") ?: "",
                         imagemBase64 = doc.getString("imagemBase64")
                     )
                 }
@@ -117,25 +112,10 @@ class TelaHomeActivity : AppCompatActivity() {
                     adapterNoticias.updateList(noticias)
                     setupDots(layoutDots, noticias.size)
                     updateDots(layoutDots, 0)
-                } else {
-                    // Fallback para mock se o firestore estiver vazio
-                    val mockNoticias = listOf(
-                        Noticia("Novo jogo chega à biblioteca!", "Venha conferir o mais novo jogo de tabuleiro que chegou na ludoteca da biblioteca.", imagemRes = R.drawable.war),
-                        Noticia("Professor Boba Fett", "Inacreditável! Um professor de Computação deu aula totalmente fantasiado de Boba Fett de Star Wars hoje.", imagemRes = R.drawable.logo)
-                    )
-                    adapterNoticias.updateList(mockNoticias)
-                    setupDots(layoutDots, mockNoticias.size)
-                    updateDots(layoutDots, 0)
                 }
             }
             .addOnFailureListener {
-                val mockNoticias = listOf(
-                    Noticia("Novo jogo chega à biblioteca!", "Venha conferir o mais novo jogo de tabuleiro que chegou na ludoteca da biblioteca.", imagemRes = R.drawable.war),
-                    Noticia("Professor Boba Fett", "Inacreditável! Um professor de Computação deu aula totalmente fantasiado de Boba Fett de Star Wars hoje.", imagemRes = R.drawable.logo)
-                )
-                adapterNoticias.updateList(mockNoticias)
-                setupDots(layoutDots, mockNoticias.size)
-                updateDots(layoutDots, 0)
+                // Silently fail or show empty
             }
 
         // SnapHelper para comportamento de carrossel (para parar na notícia centralizada)
@@ -161,12 +141,20 @@ class TelaHomeActivity : AppCompatActivity() {
         // Botões de Navegação
         btnPrev.setOnClickListener {
             val currentPos = (rvNoticias.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-            if (currentPos > 0) rvNoticias.smoothScrollToPosition(currentPos - 1)
+            val total = adapterNoticias.itemCount
+            if (total > 0 && currentPos != RecyclerView.NO_POSITION) {
+                val targetPos = if (currentPos == 0) total - 1 else currentPos - 1
+                rvNoticias.smoothScrollToPosition(targetPos)
+            }
         }
 
         btnNext.setOnClickListener {
             val currentPos = (rvNoticias.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-            if (currentPos < adapterNoticias.itemCount - 1) rvNoticias.smoothScrollToPosition(currentPos + 1)
+            val total = adapterNoticias.itemCount
+            if (total > 0 && currentPos != RecyclerView.NO_POSITION) {
+                val targetPos = if (currentPos == total - 1) 0 else currentPos + 1
+                rvNoticias.smoothScrollToPosition(targetPos)
+            }
         }
 
         carregarLivrosPopulares()
