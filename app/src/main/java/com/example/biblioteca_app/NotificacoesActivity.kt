@@ -114,7 +114,7 @@ class NotificacoesActivity : AppCompatActivity() {
                                 val acao = if (status == "aceito") "aprovado" else "recusado"
 
                                 val titulo = "Administração - Solicitação"
-                                val mensagem = "Solicitação de aluguel do $tipoObjeto \"$nomeObjeto\" foi $acao."
+                                val mensagem = "Solicitação de aluguel do $tipoObjeto\n\"$nomeObjeto\" foi $acao."
 
                                 val sdfTime = SimpleDateFormat("hh:mm a", Locale.US)
                                 val sdfDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
