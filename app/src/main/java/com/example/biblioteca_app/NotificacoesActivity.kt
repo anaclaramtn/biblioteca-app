@@ -95,10 +95,9 @@ class NotificacoesActivity : AppCompatActivity() {
                 val tempLista = mutableListOf<Notificacao>()
                 var totalEsperado = solicitacoesDocs.size()
 
-                // 2. Carregar do Histórico (Lembretes e Multas)
+                // 2. Carregar do Histórico (Multas, Lembretes e Devoluções Automáticas)
                 db.collection("historico")
                     .whereEqualTo("idUsuario", uid)
-                    .whereEqualTo("tipoObjeto", "livro")
                     .whereEqualTo("isDevolvido", false)
                     .get()
                     .addOnSuccessListener { historicoDocs ->
@@ -198,43 +197,66 @@ class NotificacoesActivity : AppCompatActivity() {
                             } else { checkConcluido() }
                         }
 
-                        // Processar Histórico (Multas e Lembretes)
+                        // Processar Histórico (Multas, Lembretes e Devoluções Automáticas)
                         for (hDoc in historicoDocs) {
                             val idObjeto = hDoc.getString("idObjeto")
+                            val tipoObjeto = hDoc.getString("tipoObjeto") ?: "livro"
                             val dataPrazo = hDoc.getTimestamp("dataPrazo")
                             val agora = Timestamp.now()
 
                             if (idObjeto != null && dataPrazo != null) {
-                                db.collection("livros").document(idObjeto).get().addOnSuccessListener { bDoc ->
-                                    val tituloLivro = bDoc.getString("titulo") ?: "Livro"
-                                    
-                                    val diffMillis = agora.toDate().time - dataPrazo.toDate().time
-                                    val diffDias = (diffMillis / (1000 * 60 * 60 * 24)).toInt()
+                                val colecao = when (tipoObjeto) {
+                                    "jogo" -> "jogos"
+                                    "sala" -> "salas"
+                                    else -> "livros"
+                                }
 
-                                    if (diffMillis > 0) {
-                                        // ATRASADO (Multa)
-                                        val multa = diffDias * 0.50
-                                        val msgMulta = "O livro \"$tituloLivro\" está atrasado $diffDias dias.\nMulta acumulada : R$ ${String.format(Locale.getDefault(), "%.2f", multa)}"
-                                        
-                                        tempLista.add(Notificacao(
-                                            id = hDoc.id + "_multa",
-                                            titulo = "Administração - Multa",
-                                            mensagem = msgMulta,
-                                            data = formatarData(agora),
-                                            lida = false, // Multa sempre alerta
-                                            timestamp = agora.seconds
-                                        ))
-                                    } else {
-                                        // LEMBRETE (Próximos 3 dias)
-                                        val diasRestantes = (-diffDias)
-                                        if (diasRestantes in 0..3) {
+                                db.collection(colecao).document(idObjeto).get().addOnSuccessListener { bDoc ->
+                                    if (tipoObjeto == "livro") {
+                                        val tituloLivro = bDoc.getString("titulo") ?: "Livro"
+
+                                        val diffMillis = agora.toDate().time - dataPrazo.toDate().time
+                                        val diffDias = (diffMillis / (1000 * 60 * 60 * 24)).toInt()
+
+                                        if (diffMillis > 0) {
+                                            // ATRASADO (Multa)
+                                            val multa = diffDias * 0.50
+                                            val msgMulta = "O livro \"$tituloLivro\" está atrasado $diffDias dias.\nMulta acumulada : R$ ${String.format(Locale.getDefault(), "%.2f", multa)}"
+
                                             tempLista.add(Notificacao(
-                                                id = hDoc.id + "_lembrete",
-                                                titulo = "Administração - Lembrete",
-                                                mensagem = "O livro \"$tituloLivro\" deve ser devolvido em $diasRestantes dias.",
+                                                id = hDoc.id + "_multa",
+                                                titulo = "Administração - Multa",
+                                                mensagem = msgMulta,
                                                 data = formatarData(agora),
-                                                lida = false,
+                                                lida = false, // Multa sempre alerta
                                                 timestamp = agora.seconds
+                                            ))
+                                        } else {
+                                            // LEMBRETE (Próximos 3 dias)
+                                            val diasRestantes = (-diffDias)
+                                            if (diasRestantes in 0..3) {
+                                                tempLista.add(Notificacao(
+                                                    id = hDoc.id + "_lembrete",
+                                                    titulo = "Administração - Lembrete",
+                                                    mensagem = "O livro \"$tituloLivro\" deve ser devolvido em $diasRestantes dias.",
+                                                    data = formatarData(agora),
+                                                    lida = false,
+                                                    timestamp = agora.seconds
+                                                ))
+                                            }
+                                        }
+                                    } else if (tipoObjeto == "jogo" || tipoObjeto == "sala") {
+                                        val nomeObjeto = bDoc.getString("nome") ?: (if (tipoObjeto == "jogo") "Jogo" else "Sala")
+
+                                        if (agora.toDate().after(dataPrazo.toDate())) {
+                                            // DEVOLUÇÃO AUTOMÁTICA
+                                            tempLista.add(Notificacao(
+                                                id = hDoc.id + "_autodev",
+                                                titulo = "Administração - Devolução",
+                                                mensagem = "A ${tipoObjeto} \"$nomeObjeto\" foi devolvida automaticamente.",
+                                                data = formatarData(dataPrazo),
+                                                lida = false,
+                                                timestamp = dataPrazo.seconds
                                             ))
                                         }
                                     }
