@@ -311,7 +311,7 @@ class LivroActivity : AppCompatActivity() {
                 }
 
                 if (ocupado) {
-                    Toast.makeText(this, "Você já possui um aluguel ativo e não pode solicitar outro!", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Você já possui um aluguel ativo ou devolução pendente e não pode solicitar outro!", Toast.LENGTH_LONG).show()
                 } else {
                     val solicitacao = hashMapOf(
                         "idUsuario" to uid,

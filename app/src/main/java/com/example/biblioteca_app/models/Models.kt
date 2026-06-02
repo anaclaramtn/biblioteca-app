@@ -24,10 +24,13 @@ data class Livro(
     val totalAvaliacoes: Int = 0
 ) : Serializable
 data class Notificacao(
-    val titulo: String,
-    val mensagem: String,
-    val data: String,
-    var lida: Boolean = false
+    var id: String = "",
+    val titulo: String = "",
+    val mensagem: String = "",
+    val data: String = "",
+    var lida: Boolean = false,
+    val idDocOriginal: String? = null,
+    val timestamp: Long = 0
 )
 
 data class Usuario(
