@@ -15,7 +15,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import java.util.Calendar
 
 class AdminNotificacoesActivity : AppCompatActivity() {
 
@@ -49,8 +51,7 @@ class AdminNotificacoesActivity : AppCompatActivity() {
 
     private fun carregarNotificacoes() {
         carregarDenuncias()
-        carregarSolicitacoesAluguel()
-        // Você pode adicionar outras cargas aqui (Salas, Jogos, etc)
+        carregarSolicitacoes()
     }
 
     private fun carregarDenuncias() {
@@ -83,6 +84,71 @@ class AdminNotificacoesActivity : AppCompatActivity() {
                         colecao = "denuncias",
                         status = status
                     )
+                }
+            }
+    }
+
+    private fun carregarSolicitacoes() {
+        db.collection("solicitacoes")
+            .whereEqualTo("status", "pendente")
+            .get()
+            .addOnSuccessListener { documents ->
+                for (doc in documents) {
+                    val uid = doc.getString("idUsuario")
+                    val idObjeto = doc.getString("idObjeto")
+                    val tipoObjeto = doc.getString("tipoObjeto")
+                    val idDoc = doc.id
+                    val isDevolucao = doc.getBoolean("isDevolucao") ?: false
+
+                    if (uid != null && idObjeto != null && tipoObjeto != null) {
+                        db.collection("usuarios").document(uid).get().addOnSuccessListener { userDoc ->
+                            val nome = userDoc.getString("nome") ?: "Usuário"
+                            val email = userDoc.getString("email") ?: ""
+
+                            val colecaoObjeto = when (tipoObjeto) {
+                                "livro" -> "livros"
+                                "jogo" -> "jogos"
+                                "sala" -> "salas"
+                                else -> ""
+                            }
+
+                            if (colecaoObjeto.isNotEmpty()) {
+                                db.collection(colecaoObjeto).document(idObjeto).get().addOnSuccessListener { objDoc ->
+                                    val nomeObjeto = if (tipoObjeto == "livro") objDoc.getString("titulo") else objDoc.getString("nome")
+                                    val nomeFinal = nomeObjeto ?: "Item"
+
+                                    val descricao = if (isDevolucao) {
+                                        "Requerimento de devolução de ${tipoObjeto.replaceFirstChar { it.uppercase() }}\n'$nomeFinal'"
+                                    } else {
+                                        when (tipoObjeto) {
+                                            "sala" -> "Requerimento de Sala: $nomeFinal"
+                                            "jogo" -> "Requerimento de aluguel de Jogo\n\"$nomeFinal\""
+                                            else -> "Requerimento de aluguel de Livro\n'$nomeFinal'"
+                                        }
+                                    }
+
+                                    val tipoNotif = when (tipoObjeto) {
+                                        "livro" -> TipoNotificacao.LIVROS
+                                        "jogo" -> TipoNotificacao.JOGOS
+                                        "sala" -> TipoNotificacao.SALAS
+                                        else -> TipoNotificacao.LIVROS
+                                    }
+
+                                    adicionarItemNotificacao(
+                                        tipoNotif,
+                                        nome,
+                                        email,
+                                        descricao,
+                                        idDocumento = idDoc,
+                                        colecao = "solicitacoes",
+                                        idRelacionado = idObjeto,
+                                        idUsuario = uid,
+                                        tipoObjeto = tipoObjeto
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
     }
@@ -172,7 +238,9 @@ class AdminNotificacoesActivity : AppCompatActivity() {
         idRelacionado: String? = null,
         idDocumento: String? = null,
         colecao: String? = null,
-        status: String = "pendente"
+        status: String = "pendente",
+        idUsuario: String? = null,
+        tipoObjeto: String? = null
     ) {
         val layoutRes = when (tipo) {
             TipoNotificacao.LIVROS, TipoNotificacao.JOGOS, TipoNotificacao.SALAS -> R.layout.item_solicitacao_aluguel
@@ -198,11 +266,42 @@ class AdminNotificacoesActivity : AppCompatActivity() {
                 itemView.findViewById<Button>(R.id.btnAprovar).setOnClickListener {
                     confirmarAcao("Aprovar solicitação de $nome?") {
                         if (idDocumento != null && colecao != null) {
-                            db.collection(colecao).document(idDocumento).update("status", "aprovado")
-                                .addOnSuccessListener {
-                                    Toast.makeText(this, "Aprovado!", Toast.LENGTH_SHORT).show()
-                                    removerItem(itemView)
+                            val dataResposta = Timestamp.now()
+                            db.collection(colecao).document(idDocumento).update(
+                                "status", "aceito",
+                                "dataResposta", dataResposta
+                            ).addOnSuccessListener {
+                                if (colecao == "solicitacoes" && idUsuario != null && tipoObjeto != null) {
+                                    val calendar = Calendar.getInstance()
+                                    calendar.time = dataResposta.toDate()
+
+                                    if (tipoObjeto == "sala" || tipoObjeto == "jogo") {
+                                        calendar.add(Calendar.HOUR, 2)
+                                    } else if (tipoObjeto == "livro") {
+                                        calendar.add(Calendar.DAY_OF_YEAR, 30)
+                                    }
+
+                                    val dataPrazo = Timestamp(calendar.time)
+                                    val dataSaida = if (tipoObjeto == "sala" || tipoObjeto == "jogo") dataPrazo else null
+
+                                    val historico = hashMapOf(
+                                        "dataEntrada" to dataResposta,
+                                        "dataPrazo" to dataPrazo,
+                                        "dataSaida" to dataSaida,
+                                        "idObjeto" to idRelacionado,
+                                        "idUsuario" to idUsuario,
+                                        "isDevolvido" to false,
+                                        "status" to "pendente",
+                                        "tipoObjeto" to tipoObjeto
+                                    )
+
+                                    db.collection("historico").add(historico)
                                 }
+                                Toast.makeText(this, "Aprovado!", Toast.LENGTH_SHORT).show()
+                                removerItem(itemView)
+                            }.addOnFailureListener {
+                                Toast.makeText(this, "Erro ao atualizar solicitação", Toast.LENGTH_SHORT).show()
+                            }
                         } else {
                             removerItem(itemView)
                         }
@@ -211,11 +310,16 @@ class AdminNotificacoesActivity : AppCompatActivity() {
                 itemView.findViewById<Button>(R.id.btnRecusar).setOnClickListener {
                     confirmarAcao("Recusar solicitação de $nome?") {
                         if (idDocumento != null && colecao != null) {
-                            db.collection(colecao).document(idDocumento).update("status", "recusado")
-                                .addOnSuccessListener {
-                                    Toast.makeText(this, "Recusado!", Toast.LENGTH_SHORT).show()
-                                    removerItem(itemView)
-                                }
+                            val dataResposta = Timestamp.now()
+                            db.collection(colecao).document(idDocumento).update(
+                                "status", "recusado",
+                                "dataResposta", dataResposta
+                            ).addOnSuccessListener {
+                                Toast.makeText(this, "Recusado!", Toast.LENGTH_SHORT).show()
+                                removerItem(itemView)
+                            }.addOnFailureListener {
+                                Toast.makeText(this, "Erro ao recusar solicitação", Toast.LENGTH_SHORT).show()
+                            }
                         } else {
                             removerItem(itemView)
                         }

@@ -19,8 +19,12 @@ import com.example.biblioteca_app.adapters.GenericAdapter
 import com.example.biblioteca_app.models.Jogo
 import com.example.biblioteca_app.models.Sala
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import android.net.Uri
+import com.google.firebase.firestore.Query
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class LudotecaActivity : AppCompatActivity() {
 
@@ -30,6 +34,10 @@ class LudotecaActivity : AppCompatActivity() {
     private val listaSalas = mutableListOf<Sala>()
     private lateinit var adapterJogos: GenericAdapter<Jogo>
     private lateinit var adapterSalas: GenericAdapter<Sala>
+    
+    private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+    private val userId: String? get() = auth.currentUser?.uid
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,7 +88,10 @@ class LudotecaActivity : AppCompatActivity() {
         adapterJogos = GenericAdapter(R.layout.item_jogo_ludoteca, listaJogos) { view, item, _ ->
             view.findViewById<TextView>(R.id.txtNomeJogo).text = item.nome
             val imgJogo = view.findViewById<ImageView>(R.id.imgJogo)
-            
+            val btnAlugar = view.findViewById<Button>(R.id.btnAlugar)
+
+            verificarStatus(item.id, "jogo", btnAlugar)
+
             when {
                 !item.imagemBase64.isNullOrEmpty() -> {
                     try {
@@ -99,9 +110,8 @@ class LudotecaActivity : AppCompatActivity() {
                 }
             }
 
-            val btnAlugar = view.findViewById<Button>(R.id.btnAlugar)
             btnAlugar.setOnClickListener {
-                atualizarBotaoSolicitacao(btnAlugar, "Aluguel solicitado!")
+                solicitarAluguel(item.id, "jogo", btnAlugar)
             }
         }
         rvJogos.layoutManager = LinearLayoutManager(this)
@@ -111,17 +121,133 @@ class LudotecaActivity : AppCompatActivity() {
             view.findViewById<TextView>(R.id.txtNomeSala).text = item.nome
             view.findViewById<TextView>(R.id.txtStatusSala).text = "Disponível\nCapacidade: ${item.capacidade} pessoas"
             val btnReservar = view.findViewById<Button>(R.id.btnReservar)
+
+            verificarStatus(item.id, "sala", btnReservar)
+
             btnReservar.setOnClickListener {
-                atualizarBotaoSolicitacao(btnReservar, "Reserva solicitada!")
+                solicitarAluguel(item.id, "sala", btnReservar)
             }
         }
         rvSalas.layoutManager = LinearLayoutManager(this)
         rvSalas.adapter = adapterSalas
     }
 
-    private fun carregarDadosFirestore() {
-        val db = FirebaseFirestore.getInstance()
+    private fun verificarStatus(idObjeto: String, tipo: String, botao: Button) {
+        val uid = userId ?: return
 
+        // 1. Verifica se o item está ocupado por QUALQUER usuário (incluindo o atual)
+        db.collection("historico")
+            .whereEqualTo("idObjeto", idObjeto)
+            .whereEqualTo("isDevolvido", false)
+            .get()
+            .addOnSuccessListener { snapshots ->
+                var activeRentalDoc: com.google.firebase.firestore.DocumentSnapshot? = null
+                val agora = java.util.Date()
+
+                for (doc in snapshots.documents) {
+                    val dataSaida = doc.getTimestamp("dataSaida")?.toDate()
+                    val statusResolvido = doc.getString("status") == "resolvido"
+                    val isDevolvidoPorTempo = if (dataSaida != null) agora.after(dataSaida) else false
+
+                    if (!isDevolvidoPorTempo && !statusResolvido) {
+                        activeRentalDoc = doc
+                        break
+                    }
+                }
+
+                if (activeRentalDoc != null) {
+                    val renterId = activeRentalDoc.getString("idUsuario")
+                    if (renterId == uid) {
+                        // É o próprio usuário: mostra o prazo
+                        val dataPrazo = activeRentalDoc.getTimestamp("dataPrazo")?.toDate()
+                        if (dataPrazo != null) {
+                            val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+                            botao.text = "Prazo : ${sdf.format(dataPrazo)}"
+                        } else {
+                            botao.text = "Emprestado"
+                        }
+                    } else {
+                        // É outro usuário: mostra indisponível
+                        botao.text = "Indisponível"
+                    }
+                    botao.isEnabled = false
+                    botao.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#9E9E9E"))
+                } else {
+                    // 2. Se não estiver ocupado, verifica solicitações pendentes do usuário atual
+                    db.collection("solicitacoes")
+                        .whereEqualTo("idUsuario", uid)
+                        .whereEqualTo("idObjeto", idObjeto)
+                        .whereEqualTo("status", "pendente")
+                        .get()
+                        .addOnSuccessListener { pendSnap ->
+                            if (!pendSnap.isEmpty) {
+                                botao.text = "Solicitação enviada"
+                                botao.isEnabled = false
+                                botao.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#9E9E9E"))
+                            } else {
+                                resetBotao(botao, tipo)
+                            }
+                        }
+                }
+            }
+    }
+
+    private fun resetBotao(botao: Button, tipo: String) {
+        botao.text = if (tipo == "jogo") "Alugar" else "Reservar"
+        botao.isEnabled = true
+        botao.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#002D5E"))
+        botao.setTextColor(Color.WHITE)
+    }
+
+    private fun solicitarAluguel(idObjeto: String, tipo: String, botao: Button) {
+        val uid = userId ?: run {
+            Toast.makeText(this, "Usuário não autenticado", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Verificar se já existe uma solicitação pendente antes de enviar
+        db.collection("solicitacoes")
+            .whereEqualTo("idUsuario", uid)
+            .whereEqualTo("idObjeto", idObjeto)
+            .whereEqualTo("status", "pendente")
+            .get()
+            .addOnSuccessListener { result ->
+                if (!result.isEmpty) {
+                    Toast.makeText(this, "Você já possui uma solicitação pendente para este item.", Toast.LENGTH_SHORT).show()
+                    botao.text = "Solicitação enviada"
+                    botao.isEnabled = false
+                    botao.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#9E9E9E"))
+                    return@addOnSuccessListener
+                }
+
+                // Se não houver pendente, procede com a solicitação
+                val solicitacao = hashMapOf(
+                    "idUsuario" to uid,
+                    "idObjeto" to idObjeto,
+                    "tipoObjeto" to tipo,
+                    "status" to "pendente",
+                    "dataSolicitacao" to com.google.firebase.Timestamp.now(),
+                    "isDevolucao" to false,
+                    "dataResposta" to null
+                )
+
+                db.collection("solicitacoes").add(solicitacao)
+                    .addOnSuccessListener {
+                        botao.text = "Solicitação enviada"
+                        botao.isEnabled = false
+                        botao.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#9E9E9E"))
+                        Toast.makeText(this, "Solicitação enviada com sucesso!", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(this, "Erro ao enviar solicitação", Toast.LENGTH_SHORT).show()
+                    }
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Erro ao verificar status atual", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun carregarDadosFirestore() {
         // Carregar Jogos
         db.collection("jogos").get().addOnSuccessListener { documentos ->
             listaJogos.clear()
@@ -150,17 +276,6 @@ class LudotecaActivity : AppCompatActivity() {
             }
             adapterSalas.updateList(listaSalas)
         }
-    }
-
-    private fun atualizarBotaoSolicitacao(botao: Button, mensagem: String) {
-        botao.text = "Solicitação Enviada"
-        botao.isEnabled = false
-        botao.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#9E9E9E"))
-        botao.setTextColor(Color.WHITE)
-        if (botao is com.google.android.material.button.MaterialButton) {
-            botao.strokeWidth = 0
-        }
-        Toast.makeText(this, mensagem, Toast.LENGTH_SHORT).show()
     }
 
     private fun setupNavBar() {
