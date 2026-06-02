@@ -288,14 +288,15 @@ class AdminNotificacoesActivity : AppCompatActivity() {
                     if (idUsuario == null) return@setOnClickListener
 
                     confirmarAcao("Aprovar solicitação de $nome?") {
-                        // 1. VERIFICAR SE O USUÁRIO JÁ TEM ALGO ALUGADO (Limite de 1 item por user)
+                        // 1. VERIFICAR SE O USUÁRIO JÁ TEM ALGO DO MESMO TIPO ALUGADO
                         db.collection("historico")
                             .whereEqualTo("idUsuario", idUsuario)
+                            .whereEqualTo("tipoObjeto", tipoObjeto)
                             .whereEqualTo("isDevolvido", false)
                             .get()
                             .addOnSuccessListener { userSnapshots ->
                                 val userOcupado = userSnapshots.documents.any { hDoc ->
-                                    if (hDoc.getString("tipoObjeto") == "livro") {
+                                    if (tipoObjeto == "livro") {
                                         true
                                     } else {
                                         val dataSaida = hDoc.getTimestamp("dataSaida")
@@ -304,7 +305,13 @@ class AdminNotificacoesActivity : AppCompatActivity() {
                                 }
 
                                 if (userOcupado) {
-                                    Toast.makeText(this, "O usuário já possui um aluguel ativo!", Toast.LENGTH_LONG).show()
+                                    val msgErro = when(tipoObjeto) {
+                                        "livro" -> "O usuário já possui um livro alugado!"
+                                        "jogo" -> "O usuário já possui um jogo alugado!"
+                                        "sala" -> "O usuário já possui uma sala reservada!"
+                                        else -> "O usuário já possui um item deste tipo ativo!"
+                                    }
+                                    Toast.makeText(this, msgErro, Toast.LENGTH_LONG).show()
                                     if (idDocumento != null && colecao != null && status == "pendente") {
                                         db.collection(colecao).document(idDocumento).update("status", "visto")
                                         indicador?.visibility = View.GONE

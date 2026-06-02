@@ -205,45 +205,66 @@ class LudotecaActivity : AppCompatActivity() {
             return
         }
 
-        // Verificar se já existe uma solicitação pendente antes de enviar
-        db.collection("solicitacoes")
+        // 1. Verificar se o usuário já possui algo do MESMO TIPO alugado ativamente
+        db.collection("historico")
             .whereEqualTo("idUsuario", uid)
-            .whereEqualTo("idObjeto", idObjeto)
-            .whereEqualTo("status", "pendente")
+            .whereEqualTo("tipoObjeto", tipo)
+            .whereEqualTo("isDevolvido", false)
             .get()
-            .addOnSuccessListener { result ->
-                if (!result.isEmpty) {
-                    Toast.makeText(this, "Você já possui uma solicitação pendente para este item.", Toast.LENGTH_SHORT).show()
-                    botao.text = "Solicitação enviada"
-                    botao.isEnabled = false
-                    botao.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#9E9E9E"))
+            .addOnSuccessListener { snapshots ->
+                val ocupado = snapshots.documents.any { hDoc ->
+                    if (tipo == "livro") {
+                        true
+                    } else {
+                        // Para jogo/sala, verifica se ainda está no prazo de 2h (dataSaida)
+                        val dataSaida = hDoc.getTimestamp("dataSaida")?.toDate()
+                        dataSaida != null && dataSaida.after(java.util.Date())
+                    }
+                }
+
+                if (ocupado) {
+                    val msg = if (tipo == "jogo") "Você já possui um jogo alugado!" else "Você já possui uma sala reservada!"
+                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                     return@addOnSuccessListener
                 }
 
-                // Se não houver pendente, procede com a solicitação
-                val solicitacao = hashMapOf(
-                    "idUsuario" to uid,
-                    "idObjeto" to idObjeto,
-                    "tipoObjeto" to tipo,
-                    "status" to "pendente",
-                    "dataSolicitacao" to com.google.firebase.Timestamp.now(),
-                    "isDevolucao" to false,
-                    "dataResposta" to null
-                )
+                // 2. Verificar se já existe uma solicitação pendente para este item específico
+                db.collection("solicitacoes")
+                    .whereEqualTo("idUsuario", uid)
+                    .whereEqualTo("idObjeto", idObjeto)
+                    .whereEqualTo("status", "pendente")
+                    .get()
+                    .addOnSuccessListener { result ->
+                        if (!result.isEmpty) {
+                            Toast.makeText(this, "Você já possui uma solicitação pendente para este item.", Toast.LENGTH_SHORT).show()
+                            botao.text = "Solicitação enviada"
+                            botao.isEnabled = false
+                            botao.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#9E9E9E"))
+                            return@addOnSuccessListener
+                        }
 
-                db.collection("solicitacoes").add(solicitacao)
-                    .addOnSuccessListener {
-                        botao.text = "Solicitação enviada"
-                        botao.isEnabled = false
-                        botao.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#9E9E9E"))
-                        Toast.makeText(this, "Solicitação enviada com sucesso!", Toast.LENGTH_SHORT).show()
+                        // Se não houver pendente, procede com a solicitação
+                        val solicitacao = hashMapOf(
+                            "idUsuario" to uid,
+                            "idObjeto" to idObjeto,
+                            "tipoObjeto" to tipo,
+                            "status" to "pendente",
+                            "dataSolicitacao" to com.google.firebase.Timestamp.now(),
+                            "isDevolucao" to false,
+                            "dataResposta" to null
+                        )
+
+                        db.collection("solicitacoes").add(solicitacao)
+                            .addOnSuccessListener {
+                                botao.text = "Solicitação enviada"
+                                botao.isEnabled = false
+                                botao.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#9E9E9E"))
+                                Toast.makeText(this, "Solicitação enviada com sucesso!", Toast.LENGTH_SHORT).show()
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(this, "Erro ao enviar solicitação", Toast.LENGTH_SHORT).show()
+                            }
                     }
-                    .addOnFailureListener {
-                        Toast.makeText(this, "Erro ao enviar solicitação", Toast.LENGTH_SHORT).show()
-                    }
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Erro ao verificar status atual", Toast.LENGTH_SHORT).show()
             }
     }
 

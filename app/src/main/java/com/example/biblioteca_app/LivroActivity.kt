@@ -294,21 +294,14 @@ class LivroActivity : AppCompatActivity() {
     private fun realizarAluguel(livro: Livro) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        // Verificar se o usuário já possui QUALQUER aluguel ativo (Livro, Sala ou Jogo)
+        // Verificar se o usuário já possui um LIVRO alugado ativamente
         db.collection("historico")
             .whereEqualTo("idUsuario", uid)
+            .whereEqualTo("tipoObjeto", "livro")
             .whereEqualTo("isDevolvido", false)
             .get()
             .addOnSuccessListener { snapshots ->
-                val ocupado = snapshots.documents.any { hDoc ->
-                    if (hDoc.getString("tipoObjeto") == "livro") {
-                        true // Livro não devolvido
-                    } else {
-                        // Sala ou Jogo ainda no prazo de 2h
-                        val dataSaida = hDoc.getTimestamp("dataSaida")
-                        dataSaida != null && dataSaida.toDate().after(java.util.Date())
-                    }
-                }
+                val ocupado = !snapshots.isEmpty
 
                 if (ocupado) {
                     Toast.makeText(this, "Você já possui um aluguel ativo ou devolução pendente e não pode solicitar outro!", Toast.LENGTH_LONG).show()
