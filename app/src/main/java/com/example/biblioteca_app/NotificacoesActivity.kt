@@ -87,84 +87,162 @@ class NotificacoesActivity : AppCompatActivity() {
     private fun carregarNotificacoes() {
         val uid = auth.currentUser?.uid ?: return
 
+        // 1. Carregar das Solicitações (Enviadas, Aprovadas, Recusadas, Devoluções)
         db.collection("solicitacoes")
             .whereEqualTo("idUsuario", uid)
             .get()
-            .addOnSuccessListener { documents ->
+            .addOnSuccessListener { solicitacoesDocs ->
                 val tempLista = mutableListOf<Notificacao>()
-                var processados = 0
+                var totalEsperado = solicitacoesDocs.size()
 
-                if (documents.isEmpty) {
-                    adapter.updateList(emptyList())
-                    return@addOnSuccessListener
-                }
+                // 2. Carregar do Histórico (Lembretes e Multas)
+                db.collection("historico")
+                    .whereEqualTo("idUsuario", uid)
+                    .whereEqualTo("tipoObjeto", "livro")
+                    .whereEqualTo("isDevolvido", false)
+                    .get()
+                    .addOnSuccessListener { historicoDocs ->
+                        totalEsperado += historicoDocs.size()
 
-                for (doc in documents) {
-                    val status = doc.getString("status")
-                    val tipoObjeto = doc.getString("tipoObjeto")
-                    val idObjeto = doc.getString("idObjeto")
-                    val dataSolicitacao = doc.getTimestamp("dataSolicitacao")
-                    val dataResposta = doc.getTimestamp("dataResposta")
-                    val lida = doc.getBoolean("lidaUsuario") ?: false
-                    val isDevolucao = doc.getBoolean("isDevolucao") ?: false
-
-                    if (tipoObjeto != null && idObjeto != null) {
-                        val colecao = when (tipoObjeto) {
-                            "livro" -> "livros"
-                            "jogo" -> "jogos"
-                            "sala" -> "salas"
-                            else -> ""
+                        if (totalEsperado == 0) {
+                            adapter.updateList(emptyList())
+                            return@addOnSuccessListener
                         }
 
-                        if (colecao.isNotEmpty()) {
-                            db.collection(colecao).document(idObjeto).get().addOnSuccessListener { objDoc ->
-                                val nomeObjeto = if (tipoObjeto == "livro") objDoc.getString("titulo") else objDoc.getString("nome")
+                        var processados = 0
 
-                                // 1. Notificação de "Enviada" (Apenas para aluguel)
-                                if (!isDevolucao && dataSolicitacao != null) {
-                                    // Se já foi respondida (aceito/recusado), consideramos a de envio como lida
-                                    val lidaEnv = if (status == "pendente" || status == "visto") lida else true
-
-                                    tempLista.add(Notificacao(
-                                        id = doc.id + "_env",
-                                        titulo = "Administração - Solicitação",
-                                        mensagem = "Solicitação de aluguel do $tipoObjeto\n\"$nomeObjeto\" foi enviada.",
-                                        data = formatarData(dataSolicitacao),
-                                        lida = lidaEnv,
-                                        timestamp = dataSolicitacao.seconds
-                                    ))
-                                }
-
-                                // 2. Notificação de "Aprovado/Recusado"
-                                if (dataResposta != null && (status == "aceito" || status == "recusado")) {
-                                    val acao = if (status == "aceito") "aprovado" else "recusado"
-                                    tempLista.add(Notificacao(
-                                        id = doc.id,
-                                        titulo = "Administração - Solicitação",
-                                        mensagem = "Solicitação de aluguel do $tipoObjeto\n\"$nomeObjeto\" foi $acao.",
-                                        data = formatarData(dataResposta),
-                                        lida = lida,
-                                        timestamp = dataResposta.seconds
-                                    ))
-                                }
-
-                                processados++
-                                if (processados == documents.size()) {
-                                    finalizarCarregamento(tempLista)
-                                }
-                            }.addOnFailureListener {
-                                processados++
-                                if (processados == documents.size()) finalizarCarregamento(tempLista)
-                            }
-                        } else {
+                        fun checkConcluido() {
                             processados++
-                            if (processados == documents.size()) finalizarCarregamento(tempLista)
+                            if (processados == totalEsperado) {
+                                finalizarCarregamento(tempLista)
+                            }
                         }
-                    } else {
-                        processados++
-                        if (processados == documents.size()) finalizarCarregamento(tempLista)
+
+                        // Processar Solicitações
+                        for (doc in solicitacoesDocs) {
+                            val status = doc.getString("status")
+                            val tipoObjeto = doc.getString("tipoObjeto")
+                            val idObjeto = doc.getString("idObjeto")
+                            val dataSolicitacao = doc.getTimestamp("dataSolicitacao")
+                            val dataResposta = doc.getTimestamp("dataResposta")
+                            val lida = doc.getBoolean("lidaUsuario") ?: false
+                            val isDevolucao = doc.getBoolean("isDevolucao") ?: false
+
+                            if (tipoObjeto != null && idObjeto != null) {
+                                val colecao = when (tipoObjeto) {
+                                    "livro" -> "livros"
+                                    "jogo" -> "jogos"
+                                    "sala" -> "salas"
+                                    else -> ""
+                                }
+
+                                if (colecao.isNotEmpty()) {
+                                    db.collection(colecao).document(idObjeto).get().addOnSuccessListener { objDoc ->
+                                        val nomeObjeto = if (tipoObjeto == "livro") objDoc.getString("titulo") else objDoc.getString("nome")
+
+                                        // Notificações de Aluguel
+                                        if (!isDevolucao) {
+                                            // Enviada
+                                            if (dataSolicitacao != null) {
+                                                val lidaEnv = if (status == "pendente" || status == "visto") lida else true
+                                                tempLista.add(Notificacao(
+                                                    id = doc.id + "_env",
+                                                    titulo = "Administração - Solicitação",
+                                                    mensagem = "Solicitação de aluguel do $tipoObjeto\n\"$nomeObjeto\" foi enviada.",
+                                                    data = formatarData(dataSolicitacao),
+                                                    lida = lidaEnv,
+                                                    timestamp = dataSolicitacao.seconds
+                                                ))
+                                            }
+                                            // Resposta (Aceito/Recusado)
+                                            if (dataResposta != null && (status == "aceito" || status == "recusado")) {
+                                                val acao = if (status == "aceito") "aprovado" else "recusado"
+                                                tempLista.add(Notificacao(
+                                                    id = doc.id,
+                                                    titulo = "Administração - Solicitação",
+                                                    mensagem = "Solicitação de aluguel do $tipoObjeto\n\"$nomeObjeto\" foi $acao.",
+                                                    data = formatarData(dataResposta),
+                                                    lida = lida,
+                                                    timestamp = dataResposta.seconds
+                                                ))
+                                            }
+                                        } else if (tipoObjeto == "livro") {
+                                            // Notificações de Devolução (Exclusivas de Livro)
+                                            // Enviada
+                                            if (dataSolicitacao != null) {
+                                                val lidaDevEnv = if (status == "pendente" || status == "visto") lida else true
+                                                tempLista.add(Notificacao(
+                                                    id = doc.id + "_dev_env",
+                                                    titulo = "Administração - Devolução",
+                                                    mensagem = "A solicitação de devolução do livro\n\"$nomeObjeto\" foi enviada.",
+                                                    data = formatarData(dataSolicitacao),
+                                                    lida = lidaDevEnv,
+                                                    timestamp = dataSolicitacao.seconds
+                                                ))
+                                            }
+                                            // Confirmada
+                                            if (dataResposta != null && status == "aceito") {
+                                                tempLista.add(Notificacao(
+                                                    id = doc.id,
+                                                    titulo = "Administração - Devolução",
+                                                    mensagem = "A devolução do livro\n\"$nomeObjeto\" foi confirmada pelo administrador.",
+                                                    data = formatarData(dataResposta),
+                                                    lida = lida,
+                                                    timestamp = dataResposta.seconds
+                                                ))
+                                            }
+                                        }
+                                        checkConcluido()
+                                    }.addOnFailureListener { checkConcluido() }
+                                } else { checkConcluido() }
+                            } else { checkConcluido() }
+                        }
+
+                        // Processar Histórico (Multas e Lembretes)
+                        for (hDoc in historicoDocs) {
+                            val idObjeto = hDoc.getString("idObjeto")
+                            val dataPrazo = hDoc.getTimestamp("dataPrazo")
+                            val agora = Timestamp.now()
+
+                            if (idObjeto != null && dataPrazo != null) {
+                                db.collection("livros").document(idObjeto).get().addOnSuccessListener { bDoc ->
+                                    val tituloLivro = bDoc.getString("titulo") ?: "Livro"
+                                    
+                                    val diffMillis = agora.toDate().time - dataPrazo.toDate().time
+                                    val diffDias = (diffMillis / (1000 * 60 * 60 * 24)).toInt()
+
+                                    if (diffMillis > 0) {
+                                        // ATRASADO (Multa)
+                                        val multa = diffDias * 0.50
+                                        val msgMulta = "O livro \"$tituloLivro\" está atrasado $diffDias dias.\nMulta acumulada : R$ ${String.format(Locale.getDefault(), "%.2f", multa)}"
+                                        
+                                        tempLista.add(Notificacao(
+                                            id = hDoc.id + "_multa",
+                                            titulo = "Administração - Multa",
+                                            mensagem = msgMulta,
+                                            data = formatarData(agora),
+                                            lida = false, // Multa sempre alerta
+                                            timestamp = agora.seconds
+                                        ))
+                                    } else {
+                                        // LEMBRETE (Próximos 3 dias)
+                                        val diasRestantes = (-diffDias)
+                                        if (diasRestantes in 0..3) {
+                                            tempLista.add(Notificacao(
+                                                id = hDoc.id + "_lembrete",
+                                                titulo = "Administração - Lembrete",
+                                                mensagem = "O livro \"$tituloLivro\" deve ser devolvido em $diasRestantes dias.",
+                                                data = formatarData(agora),
+                                                lida = false,
+                                                timestamp = agora.seconds
+                                            ))
+                                        }
+                                    }
+                                    checkConcluido()
+                                }.addOnFailureListener { checkConcluido() }
+                            } else { checkConcluido() }
+                        }
                     }
-                }
             }
             .addOnFailureListener {
                 Toast.makeText(this, "Erro ao carregar notificações", Toast.LENGTH_SHORT).show()
