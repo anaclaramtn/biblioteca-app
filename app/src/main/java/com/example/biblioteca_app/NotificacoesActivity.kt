@@ -65,8 +65,9 @@ class NotificacoesActivity : AppCompatActivity() {
                     indicador.visibility = View.GONE
                     adapter.updateItem(position, item)
 
-                    // Persistir no Firestore
-                    db.collection("solicitacoes").document(item.id)
+                    // Persistir no Firestore (removemos o sufixo _env se existir)
+                    val idFirestore = item.id.split("_")[0]
+                    db.collection("solicitacoes").document(idFirestore)
                         .update("lidaUsuario", true)
                 }
             }
@@ -76,15 +77,20 @@ class NotificacoesActivity : AppCompatActivity() {
         recycler.adapter = adapter
     }
 
+    private fun formatarData(timestamp: Timestamp?): String {
+        if (timestamp == null) return ""
+        val sdfTime = SimpleDateFormat("hh:mm a", Locale.US)
+        val sdfDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        return "${sdfTime.format(timestamp.toDate()).lowercase()}\n${sdfDate.format(timestamp.toDate())}"
+    }
+
     private fun carregarNotificacoes() {
         val uid = auth.currentUser?.uid ?: return
 
         db.collection("solicitacoes")
             .whereEqualTo("idUsuario", uid)
-            .whereIn("status", listOf("aceito", "recusado"))
             .get()
             .addOnSuccessListener { documents ->
-                lista.clear()
                 val tempLista = mutableListOf<Notificacao>()
                 var processados = 0
 
@@ -97,10 +103,12 @@ class NotificacoesActivity : AppCompatActivity() {
                     val status = doc.getString("status")
                     val tipoObjeto = doc.getString("tipoObjeto")
                     val idObjeto = doc.getString("idObjeto")
+                    val dataSolicitacao = doc.getTimestamp("dataSolicitacao")
                     val dataResposta = doc.getTimestamp("dataResposta")
                     val lida = doc.getBoolean("lidaUsuario") ?: false
+                    val isDevolucao = doc.getBoolean("isDevolucao") ?: false
 
-                    if (dataResposta != null && tipoObjeto != null && idObjeto != null) {
+                    if (tipoObjeto != null && idObjeto != null) {
                         val colecao = when (tipoObjeto) {
                             "livro" -> "livros"
                             "jogo" -> "jogos"
@@ -111,52 +119,63 @@ class NotificacoesActivity : AppCompatActivity() {
                         if (colecao.isNotEmpty()) {
                             db.collection(colecao).document(idObjeto).get().addOnSuccessListener { objDoc ->
                                 val nomeObjeto = if (tipoObjeto == "livro") objDoc.getString("titulo") else objDoc.getString("nome")
-                                val acao = if (status == "aceito") "aprovado" else "recusado"
 
-                                val titulo = "Administração - Solicitação"
-                                val mensagem = "Solicitação de aluguel do $tipoObjeto\n\"$nomeObjeto\" foi $acao."
+                                // 1. Notificação de "Enviada" (Apenas para aluguel)
+                                if (!isDevolucao && dataSolicitacao != null) {
+                                    // Se já foi respondida (aceito/recusado), consideramos a de envio como lida
+                                    val lidaEnv = if (status == "pendente" || status == "visto") lida else true
 
-                                val sdfTime = SimpleDateFormat("hh:mm a", Locale.US)
-                                val sdfDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                                    tempLista.add(Notificacao(
+                                        id = doc.id + "_env",
+                                        titulo = "Administração - Solicitação",
+                                        mensagem = "Solicitação de aluguel do $tipoObjeto\n\"$nomeObjeto\" foi enviada.",
+                                        data = formatarData(dataSolicitacao),
+                                        lida = lidaEnv,
+                                        timestamp = dataSolicitacao.seconds
+                                    ))
+                                }
 
-                                val dataFormatada = "${sdfTime.format(dataResposta.toDate()).lowercase()}\n${sdfDate.format(dataResposta.toDate())}"
-
-                                tempLista.add(Notificacao(
-                                    id = doc.id,
-                                    titulo = titulo,
-                                    mensagem = mensagem,
-                                    data = dataFormatada,
-                                    lida = lida,
-                                    timestamp = dataResposta.seconds
-                                ))
+                                // 2. Notificação de "Aprovado/Recusado"
+                                if (dataResposta != null && (status == "aceito" || status == "recusado")) {
+                                    val acao = if (status == "aceito") "aprovado" else "recusado"
+                                    tempLista.add(Notificacao(
+                                        id = doc.id,
+                                        titulo = "Administração - Solicitação",
+                                        mensagem = "Solicitação de aluguel do $tipoObjeto\n\"$nomeObjeto\" foi $acao.",
+                                        data = formatarData(dataResposta),
+                                        lida = lida,
+                                        timestamp = dataResposta.seconds
+                                    ))
+                                }
 
                                 processados++
                                 if (processados == documents.size()) {
-                                    tempLista.sortByDescending { it.timestamp }
-                                    lista.clear()
-                                    lista.addAll(tempLista)
-                                    adapter.updateList(lista)
+                                    finalizarCarregamento(tempLista)
                                 }
                             }.addOnFailureListener {
                                 processados++
-                                if (processados == documents.size()) {
-                                    tempLista.sortByDescending { it.timestamp }
-                                    lista.clear()
-                                    lista.addAll(tempLista)
-                                    adapter.updateList(lista)
-                                }
+                                if (processados == documents.size()) finalizarCarregamento(tempLista)
                             }
                         } else {
                             processados++
+                            if (processados == documents.size()) finalizarCarregamento(tempLista)
                         }
                     } else {
                         processados++
+                        if (processados == documents.size()) finalizarCarregamento(tempLista)
                     }
                 }
             }
             .addOnFailureListener {
                 Toast.makeText(this, "Erro ao carregar notificações", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    private fun finalizarCarregamento(tempLista: List<Notificacao>) {
+        val listaOrdenada = tempLista.sortedByDescending { it.timestamp }
+        lista.clear()
+        lista.addAll(listaOrdenada)
+        adapter.updateList(lista)
     }
 
     private fun setupBotaoLimpar() {
