@@ -161,8 +161,8 @@ class LudotecaActivity : AppCompatActivity() {
                         // É o próprio usuário: mostra o prazo
                         val dataPrazo = activeRentalDoc.getTimestamp("dataPrazo")?.toDate()
                         if (dataPrazo != null) {
-                            val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
-                            botao.text = "Prazo : ${sdf.format(dataPrazo)}"
+                            val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+                            botao.text = "Prazo: ${sdf.format(dataPrazo)}"
                         } else {
                             botao.text = "Emprestado"
                         }
