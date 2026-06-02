@@ -231,27 +231,32 @@ class TelaHomeActivity : AppCompatActivity() {
     }
 
     private fun carregarLivrosBemAvaliados() {
-        db.collection("livros")
-            .orderBy("media", Query.Direction.DESCENDING)
-            .limit(6)
-            .get()
-            .addOnSuccessListener { documentos ->
-                val livros = mutableListOf<Livro>()
-                for (documento in documentos) {
-                    val livro = Livro(
-                        id = documento.id,
-                        titulo = documento.getString("titulo") ?: "",
-                        autor = documento.getString("autor") ?: "",
-                        descricao = documento.getString("sinopse") ?: "",
-                        imagemBase64 = documento.getString("imagemBase64"),
-                        disponivel = documento.getBoolean("disponivel") ?: true,
-                        media = documento.getDouble("media")?.toFloat() ?: 0f,
-                        totalAvaliacoes = documento.getLong("totalAvaliacoes")?.toInt() ?: 0
-                    )
-                    livros.add(livro)
-                }
-                mostrarLivrosBemAvaliados(livros)
+        db.collection("livros").get().addOnSuccessListener { livrosDocs ->
+            val todosLivros = livrosDocs.map { doc ->
+                Livro(
+                    id = doc.id,
+                    titulo = doc.getString("titulo") ?: "",
+                    autor = doc.getString("autor") ?: "",
+                    descricao = doc.getString("sinopse") ?: "",
+                    imagemBase64 = doc.getString("imagemBase64"),
+                    disponivel = doc.getBoolean("disponivel") ?: true,
+                    media = doc.getDouble("media")?.toFloat() ?: 0f,
+                    totalAvaliacoes = doc.getLong("totalAvaliacoes")?.toInt() ?: 0
+                )
             }
+
+            db.collection("avaliacoes").get().addOnSuccessListener { avalDocs ->
+                val grupos = avalDocs.groupBy { it.get("idLivro")?.toString() ?: "" }
+                val livrosComMedia = todosLivros.map { livro ->
+                    val notas = grupos[livro.id]?.mapNotNull { it.getDouble("nota") } ?: emptyList()
+                    val mediaCalculada = if (notas.isNotEmpty()) notas.average().toFloat() else 0f
+                    livro.copy(media = mediaCalculada, totalAvaliacoes = notas.size)
+                }
+
+                val top6 = livrosComMedia.sortedByDescending { it.media }.take(6)
+                mostrarLivrosBemAvaliados(top6)
+            }
+        }
     }
 
     private fun carregarLivrosPopulares() {
@@ -279,27 +284,28 @@ class TelaHomeActivity : AppCompatActivity() {
     }
 
     private fun carregarLivrosMaisCurtidos() {
-        db.collection("livros")
-            .orderBy("media", Query.Direction.DESCENDING) // Usando media como fallback ou se houver um campo "curtidas" futuramente
-            .limit(6)
-            .get()
-            .addOnSuccessListener { documentos ->
-                val livros = mutableListOf<Livro>()
-                for (documento in documentos) {
-                    val livro = Livro(
-                        id = documento.id,
-                        titulo = documento.getString("titulo") ?: "",
-                        autor = documento.getString("autor") ?: "",
-                        descricao = documento.getString("sinopse") ?: "",
-                        imagemBase64 = documento.getString("imagemBase64"),
-                        disponivel = documento.getBoolean("disponivel") ?: true,
-                        media = documento.getDouble("media")?.toFloat() ?: 0f,
-                        totalAvaliacoes = documento.getLong("totalAvaliacoes")?.toInt() ?: 0
-                    )
-                    livros.add(livro)
-                }
-                mostrarLivrosMaisCurtidos(livros)
+        db.collection("livros").get().addOnSuccessListener { livrosDocs ->
+            val todosLivros = livrosDocs.map { doc ->
+                Livro(
+                    id = doc.id,
+                    titulo = doc.getString("titulo") ?: "",
+                    autor = doc.getString("autor") ?: "",
+                    descricao = doc.getString("sinopse") ?: "",
+                    imagemBase64 = doc.getString("imagemBase64"),
+                    disponivel = doc.getBoolean("disponivel") ?: true,
+                    media = doc.getDouble("media")?.toFloat() ?: 0f,
+                    totalAvaliacoes = doc.getLong("totalAvaliacoes")?.toInt() ?: 0
+                )
             }
+
+            db.collection("livrosCurtidos").get().addOnSuccessListener { curtidasDocs ->
+                val contagemCurtidas = curtidasDocs.groupBy { it.get("idLivro")?.toString() ?: "" }
+                    .mapValues { it.value.size }
+
+                val top6 = todosLivros.sortedByDescending { contagemCurtidas[it.id] ?: 0 }.take(6)
+                mostrarLivrosMaisCurtidos(top6)
+            }
+        }
     }
 
     private fun mostrarLivrosPopulares(livros: List<Livro>) {

@@ -65,7 +65,7 @@ class AdminNotificacoesActivity : AppCompatActivity() {
                     val tituloLivro = doc.getString("tituloLivro") ?: ""
                     val motivo = doc.getString("motivo") ?: ""
                     val comentario = doc.getString("comentario") ?: ""
-                    val idLivro = doc.getString("idLivro") ?: ""
+                    val idLivro = doc.get("idLivro")?.toString() ?: ""
                     val idAvaliacao = doc.getString("idAvaliacao") ?: ""
 
                     // Informações formatadas para o admin
@@ -160,7 +160,7 @@ class AdminNotificacoesActivity : AppCompatActivity() {
             .addOnSuccessListener { documents ->
                 for (doc in documents) {
                     val uid = doc.getString("idUsuario")
-                    val idLivro = doc.getString("idLivro")
+                    val idLivro = doc.get("idLivro")?.toString()
                     val idDoc = doc.id
 
                     if (uid != null && idLivro != null) {
