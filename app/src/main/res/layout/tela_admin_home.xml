@@ -56,9 +56,10 @@
                             app:tint="@android:color/black"/>
 
                         <TextView
+                            android:id="@+id/txtTotalLivros"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="578"
+                            android:text="0"
                             android:textSize="24sp"
                             android:textStyle="bold"
                             android:gravity="center"/>
@@ -89,9 +90,10 @@
                             app:tint="@android:color/black"/>
 
                         <TextView
+                            android:id="@+id/txtTotalUsuarios"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="1.572"
+                            android:text="0"
                             android:textSize="24sp"
                             android:textStyle="bold"
                             android:gravity="center"/>
@@ -129,9 +131,10 @@
                             app:tint="@android:color/black"/>
 
                         <TextView
+                            android:id="@+id/txtSolicitacoesPendentes"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="57"
+                            android:text="0"
                             android:textSize="24sp"
                             android:textStyle="bold"
                             android:gravity="center"/>
@@ -162,9 +165,10 @@
                             app:tint="@android:color/black"/>
 
                         <TextView
+                            android:id="@+id/txtEmprestimosAtivos"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="129"
+                            android:text="0"
                             android:textSize="24sp"
                             android:textStyle="bold"
                             android:gravity="center"/>

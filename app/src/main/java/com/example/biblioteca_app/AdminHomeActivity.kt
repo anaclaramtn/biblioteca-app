@@ -8,6 +8,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.firestore.AggregateSource
+import com.google.firebase.firestore.FirebaseFirestore
 
 class AdminHomeActivity : AppCompatActivity() {
 
@@ -17,7 +19,40 @@ class AdminHomeActivity : AppCompatActivity() {
 
         setupHeader()
         setupAtalhos()
+        setupDashboard()
         setupNavBar()
+    }
+
+    private fun setupDashboard() {
+        val db = FirebaseFirestore.getInstance()
+
+        // Total de livros
+        db.collection("livros").count().get(AggregateSource.SERVER).addOnSuccessListener {
+            findViewById<TextView>(R.id.txtTotalLivros).text = it.count.toString()
+        }
+
+        // Total de usuários (isAdmin == false)
+        db.collection("usuarios")
+            .whereEqualTo("isAdmin", false)
+            .count().get(AggregateSource.SERVER).addOnSuccessListener {
+                findViewById<TextView>(R.id.txtTotalUsuarios).text = it.count.toString()
+            }
+
+        // Solicitações pendentes
+        db.collection("solicitacoes")
+            .whereEqualTo("status", "pendente")
+            .count().get(AggregateSource.SERVER).addOnSuccessListener {
+                findViewById<TextView>(R.id.txtSolicitacoesPendentes).text = it.count.toString()
+            }
+
+        // Empréstimos ativos (tipoObjeto: livro, dataSaida: nula ou vazia)
+        // Nota: Realizando busca por null; se houver vazios, o ideal é tratar na inserção ou usar filtros OR.
+        db.collection("historico")
+            .whereEqualTo("tipoObjeto", "livro")
+            .whereEqualTo("dataSaida", null)
+            .count().get(AggregateSource.SERVER).addOnSuccessListener {
+                findViewById<TextView>(R.id.txtEmprestimosAtivos).text = it.count.toString()
+            }
     }
 
     private fun setupHeader() {
