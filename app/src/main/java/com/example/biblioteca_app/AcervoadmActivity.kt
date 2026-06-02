@@ -30,11 +30,7 @@ class AcervoadmActivity : AppCompatActivity() {
 
     companion object {
         val listaLivros = mutableListOf<Livro>()
-        val listaNoticias = mutableListOf(
-            Noticia("Título da notícia", "Descrição breve da notícia para o admin."),
-            Noticia("Evento na Biblioteca", "Nova ala de estudos aberta."),
-            Noticia("Manutenção", "Sistema ficará offline no domingo.")
-        )
+        val listaNoticias = mutableListOf<Noticia>()
         val listaJogos = mutableListOf<Jogo>()
         val listaSalas = mutableListOf<Sala>()
         val listaPesquisas = mutableListOf<PesquisaAdm>()
@@ -53,6 +49,7 @@ class AcervoadmActivity : AppCompatActivity() {
         recycler = findViewById(R.id.recyclerAcervo)
         carregarLivros()
         carregarPesquisas()
+        carregarNoticias()
         setupSpinner()
         setupNavBar()
 
@@ -79,6 +76,7 @@ class AcervoadmActivity : AppCompatActivity() {
         carregarPesquisas()
         carregarJogos()
         carregarSalas()
+        carregarNoticias()
         val spinner = findViewById<Spinner>(R.id.spinnerFiltro)
         atualizarConteudo(spinner.selectedItem.toString())
     }
@@ -300,10 +298,12 @@ class AcervoadmActivity : AppCompatActivity() {
                             true
                         }
                         "Deletar" -> {
-                            listaNoticias.removeAt(position)
-                            recycler.adapter?.notifyItemRemoved(position)
-                            recycler.adapter?.notifyItemRangeChanged(position, listaNoticias.size)
-                            Toast.makeText(this, "Notícia '${item.titulo}' deletada!", Toast.LENGTH_SHORT).show()
+                            FirebaseFirestore.getInstance().collection("noticias").document(item.id).delete()
+                                .addOnSuccessListener {
+                                    listaNoticias.removeAt(position)
+                                    (recycler.adapter as? GenericAdapter<Noticia>)?.removeAt(position)
+                                    Toast.makeText(this, "Notícia '${item.titulo}' deletada!", Toast.LENGTH_SHORT).show()
+                                }
                             true
                         }
                         else -> false
@@ -356,8 +356,7 @@ class AcervoadmActivity : AppCompatActivity() {
                             FirebaseFirestore.getInstance().collection("jogos").document(item.id).delete()
                                 .addOnSuccessListener {
                                     listaJogos.removeAt(position)
-                                    recycler.adapter?.notifyItemRemoved(position)
-                                    recycler.adapter?.notifyItemRangeChanged(position, listaJogos.size)
+                                    (recycler.adapter as? GenericAdapter<Jogo>)?.removeAt(position)
                                     Toast.makeText(this, "Jogo '${item.nome}' deletado!", Toast.LENGTH_SHORT).show()
                                 }
                             true
@@ -393,8 +392,7 @@ class AcervoadmActivity : AppCompatActivity() {
                             FirebaseFirestore.getInstance().collection("salas").document(item.id).delete()
                                 .addOnSuccessListener {
                                     listaSalas.removeAt(position)
-                                    recycler.adapter?.notifyItemRemoved(position)
-                                    recycler.adapter?.notifyItemRangeChanged(position, listaSalas.size)
+                                    (recycler.adapter as? GenericAdapter<Sala>)?.removeAt(position)
                                     Toast.makeText(this, "Sala '${item.nome}' deletada!", Toast.LENGTH_SHORT).show()
                                 }
                             true
@@ -431,8 +429,7 @@ class AcervoadmActivity : AppCompatActivity() {
                             FirebaseFirestore.getInstance().collection("pesquisaCientifica").document(item.id).delete()
                                 .addOnSuccessListener {
                                     listaPesquisas.removeAt(position)
-                                    recycler.adapter?.notifyItemRemoved(position)
-                                    recycler.adapter?.notifyItemRangeChanged(position, listaPesquisas.size)
+                                    (recycler.adapter as? GenericAdapter<PesquisaAdm>)?.removeAt(position)
                                     Toast.makeText(this, "Pesquisa de '${item.nome}' deletada!", Toast.LENGTH_SHORT).show()
                                 }
                                 .addOnFailureListener {

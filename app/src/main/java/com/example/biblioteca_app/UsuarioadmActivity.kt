@@ -19,17 +19,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.biblioteca_app.adapters.GenericAdapter
 import com.example.biblioteca_app.models.Usuario
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.Timestamp
 
 class UsuarioadmActivity : AppCompatActivity() {
 
-    private lateinit var adapter: GenericAdapter<Usuario>
-    private val listaUsuariosOriginal = listOf(
-        Usuario(nome = "Bruno Facó", email = "bruno@fuja.com"),
-        Usuario(nome = "Ygor Costa", email = "ygor@gmail.com"),
-        Usuario(nome = "Breno Faca", email = "breno@fuja.com"),
-        Usuario(nome = "Igor Frente", email = "igor@gmail.com"),
-        Usuario(nome = "Maria Clara", email = "maria@fuja.com"),
-        Usuario(nome = "Joao Pedro", email = "jp@gmail.com")
+    private lateinit var adapter: GenericAdapter<UsuarioDisplay>
+    private val listaUsuariosOriginal = mutableListOf<UsuarioDisplay>()
+    private val db = FirebaseFirestore.getInstance()
+
+    data class UsuarioDisplay(
+        val usuario: Usuario,
+        val qtdLivros: Int,
+        val multa: Double
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,6 +48,62 @@ class UsuarioadmActivity : AppCompatActivity() {
         setupRecyclerView()
         setupBusca()
         setupNavBar()
+        carregarUsuarios()
+    }
+
+    private fun carregarUsuarios() {
+        db.collection("usuarios")
+            .whereEqualTo("isAdmin", false) // Filtrar apenas usuários comuns
+            .get()
+            .addOnSuccessListener { snapshots ->
+                listaUsuariosOriginal.clear()
+                val usuarios = snapshots.mapNotNull { it.toObject(Usuario::class.java).copy(uid = it.id) }
+                
+                var carregados = 0
+                if (usuarios.isEmpty()) {
+                    adapter.updateList(emptyList())
+                    return@addOnSuccessListener
+                }
+
+                for (user in usuarios) {
+                    // Buscar histórico para cada usuário
+                    db.collection("historico")
+                        .whereEqualTo("idUsuario", user.uid)
+                        .whereEqualTo("dataSaida", null) // Livros não devolvidos
+                        .get()
+                        .addOnSuccessListener { histSnap ->
+                            val qtdLivros = histSnap.size()
+                            var multaTotal = 0.0
+
+                            for (doc in histSnap) {
+                                val dataPrazo = doc.getTimestamp("dataPrazo")
+                                if (dataPrazo != null) {
+                                    val agora = Timestamp.now().toDate().time
+                                    val prazo = dataPrazo.toDate().time
+                                    if (agora > prazo) {
+                                        val diff = agora - prazo
+                                        val diasAtraso = (diff / (1000 * 60 * 60 * 24)).toInt()
+                                        multaTotal += diasAtraso * 0.50
+                                    }
+                                }
+                            }
+
+                            listaUsuariosOriginal.add(UsuarioDisplay(user, qtdLivros, multaTotal))
+                            carregados++
+
+                            if (carregados == usuarios.size) {
+                                adapter.updateList(listaUsuariosOriginal)
+                            }
+                        }
+                        .addOnFailureListener {
+                            carregados++
+                            listaUsuariosOriginal.add(UsuarioDisplay(user, 0, 0.0))
+                            if (carregados == usuarios.size) {
+                                adapter.updateList(listaUsuariosOriginal)
+                            }
+                        }
+                }
+            }
     }
 
     private fun setupRecyclerView() {
@@ -55,15 +113,17 @@ class UsuarioadmActivity : AppCompatActivity() {
         adapter = GenericAdapter(
             R.layout.item_usuario,
             listaUsuariosOriginal
-        ) { view, usuario, _ ->
+        ) { view, item, _ ->
+            val usuario = item.usuario
             view.findViewById<TextView>(R.id.txtNomeUsuario).text = usuario.nome
             view.findViewById<TextView>(R.id.txtEmailUsuario).text = usuario.email
-            view.findViewById<TextView>(R.id.txtQtdLivros).text = "-"
-            view.findViewById<TextView>(R.id.txtMulta).text = "R$: 0,00"
+            view.findViewById<TextView>(R.id.txtQtdLivros).text = item.qtdLivros.toString()
+            view.findViewById<TextView>(R.id.txtMulta).text = String.format(Locale.getDefault(), "R$: %.2f", item.multa)
 
             // Facilitando a alteração pelo Admin
             view.setOnClickListener {
-                val intent = Intent(this, DetalhesusuarioadmActivity::class.java)
+                val intent = Intent(this@UsuarioadmActivity, DetalhesusuarioadmActivity::class.java)
+                intent.putExtra("USUARIO_ID", usuario.uid)
                 startActivity(intent)
             }
         }
@@ -93,8 +153,8 @@ class UsuarioadmActivity : AppCompatActivity() {
             listaUsuariosOriginal
         } else {
             listaUsuariosOriginal.filter {
-                it.nome.contains(texto, ignoreCase = true) || 
-                it.email.contains(texto, ignoreCase = true)
+                it.usuario.nome.contains(texto, ignoreCase = true) || 
+                it.usuario.email.contains(texto, ignoreCase = true)
             }
         }
 

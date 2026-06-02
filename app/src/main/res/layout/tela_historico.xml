@@ -50,18 +50,7 @@
             android:orientation="vertical"
             android:paddingVertical="8dp">
 
-            <!-- Os itens de histórico serão inseridos aqui via Activity usando include -->
-            <include
-                android:id="@+id/item1"
-                layout="@layout/item_emprestimo_historico" />
-
-            <include
-                android:id="@+id/item2"
-                layout="@layout/item_emprestimo_historico" />
-
-            <include
-                android:id="@+id/item3"
-                layout="@layout/item_emprestimo_historico" />
+            <!-- Os itens de histórico serão inseridos aqui via Activity dinamicamente -->
 
         </LinearLayout>
     </ScrollView>

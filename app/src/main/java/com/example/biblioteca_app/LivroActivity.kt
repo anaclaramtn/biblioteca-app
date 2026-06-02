@@ -97,12 +97,11 @@ class LivroActivity : AppCompatActivity() {
 
     private fun converterEstrelas(media: Float): String {
         return when {
-            media > 4.5 -> "⭐⭐⭐⭐⭐"
-            media > 4 && media <= 4.5 -> "⭐⭐⭐⭐☆"
-            media > 3 && media <= 3.9 -> "⭐⭐⭐☆☆"
-            media > 2 && media <= 2.9 -> "⭐⭐☆☆☆"
-            media > 1 && media <= 1.9 -> "⭐☆☆☆☆"
-            media > 0 && media <= 0.9 -> "☆☆☆☆☆"
+            media >= 4.5 -> "⭐⭐⭐⭐⭐"
+            media >= 3.5 -> "⭐⭐⭐⭐☆"
+            media >= 2.5 -> "⭐⭐⭐☆☆"
+            media >= 1.5 -> "⭐⭐☆☆☆"
+            media >= 0.5 -> "⭐☆☆☆☆"
             else -> "☆☆☆☆☆"
         }
     }
@@ -145,6 +144,7 @@ class LivroActivity : AppCompatActivity() {
                             item.txtTituloAvaliacao.text = avaliacao.titulo
                             item.txtComentario.text = avaliacao.descricao
                             item.txtCurtidas.text = avaliacao.curtidas.toString()
+                            item.txtEstrelas.text = converterEstrelas(avaliacao.nota)
 
                             // Tratamento e exibição da Data
                             val timestamp = doc.getTimestamp("data")

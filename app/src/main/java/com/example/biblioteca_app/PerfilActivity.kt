@@ -21,6 +21,7 @@ class PerfilActivity : AppCompatActivity() {
     private val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
     private var idHistoricoAtual: String? = null
     private var idLivroAtual: String? = null
+    private var curtidosListener: com.google.firebase.firestore.ListenerRegistration? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +52,9 @@ class PerfilActivity : AppCompatActivity() {
 
         // Configurar livros curtidos (carrossel)
         setupLivrosCurtidos()
+
+        // Configurar minhas avaliações
+        setupMinhasAvaliacoes()
 
         // Configurar clique no livro alugado (Título e Capa)
         val cliqueLivroAlugado = View.OnClickListener {
@@ -153,30 +157,37 @@ class PerfilActivity : AppCompatActivity() {
 
     private fun setupLivrosCurtidos() {
         val user = auth.currentUser ?: return
-        val container = findViewById<android.widget.LinearLayout>(R.id.containerCurtidos)
+        val container = findViewById<android.widget.LinearLayout>(R.id.containerCurtidos) ?: return
 
-        db.collection("usuarios")
-            .document(user.uid)
-            .collection("curtidos")
-            .get()
-            .addOnSuccessListener { documents ->
-                if (documents.isEmpty) {
-                    // Fallback para itens estáticos se não houver curtidas no firestore
-                    configurarItemLivro(R.id.livro1, R.drawable.capa_star_wars, "Star Wars", "George Lucas")
-                    configurarItemLivro(R.id.livro2, R.drawable.frankstein, "Frankstein", "Mary Shelley")
-                    configurarItemLivro(R.id.livro3, R.drawable.capadomquixote, "Dom Quixote", "Miguel de Cervantes")
-                    configurarItemLivro(R.id.livro4, R.drawable.logo, "Biblioteca", "Unifor")
+        // Usando SnapshotListener para atualizar em tempo real quando um livro for descurtido
+        curtidosListener?.remove()
+        curtidosListener = db.collection("livrosCurtidos")
+            .whereEqualTo("idUsuario", user.uid)
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Toast.makeText(this, "Erro ao carregar curtidas", Toast.LENGTH_SHORT).show()
+                    return@addSnapshotListener
+                }
+
+                container.removeAllViews()
+
+                if (snapshots == null || snapshots.isEmpty) {
+                    val tvSemCurtidos = TextView(this)
+                    tvSemCurtidos.text = "Você ainda não curtiu nenhum livro."
+                    tvSemCurtidos.setPadding(20, 20, 20, 20)
+                    container.addView(tvSemCurtidos)
                 } else {
-                    container.removeAllViews()
-                    for (doc in documents) {
-                        val livroId = doc.id
-                        db.collection("livros").document(livroId).get()
+                    for (doc in snapshots) {
+                        val idLivro = doc.getString("idLivro") ?: continue
+                        
+                        db.collection("livros").document(idLivro).get()
                             .addOnSuccessListener { livroDoc ->
                                 if (livroDoc.exists()) {
                                     val livro = com.example.biblioteca_app.models.Livro(
                                         id = livroDoc.id,
                                         titulo = livroDoc.getString("titulo") ?: "",
                                         autor = livroDoc.getString("autor") ?: "",
+                                        descricao = livroDoc.getString("sinopse") ?: "",
                                         imagemBase64 = livroDoc.getString("imagemBase64")
                                     )
                                     adicionarLivroAoCarrossel(container, livro)
@@ -185,6 +196,115 @@ class PerfilActivity : AppCompatActivity() {
                     }
                 }
             }
+    }
+
+    private fun setupMinhasAvaliacoes() {
+        val uid = auth.currentUser?.uid ?: return
+        val container = findViewById<android.widget.LinearLayout>(R.id.containerAvaliacoes) ?: return
+        val tvMedia = findViewById<TextView>(R.id.tvMediaNota)
+        val tvTotal = findViewById<TextView>(R.id.tvQtdAvaliacoes)
+
+        db.collection("avaliacoes")
+            .whereEqualTo("idUsuario", uid)
+            .addSnapshotListener { snapshots, e ->
+                if (e != null || snapshots == null) return@addSnapshotListener
+
+                container.removeAllViews()
+                val notas = mutableListOf<Float>()
+
+                if (snapshots.isEmpty) {
+                    tvMedia.text = "0.0"
+                    tvTotal.text = "(0 avaliações)"
+                    atualizarEstrelasMedia(0f)
+                    val tvSem = TextView(this)
+                    tvSem.text = "Você ainda não avaliou nenhum livro."
+                    tvSem.setPadding(20, 20, 20, 20)
+                    container.addView(tvSem)
+                } else {
+                    tvTotal.text = "(${snapshots.size()} avaliações)"
+                    
+                    for (doc in snapshots) {
+                        val avaliacao = doc.toObject(com.example.biblioteca_app.models.Avaliacao::class.java).copy(id = doc.id)
+                        notas.add(avaliacao.nota)
+                        
+                        // Inflar item de avaliação para o carrossel
+                        val itemView = layoutInflater.inflate(R.layout.item_avaliacao, container, false)
+                        
+                        // Ajustar largura para carrossel (opcional, para não ocupar a tela toda se for horizontal)
+                        val params = itemView.layoutParams
+                        params.width = (resources.displayMetrics.widthPixels * 0.8).toInt()
+                        itemView.layoutParams = params
+
+                        // Preencher campos
+                        itemView.findViewById<TextView>(R.id.txtNomeUsuario).text = "Minha Avaliação"
+                        
+                        val sdf = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+                        val dataStr = avaliacao.data?.toDate()?.let { sdf.format(it) } ?: ""
+                        itemView.findViewById<TextView>(R.id.txtData).text = dataStr
+                        
+                        itemView.findViewById<TextView>(R.id.txtEstrelas).text = converterEstrelasParaString(avaliacao.nota)
+                        itemView.findViewById<TextView>(R.id.txtTituloAvaliacao).text = avaliacao.titulo
+                        itemView.findViewById<TextView>(R.id.txtComentario).text = avaliacao.descricao
+                        itemView.findViewById<TextView>(R.id.txtCurtidas).text = avaliacao.curtidas.toString()
+                        
+                        // Desativar botões que não fazem sentido no próprio perfil (ou ajustar se quiser)
+                        itemView.findViewById<View>(R.id.btnDenunciar).visibility = View.GONE
+
+                        // Buscar título do livro para contextualizar
+                        db.collection("livros").document(avaliacao.idLivro).get().addOnSuccessListener { livroDoc ->
+                            val tituloLivro = livroDoc.getString("titulo") ?: "Livro"
+                            // Podemos colocar o título do livro antes do comentário ou no lugar do nome
+                            itemView.findViewById<TextView>(R.id.txtNomeUsuario).text = tituloLivro
+
+                            // Clique para levar à tela do livro
+                            itemView.setOnClickListener {
+                                val livro = livroDoc.toObject(com.example.biblioteca_app.models.Livro::class.java)?.copy(id = livroDoc.id)
+                                if (livro != null) {
+                                    val intent = Intent(this@PerfilActivity, LivroActivity::class.java)
+                                    intent.putExtra("LIVRO", livro)
+                                    startActivity(intent)
+                                }
+                            }
+                        }
+
+                        container.addView(itemView)
+                    }
+
+                    val media = notas.average().toFloat()
+                    tvMedia.text = String.format("%.1f", media)
+                    atualizarEstrelasMedia(media)
+                }
+            }
+    }
+
+    private fun converterEstrelasParaString(nota: Float): String {
+        val cheias = nota.toInt()
+        val vazias = 5 - cheias
+        return "⭐".repeat(cheias) + "☆".repeat(vazias)
+    }
+
+    private fun atualizarEstrelasMedia(media: Float) {
+        val stars = listOf(
+            findViewById<ImageView>(R.id.star1),
+            findViewById<ImageView>(R.id.star2),
+            findViewById<ImageView>(R.id.star3),
+            findViewById<ImageView>(R.id.star4),
+            findViewById<ImageView>(R.id.star5)
+        )
+
+        val mediaInt = media.toInt()
+        for (i in 0 until 5) {
+            if (i < mediaInt) {
+                stars[i].setImageResource(android.R.drawable.btn_star_big_on)
+            } else {
+                stars[i].setImageResource(android.R.drawable.btn_star_big_off)
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        curtidosListener?.remove()
     }
 
     private fun adicionarLivroAoCarrossel(container: android.widget.LinearLayout, livro: com.example.biblioteca_app.models.Livro) {
@@ -211,19 +331,6 @@ class PerfilActivity : AppCompatActivity() {
             startActivity(intent)
         }
         container.addView(view)
-    }
-
-    private fun configurarItemLivro(id: Int, imagem: Int, titulo: String, autor: String) {
-        val itemView = findViewById<View>(id)
-        itemView.findViewById<ImageView>(R.id.imgCapa).setImageResource(imagem)
-        itemView.findViewById<TextView>(R.id.txtTituloLivro).text = titulo
-        itemView.findViewById<TextView>(R.id.txtAutor).text = autor
-        itemView.setOnClickListener { abrirLivro() }
-    }
-
-    private fun abrirLivro() {
-        val intent = Intent(this, LivroActivity::class.java)
-        startActivity(intent)
     }
 
     fun onDevolverClick(view: View) {

@@ -179,13 +179,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
-
-                    <!-- Itens do Carrossel -->
-                    <include android:id="@+id/livro1" layout="@layout/item_livro" />
-                    <include android:id="@+id/livro2" layout="@layout/item_livro" />
-                    <include android:id="@+id/livro3" layout="@layout/item_livro" />
-                    <include android:id="@+id/livro4" layout="@layout/item_livro" />
-
+                    <!-- Inserido dinamicamente -->
                 </LinearLayout>
             </HorizontalScrollView>
 
@@ -260,55 +254,20 @@
                         </LinearLayout>
                     </LinearLayout>
 
-                    <!-- Lista de Avaliações (Exemplo único conforme imagem) -->
-                    <LinearLayout
+                    <!-- Lista de Avaliações Dinâmica -->
+                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginTop="16dp">
-
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Thiago Narak"
-                                android:textStyle="bold"
-                                android:textSize="16sp"/>
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:text="26/07/2025"
-                                android:textSize="10sp"
-                                android:textColor="#666666"/>
-                        </RelativeLayout>
-
+                        android:scrollbars="none">
                         <LinearLayout
+                            android:id="@+id/containerAvaliacoes"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
-                            android:layout_marginTop="4dp">
-                            <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@android:drawable/btn_star_big_on"/>
-                            <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@android:drawable/btn_star_big_on"/>
-                            <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@android:drawable/btn_star_big_on"/>
-                            <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@android:drawable/btn_star_big_on"/>
-                            <ImageView android:layout_width="16dp" android:layout_height="16dp" android:src="@android:drawable/btn_star_big_off"/>
+                            android:layout_marginTop="16dp">
+                            <!-- Inserido dinamicamente -->
                         </LinearLayout>
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Star Wars"
-                            android:textStyle="bold"
-                            android:layout_marginTop="4dp"/>
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Star wars!!!!"/>
-                    </LinearLayout>
+                    </HorizontalScrollView>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
