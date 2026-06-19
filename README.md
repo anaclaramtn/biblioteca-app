@@ -1,5 +1,13 @@
 # 📚 Biblioteca App
-An Android application developed to simplify access to library services, providing a practical experience for both users and administrators.
+> An Android application developed to simplify access to library services, providing a practical experience for both users and administrators.
+
+![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=flat&logo=kotlin&logoColor=white)
+![Android](https://img.shields.io/badge/Android-3DDC84?style=flat&logo=android&logoColor=white)
+![Android Studio](https://img.shields.io/badge/Android%20Studio-3DDC84?style=flat&logo=androidstudio&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=black)
+![XML](https://img.shields.io/badge/XML-005FAD?style=flat&logo=xml&logoColor=white)
+![Gradle](https://img.shields.io/badge/Gradle-02303A?style=flat&logo=gradle&logoColor=white)
+
 
 ## 🎯 Purpose
 The app was created to streamline user interaction with the library collection, allowing users to browse books, manage loans, track returns, and receive important notifications quickly and efficiently.
